@@ -1,0 +1,26 @@
+import type { Automation, Brand, Category, DetailImage, Generator, ImageValidation, Product, Settings } from '../types';
+declare const core: {
+  BASE: string; EXTENSIONS: string[];
+  clone<T>(value: T): T;
+  slug(value: string): string;
+  displayName(value: string): string;
+  smartName(value: string): string;
+  smartNameInput(value: string): string;
+  brandMatches(brand: Brand, query: string): boolean;
+  matchBrand(brands: Brand[], query: string): Brand | null;
+  normalize(value: unknown): Automation;
+  normalizeSettings(settings: Settings): Settings;
+  path(categories: Category[], code: string): string;
+  defaultFolder(categories: Category[], code: string): string;
+  imageUrl(image: DetailImage): string;
+  imageLinkUrl(image: DetailImage): string;
+  imageLinkIssue(image: DetailImage): string;
+  generatorValues(item: Product): Generator;
+  generate(generator: Generator): DetailImage[];
+  html(images: DetailImage[]): string;
+  validation(image: DetailImage): ImageValidation;
+  readyIssues(item: Product, settings: Settings): string[];
+  exportItem(item: Product, settings: Settings): Record<string, unknown>;
+  validateSettings(settings: Settings): Settings;
+};
+export default core;

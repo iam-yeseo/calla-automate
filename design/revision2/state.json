@@ -1,0 +1,114 @@
+{
+  "fileKey": "2eInZ8qvqO2kI88cxofumv",
+  "fileName": "칼라몰 상품등록 툴",
+  "date": "2026-09-30",
+  "stage": "Figma design completed; website implementation, GitHub push and Cloudflare deployment not started",
+  "sourcePage": "0:1",
+  "pages": {
+    "overview": "13:4126",
+    "foundations": "13:4127",
+    "components": "13:4128",
+    "sidebar": "13:4129",
+    "screens": "13:4130",
+    "icons": "13:4131"
+  },
+  "screens": [
+    [
+      "13:5873",
+      "등록 요청 상품"
+    ],
+    [
+      "13:6166",
+      "요청 리스트 상세"
+    ],
+    [
+      "13:6433",
+      "자동 상품 등록"
+    ],
+    [
+      "13:6686",
+      "등록 진행 및 결과"
+    ],
+    [
+      "13:6873",
+      "상품 인덱싱"
+    ],
+    [
+      "13:7130",
+      "상품 카테고리"
+    ],
+    [
+      "13:7313",
+      "서버 이미지 폴더"
+    ],
+    [
+      "13:7530",
+      "동기화 설정"
+    ]
+  ],
+  "dialogs": [
+    [
+      "13:7697",
+      "리스트 등록"
+    ],
+    [
+      "13:7739",
+      "상품 기본 설정"
+    ],
+    [
+      "13:7862",
+      "상품 이미지 설정"
+    ],
+    [
+      "13:7991",
+      "브랜드 선택"
+    ],
+    [
+      "13:8039",
+      "등록 전 검토"
+    ],
+    [
+      "13:8088",
+      "등록 진행 팝업"
+    ],
+    [
+      "13:8142",
+      "일부 등록 완료"
+    ]
+  ],
+  "counts": {
+    "uiFamilies": 16,
+    "variantSets": 14,
+    "variants": 74,
+    "standaloneUiComponents": 2,
+    "variables": 111,
+    "textStyles": 11,
+    "sfSymbols": 27,
+    "screenPrototypeSources": 74
+  },
+  "qa": {
+    "primaryForeground": "#FFFFFF",
+    "primaryStates": [
+      "Default",
+      "Hover",
+      "Focus",
+      "Loading"
+    ],
+    "disabled": "gray",
+    "activeNavigationWhite": true,
+    "scrollDialogs": [
+      "13:7739",
+      "13:7862"
+    ],
+    "scrollDialogSize": [
+      800,
+      960
+    ],
+    "htmlPreviewFixed": "13:7975",
+    "sourceGuidePreserved": true,
+    "renderedPreviews": [
+      "../previews/calla-requests-revised.png",
+      "../previews/calla-image-settings-revised.png"
+    ]
+  }
+}
