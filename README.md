@@ -71,7 +71,7 @@ npx wrangler deploy --dry-run
 
 Worker 코드와 정적 자산 경로는 `wrangler.jsonc`에 정의되어 있습니다. `dist/`는 빌드로 생성하므로 Git에 포함하지 않습니다. 로컬 Chrome 실행기는 `runner/`에 포함되어 있으며 Worker와 별도로 사용자 컴퓨터에서 실행합니다.
 
-Cloudflare Worker secrets에 아래 두 값을 설정합니다.
+Cloudflare Worker의 **Settings → Variables and Secrets**에서 아래 두 값을 **Secret**으로 설정합니다. 빌드 전용 변수에만 등록하면 실행 중인 Worker에서 사용할 수 없습니다. `wrangler.jsonc`의 `keep_vars: true`는 GitHub 자동 배포 때 대시보드에서 등록한 런타임 변수를 보존합니다. 실제 키 값은 소스나 Git에 넣지 않습니다.
 
 ```sh
 npx wrangler secret put SUPABASE_PUBLISHABLE_KEY
