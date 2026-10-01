@@ -201,7 +201,7 @@ async function route(c: Context, path: string, method: string, url: URL): Promis
   fail(404, 'API 경로를 찾을 수 없습니다.', 'not_found');
 }
 export function createWorker(options: { fetch?: typeof fetch } = {}) {
-  const fetcher = options.fetch || globalThis.fetch;
+  const fetcher = options.fetch || globalThis.fetch.bind(globalThis);
   return { async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url); if (!url.pathname.startsWith('/api/')) return env.ASSETS.fetch(request);
     try {

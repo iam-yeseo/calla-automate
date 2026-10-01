@@ -17,6 +17,30 @@ function request(path: string, method = 'GET', value?: unknown, headers: Record<
 const list = { id: LIST, title: '기존 리스트', author: '관리자', work_date: '2026-09-30', note: '메모' };
 const item = { id: ITEM, list_id: LIST, seq: 1, name_own: '<b>원문 상품명</b>', brand: 'AVMATRIX', content: 'legacy content', image_usage: 'legacy image usage', need_retail: '필요', need_wholesale: '불필요', need_naver: '필요', done: true, done_at: '2026-09-20T00:00:00Z', price_retail: 12000, automation: { categoryCodes: { retail: '003001', wholesale: '' }, detailImages: [], detailHtml: '<div>기존 원문 HTML</div>', origin: 'China', extensionFromLaterVersion: { keep: true } } };
 
+test('default fetch retains the Workers receiver for authenticated dashboard database calls', async () => {
+  const originalFetch = globalThis.fetch;
+  const calls: URL[] = [];
+  // workerd accepts a plain native fetch call, but rejects native fetch when
+  // called as a method on an arbitrary Context object.
+  globalThis.fetch = async function (this: unknown, input: RequestInfo | URL) {
+    if (this !== undefined && this !== globalThis) throw new TypeError('Illegal invocation: function called with incorrect this reference');
+    const url = new URL(String(input)); calls.push(url);
+    if (url.pathname === '/auth/v1/user') return response({ id: USER, email: 'admin@example.com', app_metadata: { calla_role: 'admin' } });
+    if (url.pathname === '/rest/v1/app_settings') return response([{ value: { schemaVersion: 1, brands: [], folders: [], categories: { retail: [], wholesale: [] } }, updated_at: '2026-10-01T00:00:00Z' }]);
+    return response([]);
+  } as typeof fetch;
+  try {
+    const worker = createWorker();
+    for (const path of ['/api/me', '/api/lists', '/api/settings', '/api/catalog']) {
+      const result = await worker.fetch(request(path), env);
+      assert.equal(result.status, 200, `${path}: ${await result.text()}`);
+    }
+    assert.ok(calls.some(url => url.pathname === '/rest/v1/app_settings'));
+    assert.ok(calls.some(url => url.pathname === '/rest/v1/product_lists'));
+    assert.ok(calls.some(url => url.pathname === '/rest/v1/product_items'));
+  } finally { globalThis.fetch = originalFetch; }
+});
+
 test('config publishes only URL and publishable key; assets work without backend credentials', async () => {
   const { worker, calls } = harness();
   const config = await worker.fetch(request('/api/config'), env); const data = await config.json();
