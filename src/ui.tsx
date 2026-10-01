@@ -187,16 +187,17 @@ function useMobile() {
 }
 
 type ShellProps = {
-  page: string; title: string; section?: string; user: { email: string; role: 'admin' | 'viewer' }; count: number;
+  page: string; title: string; section?: string; user: { email: string; username?: string; name?: string; role: 'admin' | 'viewer' }; count: number;
   onNavigate: (page: string) => void; onSearch: (query: string) => void; onLogout: () => void;
   actions?: ReactNode; children: ReactNode; demo?: boolean;
 };
-const navItems: { page: string; label: string; icon: IconName; group: 'product' | 'settings' }[] = [
+const navItems: { page: string; label: string; icon: IconName; group: 'product' | 'settings'; adminOnly?: boolean }[] = [
   { page: 'requests', label: '등록 요청 상품', icon: 'list', group: 'product' },
   { page: 'automation', label: '자동 상품 등록', icon: 'bolt', group: 'product' },
   { page: 'catalog', label: '상품 인덱싱', icon: 'box', group: 'settings' },
   { page: 'categories', label: '상품 카테고리', icon: 'list', group: 'settings' },
   { page: 'folders', label: '서버 이미지 폴더', icon: 'photo', group: 'settings' },
+  { page: 'admin', label: '사용자 계정 관리', icon: 'settings', group: 'settings', adminOnly: true },
 ];
 
 export function Shell({ page, title, section = '상품 등록', user, count, onNavigate, onSearch, onLogout, actions, children, demo }: ShellProps) {
@@ -212,7 +213,8 @@ export function Shell({ page, title, section = '상품 등록', user, count, onN
   const drag = useRef<{ x: number; width: number } | null>(null);
   const collapsed = sidebar.collapsed && !mobile;
   const selectedPage = page === 'detail' || page === 'products' || page === 'list' ? 'requests' : page;
-  const username = user.email.split('@')[0] || '사용자';
+  const accountId = user.username || user.email;
+  const username = user.name || accountId || '사용자';
   const role = user.role === 'admin' ? '상품 운영 관리자' : '상품 조회';
   useEffect(() => {
     const content = contentRef.current;
@@ -285,7 +287,7 @@ export function Shell({ page, title, section = '상품 등록', user, count, onN
     <header className="app-header" inert={mobile && mobileOpen}>
       <div className="brand-area"><button ref={mobileToggleRef} type="button" className="icon-button mobile-menu-toggle" onClick={toggleSidebar} aria-label="메뉴 열기" aria-expanded={mobileOpen} aria-controls="app-sidebar"><Icon name="sidebar" /></button><button type="button" className="brand-link" onClick={() => navigate('requests')} aria-label="calla 상품 등록 홈"><Logo /><span>상품 등록 툴</span></button></div>
       <div className="header-search"><Search ref={searchRef} value={globalSearch} onChange={value => { setGlobalSearch(value); onSearch(value); }} placeholder="상품 또는 리스트 검색" /></div>
-      <div className="header-actions">{demo && <span className="demo-badge">데모</span>}<span className="header-user" title={user.email}>{username}</span><span className="header-role">{user.role === 'admin' ? '관리자' : '조회자'}</span>
+      <div className="header-actions">{demo && <span className="demo-badge">데모</span>}<span className="header-user" title={accountId}>{username}</span><span className="header-role">{user.role === 'admin' ? '관리자' : '조회자'}</span>
         <details className="header-popover"><summary className="icon-button" aria-label="알림"><Icon name="bell" /></summary><div className="popover-panel"><strong>알림</strong><p className="muted">새로운 알림이 없습니다.</p></div></details>
         <button type="button" className="icon-button" onClick={() => navigate('sync')} aria-label="환경 설정"><Icon name="settings" /></button>
       </div>
@@ -295,9 +297,9 @@ export function Shell({ page, title, section = '상품 등록', user, count, onN
       <button type="button" className="workspace-toggle" onClick={toggleSidebar} aria-label={collapsed ? '사이드 메뉴 펼치기' : '사이드 메뉴 접기'} aria-expanded={!collapsed} title={collapsed ? '사이드 메뉴 펼치기' : '사이드 메뉴 접기'}>
         <Icon name={collapsed ? 'sidebar' : 'box'} /><span className="sidebar-label">상품 운영</span>{!collapsed && <Icon name="sidebar" />}
       </button>
-      <nav className="sidebar-nav" aria-label="상품 운영 메뉴"><div className="sidebar-section"><p className="sidebar-heading">상품 등록</p>{navItems.filter(item => item.group === 'product').map(renderNav)}</div><div className="sidebar-section"><p className="sidebar-heading">설정</p>{navItems.filter(item => item.group === 'settings').map(renderNav)}</div></nav>
+      <nav className="sidebar-nav" aria-label="상품 운영 메뉴"><div className="sidebar-section"><p className="sidebar-heading">상품 등록</p>{navItems.filter(item => item.group === 'product').map(renderNav)}</div><div className="sidebar-section"><p className="sidebar-heading">설정</p>{navItems.filter(item => item.group === 'settings' && (!item.adminOnly || user.role === 'admin')).map(renderNav)}</div></nav>
       <div className="sidebar-footer"><button type="button" className={`sidebar-item ${selectedPage === 'sync' ? 'active' : ''}`} aria-current={selectedPage === 'sync' ? 'page' : undefined} title={collapsed ? '실시간 동기화' : undefined} onClick={() => navigate('sync')}><Icon name="sync" /><span className="sidebar-label">실시간 동기화</span></button>
-        <details className="profile-menu"><summary className="profile-summary" aria-label={`${username} 계정 메뉴`} title={collapsed ? `${username} 계정 메뉴` : undefined}><span className="avatar">{username.slice(0, 1).toUpperCase()}</span><span className="profile-copy"><strong title={user.email}>{username}</strong><small>{role}</small></span><span className="profile-chevron" aria-hidden="true"><img src="/assets/figma/requests-3f384.svg" alt="" /></span></summary><div className="profile-panel"><p title={user.email}>{user.email}</p><button type="button" onClick={onLogout}>로그아웃</button></div></details>
+        <details className="profile-menu"><summary className="profile-summary" aria-label={`${username} 계정 메뉴`} title={collapsed ? `${username} 계정 메뉴` : undefined}><span className="avatar">{username.slice(0, 1).toUpperCase()}</span><span className="profile-copy"><strong title={accountId}>{username}</strong><small>{role}</small></span><span className="profile-chevron" aria-hidden="true"><img src="/assets/figma/requests-3f384.svg" alt="" /></span></summary><div className="profile-panel"><p title={accountId}>{accountId}</p><button type="button" onClick={onLogout}>로그아웃</button></div></details>
       </div>
       {!collapsed && <div className="sidebar-resizer" role="separator" aria-label="사이드바 너비 조절" aria-orientation="vertical" aria-valuemin={180} aria-valuemax={400} aria-valuenow={sidebar.width} tabIndex={mobile ? -1 : 0} onPointerDown={startResize} onPointerMove={moveResize} onPointerUp={stopResize} onPointerCancel={stopResize} onDoubleClick={() => setSidebar(value => ({ ...value, width: SIDEBAR_DEFAULT }))} onKeyDown={keyboardResize} />}
     </aside>

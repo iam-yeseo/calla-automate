@@ -16,7 +16,7 @@ npm run dev:demo
 ## 실제 연결
 
 1. `.dev.vars.example`을 `.dev.vars`로 복사하고 기존 Supabase 프로젝트의 publishable key와 service role key를 로컬 파일에 설정합니다. service key를 브라우저 코드나 Git에 넣지 않습니다.
-2. Supabase Auth에 사용할 계정을 준비하고 관리자 도구로 해당 계정의 **app_metadata.calla_role**을 `admin` 또는 `viewer`로 지정합니다. 사용자 수정이 가능한 user_metadata는 권한으로 인정하지 않습니다. 대안으로 `wrangler.jsonc`의 `ADMIN_EMAILS`에 이메일 인증이 완료된 관리자 이메일을 지정할 수 있습니다.
+2. 최초 관리자 설정용 `CALLA_SETUP_TOKEN`을 `.dev.vars`에 설정합니다. 24자 이상의 무작위 코드를 사용하고 `/setup`에서 관리자 이름과 비밀번호를 정합니다. 첫 관리자 아이디는 `calla-admin`입니다. 생성 후 초기 설정 코드를 삭제합니다. 기존 이메일 계정은 계속 로그인할 수 있습니다.
 3. 터미널 두 개에서 아래 명령을 각각 실행합니다.
 
 ```sh
@@ -33,6 +33,8 @@ npm run dev
 
 ## 구현 범위
 
+- 로그인 아래 회원가입 바로가기, 이메일 없이 아이디 가입·로그인, 관리자 승인 대기
+- `/admin` 사용자 계정 관리: 계정 생성·승인·권한 변경·이용 중지·비밀번호 재설정·삭제
 - 등록 요청 리스트 생성·검색·복제·삭제, 상품 추가·편집·일괄 설정·복제·삭제
 - XLSX/CSV 불러오기와 템플릿, JSON 내보내기
 - 썸네일 업로드, 상세 이미지 주소 생성·검증·바로가기 링크·HTML
@@ -75,6 +77,17 @@ Cloudflare Worker secrets에 아래 두 값을 설정합니다.
 npx wrangler secret put SUPABASE_PUBLISHABLE_KEY
 npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY
 ```
+
+첫 관리자 계정은 아래 순서로 준비합니다.
+
+1. Supabase **Authentication → Sign In / Providers → User Signups**에서 **Allow new users to sign up**을 끕니다. 회원가입은 이 앱의 Worker가 Admin API로 처리하므로 앱의 가입 기능은 계속 사용할 수 있습니다. Supabase 기본 가입 경로를 닫아 예약된 관리자 아이디를 외부에서 선점하지 못하게 합니다.
+2. `openssl rand -hex 24` 등으로 초기 설정 코드를 생성하고 Cloudflare Worker의 **Variables and Secrets**에 `CALLA_SETUP_TOKEN`이라는 **Secret**으로 저장합니다. 코드를 소스·Git·URL에 넣지 않습니다.
+3. 새 사이트의 `/setup` 또는 로그인 화면의 **첫 관리자 계정 설정**에서 코드·이름·비밀번호를 입력합니다. `calla-admin` 계정 생성이 완료되면 로그인합니다.
+4. Cloudflare에서 `CALLA_SETUP_TOKEN`을 삭제합니다. 첫 관리자 계정은 다른 관리자도 삭제·정지·강등할 수 없습니다. 이름과 비밀번호는 변경할 수 있습니다.
+
+회원가입 페이지는 `/signup`입니다. 아이디는 영문 소문자·숫자·점·밑줄·하이픈 3–32자이며 대소문자는 구분하지 않습니다. 이메일 주소를 입력할 필요가 없습니다. 가입자는 승인 대기 상태이며, 관리자가 `/admin`에서 조회자 또는 관리자로 승인합니다. 비밀번호를 잊은 경우 관리자가 재설정합니다. 이메일로 비밀번호를 보내는 기능은 제공하지 않습니다.
+
+계정 관리 API는 매 요청마다 Supabase에서 현재 권한과 계정 상태를 확인합니다. 이용 중지·승인 취소 후 기존 로그인 세션도 Worker 접근이 거절됩니다. 공개 가입·로그인·초기 설정 요청에는 Cloudflare Rate Limiting 바인딩을 적용합니다. 초기 관리자 생성에 실패했을 때 기존 계정을 자동으로 관리자로 승격하지 않습니다.
 
 현재 운영 사이트는 익명 Supabase 접근을 사용하는 기존 구조입니다. **새 로그인 화면 배포만으로 기존 익명 API가 차단되지는 않습니다.** 운영 전환 때 구 사이트·구 실행기의 사용을 멈추고, 백업과 새 계정/키 연결을 확인한 뒤 [supabase/cutover-review.sql](supabase/cutover-review.sql)의 접근 정책 전환을 함께 적용해야 합니다. 이 스크립트는 자동 마이그레이션이 아니며 이번 구현에서 실행하지 않았습니다. 행을 이동하거나 삭제하는 내용은 없습니다.
 

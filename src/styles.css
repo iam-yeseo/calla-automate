@@ -456,6 +456,31 @@ progress.progress::-moz-progress-bar { background: var(--brand); border-radius: 
 .login-card > .button { margin-top: 12px; }
 .login-card > small:last-child { display: block; margin-top: 24px; line-height: 18px; }
 .login-card > .eyebrow { margin-bottom: 8px; }
+.login-card form > .form-fieldset { margin-top: 0; }
+.auth-links { margin-top: 24px; color: var(--secondary); font-size: 14px; text-align: center; }
+.auth-links a { display: inline-block; margin-left: 4px; color: var(--brand-strong); font-weight: 500; text-underline-offset: 4px; }
+.auth-setup-link { margin-top: 12px; font-size: 12px; }
+.auth-success { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 28px; text-align: center; }
+.auth-success h2 { margin: 0; font-size: 18px; line-height: 28px; }
+.auth-success p { margin: 0; overflow-wrap: anywhere; }
+.auth-success .button { margin-top: 8px; }
+.auth-success-mark { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: var(--brand-soft); color: var(--brand-strong); font-size: 24px; }
+.auth-setup-help { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--secondary); font-size: 12px; }
+.auth-setup-help summary { cursor: pointer; font-size: 14px; }
+.auth-setup-help p { margin-top: 12px; overflow-wrap: anywhere; }
+.auth-preview { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+.account-summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 24px; }
+.account-summary p { margin: 4px 0 0; overflow-wrap: anywhere; }
+.account-table { min-width: 880px; }
+.account-table .wide-cell { min-width: 170px; width: 22%; }
+.account-table th, .account-table td { padding-inline: 12px; }
+.account-table td { font-size: 14px; }
+.account-table .nowrap { white-space: normal; }
+.account-row-actions .button { min-height: 40px; padding-inline: 10px; font-size: 14px; }
+.account-row-actions { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.account-self { display: inline-flex; margin-left: 8px; padding: 1px 6px; border-radius: 6px; background: var(--brand-soft); color: var(--brand-strong); font-size: 11px; font-weight: 500; white-space: nowrap; }
+.account-loading { padding: 48px 16px; color: var(--secondary); text-align: center; }
+.account-page-hint { margin-top: 16px; font-size: 12px; }
 .tabs .tab > span { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 5px; background: #eef0f3; font-size: 11px; font-variant-numeric: tabular-nums; }
 .tab.active > span { color: var(--brand-strong); background: var(--brand-soft); }
 

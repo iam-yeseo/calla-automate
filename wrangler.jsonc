@@ -14,5 +14,12 @@
     "SUPABASE_URL": "https://giuqapykceosroauaijq.supabase.co",
     "ADMIN_EMAILS": ""
   },
+  "ratelimits": [
+    {
+      "name": "AUTH_RATE_LIMITER",
+      "namespace_id": "2026100101",
+      "simple": { "limit": 30, "period": 60 }
+    }
+  ],
   "observability": { "enabled": true, "head_sampling_rate": 1 }
 }

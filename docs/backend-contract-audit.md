@@ -41,7 +41,7 @@ Required bindings: `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE
 | Method / path | Access | Response / behavior |
 |---|---|---|
 | GET `/api/config` | Public | `{supabaseUrl,supabasePublishableKey}` only |
-| GET `/api/me` | Member | `{user:{id,email},role}` |
+| GET `/api/me` | Member | `{user:{id,email,username,name},role}`; 현재 계정 상태·권한 검사 |
 | GET `/api/lists` | Member | `{lists}` with total, doneCount, retailSuccess, wholesaleSuccess, retailTotal, wholesaleTotal, runningCount, failedCount |
 | POST `/api/lists` | Admin | `{title,author,work_date,note}` → `{list}` |
 | GET `/api/lists/:id` | Member | `{list}` |
@@ -79,6 +79,8 @@ The manual completion endpoint separately preserves the existing registrar check
 Until that script is coordinated and applied, **the old anonymous endpoints remain reachable**, even though the new Worker checks admin/viewer correctly. A frontend login screen or hidden buttons cannot close those paths. Cutover must happen with the old website/runner stopped and the new authenticated website/runner ready. Verify Auth membership, a real administrator, a real viewer, signed-out denial, read/save/upload, claim conflict and no secret leakage before considering access control deployed.
 
 Role assignment uses a trusted Auth administrative process. Do not write `calla_role` through user metadata. No Auth users, roles or policies were changed by this implementation.
+
+2026-10-01: 가입·아이디 로그인·첫 관리자 설정·관리자 계정 관리 API와 화면을 추가했습니다. 현재 상태와 권한은 매 요청의 Auth 사용자 조회로 검사합니다. 사용자 생성·승인·중지·비밀번호 변경·삭제 계약 및 배포 설정은 [계정 관리 기록](account-management.md)을 참고하세요. 운영 계정 생성이나 정책 전환은 이 작업에서 실행하지 않았습니다.
 
 ## Remaining integration constraints
 

@@ -1,6 +1,8 @@
 export type Role = 'admin' | 'viewer';
 export type Channel = 'retail' | 'wholesale';
-export interface User { id: string; email: string; role: Role }
+export interface User { id: string; email: string; username?: string; name?: string; role: Role }
+export type AccountStatus = 'pending' | 'active' | 'disabled';
+export interface ManagedUser { id: string; username: string; name: string; email: string; role: Role | null; status: AccountStatus; createdAt: string | null; lastSignInAt: string | null }
 export interface Category { code: string; name: string; parentCode: string; folder?: string; active?: boolean }
 export interface Brand { code: string; name: string; aliases?: string[]; active?: boolean }
 export interface Settings { schemaVersion: number; categories: Record<Channel, Category[]>; brands: Brand[]; folders: string[]; [key: string]: unknown }

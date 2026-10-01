@@ -1,7 +1,7 @@
-
+import { accountRoute, AccountError, ensureAccountActive } from './accounts';
 type Row = Record<string, any>;
 type Role = 'admin' | 'viewer';
-type Context = { env: Env; request: Request; fetch: typeof fetch; user: { id: string; email: string }; role: Role };
+type Context = { env: Env; request: Request; fetch: typeof fetch; user: { id: string; email: string; username: string; name: string }; role: Role };
 class ApiError extends Error { constructor(public status: number, message: string, public code = 'request_failed') { super(message); } }
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const CHANNELS = ['retail', 'wholesale'] as const;
@@ -43,13 +43,10 @@ async function auth(request: Request, env: Env, fetcher: typeof fetch): Promise<
   if (res.status === 401 || res.status === 403) fail(401, '로그인이 만료되었습니다. 다시 로그인해 주세요.', 'authentication_required');
   if (!res.ok) fail(502, '로그인 상태를 확인하지 못했습니다.', 'auth_unavailable');
   const value = object(await res.json()); const id = uuid(value.id, '사용자 ID');
-  const email = typeof value.email === 'string' ? value.email : '';
-  const role = value.app_metadata?.calla_role;
-  const approved = (env.ADMIN_EMAILS || '').split(',').map((v: string) => v.trim().toLowerCase()).filter(Boolean);
-  const override = Boolean(value.email_confirmed_at) && approved.includes(email.toLowerCase());
-  const resolved = override ? 'admin' : role;
+  const identity = ensureAccountActive(value, env);
+  const resolved = identity.role;
   if (resolved !== 'admin' && resolved !== 'viewer') fail(403, '이 작업 공간에 등록된 사용자만 접근할 수 있습니다.', 'membership_required');
-  return { env, request, fetch: fetcher, user: { id, email }, role: resolved };
+  return { env, request, fetch: fetcher, user: { id, email: identity.email, username: identity.username, name: identity.name }, role: resolved };
 }
 async function db(c: Context, resource: string, query: Record<string, string> = {}, method = 'GET', payload?: unknown, prefer?: string) {
   const { url } = config(c.env, true); const target = new URL(`${url}/rest/v1/${resource}`);
@@ -210,8 +207,20 @@ export function createWorker(options: { fetch?: typeof fetch } = {}) {
     try {
       const origin = request.headers.get('origin'); if (origin && origin !== url.origin) fail(403, '다른 출처의 요청은 허용되지 않습니다.', 'origin_denied');
       if (url.pathname === '/api/config' && request.method === 'GET') { const c = config(env); return json({ supabaseUrl: c.url, supabasePublishableKey: c.key }); }
-      const context = await auth(request, env, fetcher); return await route(context, url.pathname.replace(/\/$/, ''), request.method, url);
-    } catch (error) { if (error instanceof ApiError) return json({ error: { code: error.code, message: error.message } }, error.status); return json({ error: { code: 'internal_error', message: '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.' } }, 500); }
+      if (url.pathname.startsWith('/api/auth/')) {
+        config(env, true);
+        if (!env.AUTH_RATE_LIMITER) fail(503, '계정 요청 제한 설정이 필요합니다.', 'configuration_required');
+        const ip = request.headers.get('cf-connecting-ip') || 'local';
+        const limited = await env.AUTH_RATE_LIMITER.limit({ key: `calla-auth:${ip}` });
+        if (!limited.success) return new Response(JSON.stringify({ error: { code: 'rate_limited', message: '요청이 많습니다. 잠시 후 다시 시도해 주세요.' } }), { status: 429, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'retry-after': '60' } });
+        const result = await accountRoute(request, env, fetcher);
+        if (result) return result;
+        fail(404, 'API 경로를 찾을 수 없습니다.', 'not_found');
+      }
+      const context = await auth(request, env, fetcher);
+      const accountResponse = await accountRoute(request, env, fetcher, { ...context.user, role: context.role });
+      return accountResponse || await route(context, url.pathname.replace(/\/$/, ''), request.method, url);
+    } catch (error) { if (error instanceof ApiError || error instanceof AccountError) return json({ error: { code: error.code, message: error.message } }, error.status); return json({ error: { code: 'internal_error', message: '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.' } }, 500); }
   } };
 }
 export default createWorker();

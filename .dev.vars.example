@@ -1,2 +1,5 @@
 SUPABASE_PUBLISHABLE_KEY=""
 SUPABASE_SERVICE_ROLE_KEY=""
+# First administrator setup only. Use a random code of at least 24 characters.
+# Remove this secret after creating calla-admin at /setup.
+CALLA_SETUP_TOKEN=""
