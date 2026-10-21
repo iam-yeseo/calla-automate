@@ -1,0 +1,87 @@
+{
+  "fileKey": "2eInZ8qvqO2kI88cxofumv",
+  "pageId": "30:1293",
+  "pageName": "06 · CALLA-AUTOMATE 새 디자인",
+  "date": "2026-10-21",
+  "scope": "261021 update design; original frames preserved",
+  "wrapperId": "54:4022",
+  "url": "https://www.figma.com/design/2eInZ8qvqO2kI88cxofumv/?node-id=54-4022",
+  "screens": [
+    {
+      "id": "56:4136",
+      "name": "요청 리스트 · 머리말과 저장"
+    },
+    {
+      "id": "56:4287",
+      "name": "상품 편집 · 머리말과 복수 카테고리"
+    },
+    {
+      "id": "58:4242",
+      "name": "등록 전 검토 · 공급사 선택 제거"
+    },
+    {
+      "id": "58:4425",
+      "name": "자동 상품 등록 · 실제 진행률"
+    },
+    {
+      "id": "59:4447",
+      "name": "도매 상품 조회 · 가격과 재고"
+    },
+    {
+      "id": "59:4643",
+      "name": "상품 편집 · 노출 및 판매 토글"
+    }
+  ],
+  "stateExamples": [
+    {
+      "id": "59:4780",
+      "name": "편집 모달 닫기 확인"
+    },
+    {
+      "id": "59:4788",
+      "name": "머리말 미사용"
+    },
+    {
+      "id": "59:4799",
+      "name": "등록 중단"
+    }
+  ],
+  "components": {
+    "area": "55:4022",
+    "header": "55:4026",
+    "sidebar": "55:4043",
+    "tableCell": "55:4096",
+    "progressSet": "55:4119",
+    "progressVariants": [
+      "55:4098",
+      "55:4105",
+      "55:4112"
+    ]
+  },
+  "validation": {
+    "editable": true,
+    "fonts": [
+      "Pretendard"
+    ],
+    "imageFilledNodes": 0,
+    "fullUiRasterPresent": false,
+    "nodeCountsBeforeFinalVisualFix": {
+      "TEXT": 350,
+      "FRAME": 162,
+      "INSTANCE": 307,
+      "GROUP": 12,
+      "VECTOR": 80,
+      "RECTANGLE": 11,
+      "ELLIPSE": 4
+    },
+    "screensOutsideBounds": 0,
+    "progressFillWidth": 320,
+    "progressTrackWidth": 640,
+    "progressRatio": 0.5,
+    "visualReview": "Passed full composition and targeted post-fix progress screenshot."
+  },
+  "limitations": [
+    "Design uses illustrative product values, not production result evidence.",
+    "Master sale price deliberately displays an em dash; data integration deferred by user."
+  ]
+}

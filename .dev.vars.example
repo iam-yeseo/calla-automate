@@ -3,3 +3,10 @@ SUPABASE_SERVICE_ROLE_KEY=""
 # First administrator setup only. Use a random code of at least 24 characters.
 # Remove this secret after creating calla-admin at /setup.
 CALLA_SETUP_TOKEN=""
+# Shared signup code: 24-512 characters. Unset disables public signup.
+CALLA_SIGNUP_CODE=""
+
+# Shared partner key and independent mall user keys (Worker runtime Secrets).
+GODOMALL_PARTNER_KEY=""
+GODOMALL_CALLAMEDIA_API_USER_KEY=""
+GODOMALL_CALLAMEDIA1_API_USER_KEY=""

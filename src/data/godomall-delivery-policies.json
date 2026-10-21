@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-15T04:06:48.000Z",
+  "verification": "관리자 배송정책 화면에서 읽기 전용으로 확인한 시점별 기록입니다. 등록할 때마다 배송요금을 실시간 조회한 값은 아닙니다.",
+  "policies": [
+    {
+      "mall": "retail",
+      "code": "1",
+      "name": "배송방법",
+      "sourceUrl": "http://gdadmin.callamedia.kr/policy/delivery_regist.php?sno=1",
+      "defaultMethod": "delivery",
+      "baseFee": 4000,
+      "freeAbove": 100000,
+      "currency": "KRW",
+      "payment": "주문 시 결제(선불)",
+      "chargeGrouping": "같은 배송비조건 상품끼리 1회 부과",
+      "priceBasis": "판매가 + 옵션가 + 추가상품가 - 상품할인가 - 상품쿠폰할인가",
+      "methods": [
+        { "code": "delivery", "name": "택배", "baseFee": 4000, "freeAbove": 100000 },
+        { "code": "visit", "name": "방문수령", "baseFee": 0, "freeAbove": null },
+        { "code": "quick", "name": "퀵배송", "baseFee": 4000, "freeAbove": 100000 }
+      ],
+      "additionalFeeNote": "제주시·서귀포시·울릉군은 3,300원 추가배송비가 설정되어 있습니다.",
+      "additionalInfo": [
+        "택배·퀵배송은 구매금액 100,000원 미만 4,000원, 100,000원 이상 기본배송비 무료입니다.",
+        "방문수령은 배송비 무료로 설정되어 있습니다.",
+        "추가배송비 적용 지역은 주문 배송지에 따라 결정됩니다."
+      ],
+      "additionalFees": {
+        "type": "region",
+        "sourceUrl": "http://gdadmin.callamedia.kr/policy/delivery_area_regist.php?sno=1",
+        "groupCode": "1",
+        "groupName": "지역별 배송비 설정",
+        "rules": [
+          { "region": "경상북도 울릉군", "fee": 3300 },
+          { "region": "제주특별자치도 서귀포시", "fee": 3300 },
+          { "region": "제주특별자치도 제주시", "fee": 3300 }
+        ]
+      }
+    },
+    {
+      "mall": "wholesale",
+      "code": "10",
+      "name": "칼라배송",
+      "sourceUrl": "http://gdadmin.callamedia1.godomall.com/policy/delivery_regist.php?sno=10",
+      "defaultMethod": "delivery",
+      "baseFee": 4000,
+      "freeAbove": 100000,
+      "currency": "KRW",
+      "payment": "주문 시 결제(선불)",
+      "chargeGrouping": "같은 배송비조건 상품끼리 1회 부과",
+      "priceBasis": "판매가 + 옵션가 + 추가상품가 + 텍스트옵션가",
+      "methods": [
+        { "code": "delivery", "name": "본사로 배송", "baseFee": 4000, "freeAbove": 100000 },
+        { "code": "etc", "name": "고객 직배송", "baseFee": 4000, "freeAbove": null }
+      ],
+      "additionalFeeNote": "주소에 제주·서귀포·울릉 단어가 포함되면 4,000원 추가배송비가 설정되어 있습니다. 중복 단어의 합산 방식은 관리자 목록만으로 확인되지 않습니다.",
+      "additionalInfo": [
+        "본사로 배송은 구매금액 100,000원 미만 4,000원, 100,000원 이상 기본배송비 무료입니다.",
+        "고객 직배송은 구매금액에 상관없이 기본배송비 4,000원입니다.",
+        "기본 지역별 추가배송비 기능은 사용하지 않으며 별도 추가배송비 기능을 사용합니다.",
+        "주소 단어에 따른 추가배송비 적용과 중복 계산은 실제 주문에서 최종 확인됩니다."
+      ],
+      "additionalFees": {
+        "type": "address-keyword",
+        "sourceUrl": "http://gdadmin.callamedia1.godomall.com/custom/delivery_list.php",
+        "rules": [
+          { "keyword": "서귀포", "fee": 4000 },
+          { "keyword": "울릉", "fee": 4000 },
+          { "keyword": "제주", "fee": 4000 }
+        ],
+        "overlappingRules": "unknown"
+      }
+    }
+  ]
+}

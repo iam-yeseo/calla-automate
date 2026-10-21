@@ -1,0 +1,174 @@
+diff --git a/server/index.ts b/server/index.ts
+index 81bac3d52ddf49ad9e4c230c55b681ba06b002af..14f0a2f0656577f113e319cabf9d3c966a865355 100644
+--- a/server/index.ts
++++ b/server/index.ts
+@@ -221,7 +221,16 @@
+   if (path === '/api/settings' && method === 'PUT') { admin(c); const input = await body(c.request); const value = validateSettingsPayload(input.value); const current = await settings(c); if (!sameManagedTaxonomy(current.value as Settings, value as Settings)) fail(422, '카테고리와 브랜드는 고도몰에서 관리하고 API 업데이트로 불러와 주세요.', 'taxonomy_readonly'); const revision = string(input.revision ?? input.updated_at, '설정 버전', 100); if (!revision || Number.isNaN(Date.parse(revision))) fail(422, '설정 버전이 필요합니다.', 'revision_required'); const updated = new Date().toISOString(); const { data } = await db(c, 'app_settings', { key: 'eq.product_automation_v1', updated_at: `eq.${revision}` }, 'PATCH', { value, updated_at: updated }, 'return=representation'); if (!data?.[0]) fail(409, '다른 사용자가 설정을 변경했습니다. 다시 불러와 주세요.', 'revision_conflict'); return json({ value: data[0].value, updated_at: data[0].updated_at }); }
+   if (path === '/api/catalog' && method === 'GET') {
+     const offset = Number(url.searchParams.get('offset') || '0'), limit = Number(url.searchParams.get('limit') || '50'); if (!Number.isSafeInteger(offset) || offset < 0 || offset > 100000 || !Number.isSafeInteger(limit) || limit < 1 || limit > 100) fail(422, '페이지 범위를 확인해 주세요.', 'invalid_pagination');
+-    const query: Record<string, string> = { select: '*', order: 'updated_at.desc,id.asc', offset: String(offset), limit: String(limit) }; const q = string(url.searchParams.get('q'), '검색어', 100).replace(/[\\%_*(),."\r\n]/g, ' ').trim(); if (q) query.or = `(brand.ilike.*${q}*,model.ilike.*${q}*,name_own.ilike.*${q}*)`;
++    const query: Record<string, string> = { select: '*', order: 'updated_at.desc,id.asc', offset: String(offset), limit: String(limit) };
++    // Keep model punctuation; strip user wildcards as before and quote each
++    // PostgREST value so punctuation cannot become filter syntax.
++    const q = string(url.searchParams.get('q'), '검색어', 100).replace(/[%_*\r\n]/g, ' ').trim();
++    if (q) {
++      // Escape literal backslashes for ILIKE, then for PostgREST's quoted parser.
++      const pattern = `*${q.replace(/\\/g, '\\\\')}*`;
++      const quoted = `"${pattern.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
++      query.or = `(brand.ilike.${quoted},model.ilike.${quoted},name_own.ilike.${quoted})`;
++    }
+     const { data, headers } = await db(c, 'product_items', query, 'GET', undefined, 'count=exact'); const totalValue = headers.get('content-range')?.split('/')[1]; const total = totalValue && /^\d+$/.test(totalValue) ? Number(totalValue) : null; const items = data || []; return json({ items, total, nextOffset: items.length === limit ? offset + limit : null });
+   }
+   if (path === '/api/uploads' && method === 'POST') {
+diff --git a/tests/server.test.ts b/tests/server.test.ts
+index 35dfda9a52d5964cd7d95278e6f1ef24214b0e66..e782a89612b86eb8e52aab0b400fd7d3f6e6993b 100644
+--- a/tests/server.test.ts
++++ b/tests/server.test.ts
+@@ -503,3 +503,33 @@
+   assert.equal((await godomall.worker.fetch(request('/api/godomall/retail/goods'), { ...env, GODOMALL_PARTNER_KEY: 'partner', GODOMALL_CALLAMEDIA_API_USER_KEY: 'mall' } as Env)).status, 429);
+   assert.equal(logged.mock.callCount(), 0);
+ });
++
++test('catalog searches preserve model punctuation inside quoted PostgREST values', async () => {
++  for (const q of ['MODEL-1.0', 'A1.5', 'model, variant (2)']) {
++    const { worker, calls } = harness('viewer', () => response([]));
++    assert.equal((await worker.fetch(request(`/api/catalog?${new URLSearchParams({ q })}`), env)).status, 200);
++    assert.equal(calls.at(-1)!.url.searchParams.get('or'), `(brand.ilike."*${q}*",model.ilike."*${q}*",name_own.ilike."*${q}*")`);
++  }
++});
++
++test('catalog filter injection stays inside three quoted values and user wildcards remain disabled', async () => {
++  for (const q of ['A\\B', 'MODEL\\', 'x,brand.eq.secret)', 'x"),or(id.eq.secret', 'x\\"),model.eq.secret', '.eq.(anything)', '100%_**\r\nMODEL']) {
++    const { worker, calls } = harness('viewer', () => response([]));
++    assert.equal((await worker.fetch(request(`/api/catalog?${new URLSearchParams({ q })}`), env)).status, 200);
++    const filter = calls.at(-1)!.url.searchParams.get('or')!;
++    // Parse only complete quoted operands: no fourth predicate or raw delimiter
++    // is allowed outside their strings, even when the input contains escapes.
++    const predicate = /(?:brand|model|name_own)\.ilike\."((?:[^"\\]|\\["\\])*)"/y;
++    let offset = 1;
++    const values: string[] = [];
++    while (offset < filter.length - 1) {
++      predicate.lastIndex = offset;
++      const match = predicate.exec(filter); assert.ok(match, filter);
++      values.push(match[1]!.replace(/\\(["\\])/g, '$1'));
++      offset = predicate.lastIndex;
++      if (filter[offset] === ',') offset++; else break;
++    }
++    assert.equal(filter[0], '('); assert.equal(filter.slice(offset), ')');
++    assert.deepEqual(values, Array(3).fill(`*${q.replace(/[%_*\r\n]/g, ' ').trim().replace(/\\/g, '\\\\')}*`));
++  }
++});
+diff --git a/tests/catalog-search-database.mjs b/tests/catalog-search-database.mjs
+new file mode 100644
+index 0000000000000000000000000000000000000000..698c1319713046881881f04db26a941e0e9683af
+--- /dev/null
++++ b/tests/catalog-search-database.mjs
+@@ -0,0 +1,108 @@
++// External test-only PGlite install; this does not contact a remote database.
++// node --import tsx tests/catalog-search-database.mjs /absolute/path/to/@electric-sql/pglite/dist/index.js
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import { isAbsolute } from 'node:path';
++import { pathToFileURL } from 'node:url';
++import { createWorker } from '../server/index.ts';
++
++assert.ok(process.argv[2] && isAbsolute(process.argv[2]), 'Pass the absolute PGlite module path');
++const { PGlite } = await import(pathToFileURL(process.argv[2]).href);
++const database = new PGlite();
++const env = {
++  SUPABASE_URL: 'https://example.supabase.co', SUPABASE_PUBLISHABLE_KEY: 'fixture-public',
++  SUPABASE_SERVICE_ROLE_KEY: 'fixture-service', ADMIN_EMAILS: '',
++};
++
++async function catalogPatterns(q) {
++  let filter, catalogCalls = 0;
++  const worker = createWorker({ fetch: async (input, init) => {
++    const url = new URL(String(input));
++    assert.equal(init.method || 'GET', 'GET');
++    if (url.pathname === '/auth/v1/user') return Response.json({
++      id: '33333333-3333-4333-8333-333333333333',
++      email: 'fixture@example.test', app_metadata: { calla_role: 'viewer' },
++    });
++    assert.equal(url.pathname, '/rest/v1/product_items');
++    catalogCalls++;
++    filter = url.searchParams.get('or');
++    return Response.json([]);
++  } });
++  const response = await worker.fetch(new Request(`https://calla.test/api/catalog?${new URLSearchParams({ q })}`, {
++    headers: { authorization: 'Bearer fixture-user' },
++  }), env);
++  assert.equal(response.status, 200, await response.text());
++  assert.equal(catalogCalls, 1);
++  assert.equal(typeof filter, 'string');
++
++  // PostgREST pQuotedValue consumes a backslash and the following character;
++  // SqlFragment maps each '*' to '%' for ILIKE. Reproduce only those transport
++  // transformations, then let actual PostgreSQL evaluate pattern semantics.
++  // https://github.com/PostgREST/postgrest/blob/v13.0.4/src/PostgREST/ApiRequest/QueryParams.hs#L647-L650
++  // https://github.com/PostgREST/postgrest/blob/v13.0.4/src/PostgREST/Query/SqlFragment.hs#L355-L357
++  let offset = 0;
++  const consume = expected => {
++    assert.equal(filter.slice(offset, offset + expected.length), expected, filter);
++    offset += expected.length;
++  };
++  consume('(');
++  const patterns = [];
++  for (const [index, column] of ['brand', 'model', 'name_own'].entries()) {
++    consume(`${column}.ilike."`);
++    let value = '';
++    while (offset < filter.length && filter[offset] !== '"') {
++      if (filter[offset] === '\\') {
++        offset++;
++        assert.ok(offset < filter.length, 'quoted escape needs a following character');
++      }
++      value += filter[offset++];
++    }
++    consume('"');
++    consume(index === 2 ? ')' : ',');
++    patterns.push(value.replace(/\*/g, '%'));
++  }
++  assert.equal(offset, filter.length, 'unexpected predicate outside the three quoted values');
++  assert.deepEqual(patterns, Array(3).fill(patterns[0]));
++  return patterns;
++}
++
++async function expectMatches(q, matching, nonmatching) {
++  const patterns = await catalogPatterns(q);
++  const { rows } = await database.query(`
++    select model from jsonb_array_elements_text($1::jsonb) with ordinality as candidate(model, position)
++    where model ilike $2 order by position`, [JSON.stringify([...matching, ...nonmatching]), patterns[1]]);
++  assert.deepEqual(rows.map(row => row.model), matching, q);
++}
++
++try {
++  await test('catalog SQL preserves decimal model punctuation and case-insensitive substring matching', async () => {
++    await expectMatches('MODEL-1.0', ['MODEL-1.0', 'rack model-1.0 rev2'], ['MODEL-10', 'MODEL-1x0', 'MODEL-1 0']);
++    await expectMatches('model, variant (2)', ['MODEL, variant (2)', 'rack model, variant (2) rev'], ['model variant 2', 'model, variant (3)']);
++  });
++
++  await test('catalog SQL preserves a terminal backslash without consuming the trailing wildcard', async () => {
++    await expectMatches('MODEL\\', ['MODEL\\', 'rack model\\ rev2'], ['MODEL%', 'MODEL', 'MODEL-1.0']);
++  });
++
++  await test('catalog SQL matches embedded literal backslashes instead of dropping them', async () => {
++    await expectMatches('A\\B', ['A\\B', 'rack a\\b rev2'], ['AB', 'A B', 'A\\\\B']);
++  });
++
++  await test('catalog SQL preserves literal quotes inside quoted PostgREST operands', async () => {
++    await expectMatches('Model "B"', ['Model "B"', 'rack MODEL "b" rev2'], ['Model B', 'Model C', 'Model \\"B\\"']);
++  });
++
++  await test('catalog SQL treats filter injection punctuation and escapes as literal model text', async () => {
++    for (const q of ['x,model.eq.secret)', 'x"),or(model.eq.secret', 'x\\"),model.eq.secret', '.eq.(anything)']) {
++      await expectMatches(q, [q, 'rack ' + q + ' rev2'], ['secret', 'anything', 'x', 'unrelated']);
++    }
++  });
++
++  await test('catalog SQL does not interpret user percent, underscore or star as wildcards', async () => {
++    for (const wildcard of ['%', '_', '*']) {
++      await expectMatches('A' + wildcard + 'B', ['A B', 'rack a b rev2'], ['AB', 'AxB', 'AanythingB']);
++    }
++  });
++} finally {
++  await database.close();
++}

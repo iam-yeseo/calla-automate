@@ -12,3 +12,7 @@ __pycache__/
 playwright-report/
 test-results/
 design/web-context/
+desktop/.build/
+release/
+outputs/
+supabase/.temp/

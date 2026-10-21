@@ -1,0 +1,279 @@
+const assetPathPrefix = "https://www.figma.com/api/mcp/asset/a36b3e8c-cbde-443e-b649-29608cafba2a";
+const imgSfInfoCircle = `${assetPathPrefix}/067c8.svg`;
+
+function SfInfoCircle({ className }: { className?: string }) {
+  return (
+    <div className={className || "relative size-[24px]"} data-node-id="13:4289" data-name="SF/info.circle">
+      <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgSfInfoCircle} />
+    </div>
+  );
+}
+
+type CallaAutomateProps = {
+  className?: string;
+  prop01?: string;
+  prop02?: string;
+  prop03?: string;
+  propValue?: "기본";
+  propValue1?: "기본";
+  propValue2?: "068";
+};
+
+function CallaAutomate({ className, prop01 = "기본", prop02 = "AVMATRIX PTZ1271-12A · 화이트 / 장거리 촬영용 PTZ 카메라", prop03 = "1,290,000", propValue = "기본", propValue1 = "기본", propValue2 = "068" }: CallaAutomateProps) {
+  return (
+    <div className={className || '[word-break:break-word] bg-[var(--background\\/surface,white)] border-[var(--border\\/subtle,#eee)] border-b border-solid content-stretch flex font-["Pretendard:Regular"] gap-[var(--space\\/16,16px)] items-center leading-[22px] min-h-[44px] not-italic overflow-clip px-[var(--space\\/12,12px)] py-[10px] relative text-[14px] text-[color:var(--text\\/primary,#222)] w-[1376px]'} data-node-id="34:29406">
+      <p className="relative shrink-0 w-[244px]" data-node-id="34:29403">
+        {prop01}
+      </p>
+      <p className="relative shrink-0 w-[324px]" data-node-id="34:29404">
+        {prop02}
+      </p>
+      <p className="flex-[1_0_0] min-w-px relative" data-node-id="34:29405">
+        {prop03}
+      </p>
+    </div>
+  );
+}
+
+export default function Component25() {
+  return (
+    <div className="bg-[var(--background\/surface,white)] content-stretch flex flex-col gap-[var(--space\/24,24px)] items-start p-[var(--space\/32,32px)] relative size-full" data-node-id="34:25579" data-name="25 · 개발 동작·접근성·검수 가이드">
+      <div className="[word-break:break-word] content-stretch flex flex-col gap-[var(--space\/8,8px)] items-start not-italic overflow-clip relative shrink-0 w-full" data-node-id="34:25580" data-name="내용 영역">
+        <p className="font-['Pretendard:Regular'] leading-[18px] relative shrink-0 text-[12px] text-[color:var(--brand\/strong,#ae3155)] w-full" data-node-id="34:25581">
+          CALLA-AUTOMATE / 운영 설계
+        </p>
+        <p className="font-['Pretendard:SemiBold'] leading-[36px] relative shrink-0 text-[26px] text-[color:var(--text\/primary,#222)] w-full" data-node-id="34:25582">
+          25 · 개발 동작·접근성·검수 가이드
+        </p>
+        <p className="font-['Pretendard:Regular'] leading-[22px] relative shrink-0 text-[14px] text-[color:var(--text\/secondary,#606876)] w-full" data-node-id="34:25583">
+          정적 설계 전달 · 프로토타입 연결 없음 · 아래 동작은 개발 구현 기준입니다.
+        </p>
+        <p className="font-['Pretendard:Regular'] leading-[18px] relative shrink-0 text-[12px] text-[color:var(--text\/secondary,#606876)] w-full" data-node-id="34:25584">
+          디자인 예시 · 실제 처리 결과가 아닙니다
+        </p>
+      </div>
+      <div className="bg-[var(--border\/subtle,#eee)] h-px relative shrink-0 w-full" data-node-id="34:25585" data-name="구분선" />
+      <div className="[word-break:break-word] content-stretch flex font-['Pretendard:Medium'] gap-[var(--space\/8,8px)] items-start not-italic overflow-clip relative shrink-0 w-full" data-node-id="34:25586" data-name="업무 흐름">
+        <div className="bg-[var(--background\/canvas,#f7f8fa)] content-stretch flex flex-[1_0_0] flex-col gap-[var(--space\/8,8px)] items-start min-w-px overflow-clip p-[var(--space\/12,12px)] relative" data-node-id="34:25587" data-name="업무 단계">
+          <p className="leading-[20px] relative shrink-0 text-[13px] text-[color:var(--brand\/strong,#ae3155)] whitespace-nowrap" data-node-id="34:25588">
+            01
+          </p>
+          <p className="leading-[22px] min-w-full relative shrink-0 text-[14px] text-[color:var(--text\/primary,#222)] w-[min-content]" data-node-id="34:25589">
+            상품 편집
+          </p>
+        </div>
+        <div className="bg-[var(--background\/canvas,#f7f8fa)] content-stretch flex flex-[1_0_0] flex-col gap-[var(--space\/8,8px)] items-start min-w-px overflow-clip p-[var(--space\/12,12px)] relative" data-node-id="34:25590" data-name="업무 단계">
+          <p className="leading-[20px] relative shrink-0 text-[13px] text-[color:var(--brand\/strong,#ae3155)] whitespace-nowrap" data-node-id="34:25591">
+            02
+          </p>
+          <p className="leading-[22px] min-w-full relative shrink-0 text-[14px] text-[color:var(--text\/primary,#222)] w-[min-content]" data-node-id="34:25592">
+            목록에 반영
+          </p>
+        </div>
+        <div className="bg-[var(--brand\/soft,#fff0f4)] content-stretch flex flex-[1_0_0] flex-col gap-[var(--space\/8,8px)] items-start min-w-px overflow-clip p-[var(--space\/12,12px)] relative" data-node-id="34:25593" data-name="업무 단계">
+          <p className="leading-[20px] relative shrink-0 text-[13px] text-[color:var(--brand\/strong,#ae3155)] whitespace-nowrap" data-node-id="34:25594">
+            03
+          </p>
+          <p className="leading-[22px] min-w-full relative shrink-0 text-[14px] text-[color:var(--text\/primary,#222)] w-[min-content]" data-node-id="34:25595">
+            저장하지 않음
+          </p>
+        </div>
+        <div className="bg-[var(--background\/canvas,#f7f8fa)] content-stretch flex flex-[1_0_0] flex-col gap-[var(--space\/8,8px)] items-start min-w-px overflow-clip p-[var(--space\/12,12px)] relative" data-node-id="34:25596" data-name="업무 단계">
+          <p className="leading-[20px] relative shrink-0 text-[13px] text-[color:var(--brand\/strong,#ae3155)] whitespace-nowrap" data-node-id="34:25597">
+            04
+          </p>
+          <p className="leading-[22px] min-w-full relative shrink-0 text-[14px] text-[color:var(--text\/primary,#222)] w-[min-content]" data-node-id="34:25598">
+            리스트 저장
+          </p>
+        </div>
+        <div className="bg-[var(--background\/canvas,#f7f8fa)] content-stretch flex flex-[1_0_0] flex-col gap-[var(--space\/8,8px)] items-start min-w-px overflow-clip p-[var(--space\/12,12px)] relative" data-node-id="34:25599" data-name="업무 단계">
+          <p className="leading-[20px] relative shrink-0 text-[13px] text-[color:var(--brand\/strong,#ae3155)] whitespace-nowrap" data-node-id="34:25600">
+            05
+          </p>
+          <p className="leading-[22px] min-w-full relative shrink-0 text-[14px] text-[color:var(--text\/primary,#222)] w-[min-content]" data-node-id="34:25601">
+            등록 전 검토
+          </p>
+        </div>
+        <div className="bg-[var(--background\/canvas,#f7f8fa)] content-stretch flex flex-[1_0_0] flex-col gap-[var(--space\/8,8px)] items-start min-w-px overflow-clip p-[var(--space\/12,12px)] relative" data-node-id="34:25602" data-name="업무 단계">
+          <p className="leading-[20px] relative shrink-0 text-[13px] text-[color:var(--brand\/strong,#ae3155)] whitespace-nowrap" data-node-id="34:25603">
+            06
+          </p>
+          <p className="leading-[22px] min-w-full relative shrink-0 text-[14px] text-[color:var(--text\/primary,#222)] w-[min-content]" data-node-id="34:25604">
+            등록 실행
+          </p>
+        </div>
+        <div className="bg-[var(--background\/canvas,#f7f8fa)] content-stretch flex flex-[1_0_0] flex-col gap-[var(--space\/8,8px)] items-start min-w-px overflow-clip p-[var(--space\/12,12px)] relative" data-node-id="34:25605" data-name="업무 단계">
+          <p className="leading-[20px] relative shrink-0 text-[13px] text-[color:var(--brand\/strong,#ae3155)] whitespace-nowrap" data-node-id="34:25606">
+            07
+          </p>
+          <p className="leading-[22px] min-w-full relative shrink-0 text-[14px] text-[color:var(--text\/primary,#222)] w-[min-content]" data-node-id="34:25607">
+            실제 결과 확인
+          </p>
+        </div>
+      </div>
+      <div className="[word-break:break-word] border-[var(--border\/subtle,#eee)] border-b border-solid content-stretch flex flex-col gap-[var(--space\/12,12px)] items-start not-italic overflow-clip py-[var(--space\/16,16px)] relative shrink-0 w-full" data-node-id="34:25608" data-name="업무 계약">
+        <p className="font-['Pretendard:SemiBold'] leading-[28px] relative shrink-0 text-[18px] text-[color:var(--text\/primary,#222)] w-full" data-node-id="34:25609">
+          업무 계약
+        </p>
+        <div className="font-['Pretendard:Regular'] leading-[0] relative shrink-0 text-[14px] text-[color:var(--text\/secondary,#606876)] w-full" data-node-id="34:25610">
+          <p className="leading-[22px] mb-0">목록에 반영은 리스트 초안 변경이며 저장이 아닙니다. 저장 성공 후에만 등록 전 검토를 활성화합니다.</p>
+          <p className="leading-[22px] mb-0">소매 / 도매의 분류·브랜드·배송비·공급사·등록 결과·상품번호를 독립 관리합니다. 행 선택과 준비 완료, 실제 등록 완료를 분리합니다.</p>
+          <p className="leading-[22px] mb-0">가격 4개: 소매 판매가 / 소매 정가 / 도매 베이직 / 도매 마스터. 빈 가격은 미지정(-), 0은 0원. 도매 마스터는 API로 전송하거나 베이직에 합치지 않습니다.</p>
+          <p className="leading-[22px] mb-0">상품명 HTML과 상세 원문 텍스트·HTML을 보존합니다. 표시 미리보기와 원문 편집·복사를 구분합니다. 이미지 / 텍스트 / HTML 혼합 블록은 순서를 유지합니다.</p>
+          <p className="leading-[22px]">재고 기본값은 무한정 판매, 수량 0 비활성. ‘재고량에 따름’에서만 수량 입력을 활성화합니다.</p>
+        </div>
+      </div>
+      <div className="[word-break:break-word] border-[var(--border\/subtle,#eee)] border-b border-solid content-stretch flex flex-col gap-[var(--space\/12,12px)] items-start not-italic overflow-clip py-[var(--space\/16,16px)] relative shrink-0 w-full" data-node-id="34:25611" data-name="등록과 변경·삭제의 경계">
+        <p className="font-['Pretendard:SemiBold'] leading-[28px] relative shrink-0 text-[18px] text-[color:var(--text\/primary,#222)] w-full" data-node-id="34:25612">
+          등록과 변경·삭제의 경계
+        </p>
+        <div className="font-['Pretendard:Regular'] leading-[0] relative shrink-0 text-[14px] text-[color:var(--text\/secondary,#606876)] w-full" data-node-id="34:25613">
+          <p className="leading-[22px] mb-0">고도몰 API만 사용합니다. Chrome 로그인 / 로컬 실행기 연결을 요구하지 않습니다. 스마트스토어 자동 등록은 사용할 수 없습니다.</p>
+          <p className="leading-[22px] mb-0">검토 → 요청 처리 → 결과 확인 → 반영 확인 완료. 응답 시간 초과는 실패로 확정하지 않습니다. 결과 확인 필요는 실제 결과 다시 확인이 기본 행동입니다. 미확인 자동 재등록 금지.</p>
+          <p className="leading-[22px] mb-0">성공한 몰 작업은 유지하고 건너뜁니다. 실패 수정 후에도 새 등록 전 검토를 거칩니다.</p>
+          <p className="leading-[22px]">상품 상세에서 원격 상품을 변경하는 동작과 리스트 초안 반영 / 저장을 명확히 구분합니다. 삭제는 내부 초안 / 리스트만 지원하며 원격 고도몰 상품 삭제는 제공하지 않습니다.</p>
+        </div>
+      </div>
+      <div className="[word-break:break-word] border-[var(--border\/subtle,#eee)] border-b border-solid content-stretch flex flex-col gap-[var(--space\/12,12px)] items-start not-italic overflow-clip py-[var(--space\/16,16px)] relative shrink-0 w-full" data-node-id="34:25614" data-name="모달 · 포커스 · 키보드">
+        <p className="font-['Pretendard:SemiBold'] leading-[28px] relative shrink-0 text-[18px] text-[color:var(--text\/primary,#222)] w-full" data-node-id="34:25615">
+          모달 · 포커스 · 키보드
+        </p>
+        <div className="font-['Pretendard:Regular'] leading-[0] relative shrink-0 text-[14px] text-[color:var(--text\/secondary,#606876)] w-full" data-node-id="34:25616">
+          <p className="leading-[22px] mb-0">열기: 트리거를 기억하고 첫 입력으로 포커스 이동. 삭제 확인은 취소에 초기 포커스. 긴 안내는 제목에 포커스합니다.</p>
+          <p className="leading-[22px] mb-0">Tab / Shift+Tab: 모달 내부 순환, 배경 inert 처리. 비활성 컨트롤은 포커스 순서에서 제외합니다.</p>
+          <p className="leading-[22px] mb-0">Esc / 닫기: 변경이 있으면 계속 편집 / 변경사항 버리기 / 목록에 반영 확인. 반영 후에도 리스트 저장 필요를 안내합니다. 깨끗한 편집은 바로 닫습니다.</p>
+          <p className="leading-[22px] mb-0">닫기 후 트리거 포커스 복원. 트리거가 없어지면 다음 행 또는 목록 제목으로 이동합니다.</p>
+          <p className="leading-[22px] mb-0">편집 너비 800px, 검토 1160px. 실행 높이는 창 높이 - 64px 이하. 헤더·하단은 고정, 본문만 스크롤. 정적 설계는 모든 필드를 펼쳐 표시합니다.</p>
+          <p className="leading-[22px]">오류 입력에 aria-invalid / 설명을 연결하고 오류 요약에서 필드로 이동합니다. 실패 후 입력값과 스크롤 위치를 유지합니다.</p>
+        </div>
+      </div>
+      <div className="[word-break:break-word] border-[var(--border\/subtle,#eee)] border-b border-solid content-stretch flex flex-col gap-[var(--space\/12,12px)] items-start not-italic overflow-clip py-[var(--space\/16,16px)] relative shrink-0 w-full" data-node-id="34:25617" data-name="테이블 · 범위 · 반응형">
+        <p className="font-['Pretendard:SemiBold'] leading-[28px] relative shrink-0 text-[18px] text-[color:var(--text\/primary,#222)] w-full" data-node-id="34:25618">
+          테이블 · 범위 · 반응형
+        </p>
+        <div className="font-['Pretendard:Regular'] leading-[0] relative shrink-0 text-[14px] text-[color:var(--text\/secondary,#606876)] w-full" data-node-id="34:25619">
+          <p className="leading-[22px] mb-0">표 내부 세로 스크롤에서 머리글 고정, 가로 스크롤에서 선택 / 상품 ID / 상품명 고정. 화면 전체가 가로로 늘어나지 않게 합니다.</p>
+          <p className="leading-[22px] mb-0">금액은 tabular-nums 고정 폭 숫자, 오른쪽 정렬, 천 단위 쉼표. 긴 상품명은 2줄 이상, 원문 전체는 상세에서 확인합니다.</p>
+          <p className="leading-[22px] mb-0">선택은 현재 페이지가 기본입니다. 필터 결과 전체 선택은 별도 행동과 총 수량을 명시합니다. 일괄 설정은 선택한 2개에만 적용합니다.</p>
+          <p className="leading-[22px] mb-0">행 호버: 옅은 회색. 선택: 연핑크 + 체크. 비활성: 선택 불가와 이유. 완료: 몰별 아이콘·문구. 색상만으로 의미를 표시하지 않습니다.</p>
+          <p className="leading-[22px] mb-0">1440 웹: 사이드바 260 / 60px, 제목·설명·주 행동 위치 유지. 1280×800 macOS: 60px 레일, 신호등·제목 드래그, 도구 36px, 본문 내부 스크롤, 하단 항상 접근.</p>
+          <p className="leading-[22px]">1920×1080: 사이드바 260px, 남는 공간을 상품명과 행에 배분. 장식·통계·매출 분석·AI 추천 추가 금지.</p>
+        </div>
+      </div>
+      <div className="[word-break:break-word] border-[var(--border\/subtle,#eee)] border-b border-solid content-stretch flex flex-col gap-[var(--space\/12,12px)] items-start not-italic overflow-clip py-[var(--space\/16,16px)] relative shrink-0 w-full" data-node-id="34:25620" data-name="상태와 접근성">
+        <p className="font-['Pretendard:SemiBold'] leading-[28px] relative shrink-0 text-[18px] text-[color:var(--text\/primary,#222)] w-full" data-node-id="34:25621">
+          상태와 접근성
+        </p>
+        <div className="font-['Pretendard:Regular'] leading-[0] relative shrink-0 text-[14px] text-[color:var(--text\/secondary,#606876)] w-full" data-node-id="34:25622">
+          <p className="leading-[22px] mb-0">초기 빈 목록 / 검색 결과 없음 / 로딩 / API 오류를 구분하고 만들기 / 필터 초기화 / 진행 안내 / 다시 시도를 제공합니다.</p>
+          <p className="leading-[22px] mb-0">저장 중 / 저장됨 / 저장 실패 / 저장하지 않음을 구분합니다. 실패해도 초안 유지. 조회 전용은 값 선택·복사 가능, 비활성은 회색 필드와 조건 설명.</p>
+          <p className="leading-[22px] mb-0">Pretendard 400 / 500 / 600, 본문·입력 14px, 도움말 12–13px, 제목 26px, 섹션 18px. 키보드 포커스 #AE3155 2px.</p>
+          <p className="leading-[22px] mb-0">성공 / 주의 / 오류 / 진행은 아이콘과 한국어 문구 병기. 긴 한국어 검증은 줄바꿈하고 잘라내지 않습니다.</p>
+          <p className="leading-[22px]">툴팁은 hover와 focus에서 표시하고 Esc로 닫습니다. 모든 아이콘 전용 컨트롤에 접근 가능한 이름을 제공합니다.</p>
+        </div>
+      </div>
+      <p className="[word-break:break-word] font-['Pretendard:SemiBold'] leading-[28px] not-italic relative shrink-0 text-[18px] text-[color:var(--text\/primary,#222)] whitespace-nowrap" data-node-id="34:25623">
+        아이콘 전용 컨트롤 · 툴팁 + 접근 가능한 이름
+      </p>
+      <div className="[word-break:break-word] bg-[var(--background\/surface,white)] border border-[var(--border\/subtle,#eee)] border-solid content-stretch flex flex-col items-start not-italic overflow-clip relative shrink-0 w-full" data-node-id="34:25624" data-name="테이블 / 머리글 고정">
+        <div className="bg-[var(--background\/canvas,#f7f8fa)] content-stretch flex font-['Pretendard:Medium'] gap-[var(--space\/16,16px)] items-start leading-[20px] min-h-[44px] overflow-clip px-[var(--space\/12,12px)] py-[10px] relative shrink-0 text-[13px] text-[color:var(--text\/secondary,#606876)] w-full" data-node-id="34:25625" data-name="테이블 머리글">
+          <p className="relative shrink-0 w-[244px]" data-node-id="34:25626">
+            기능
+          </p>
+          <p className="relative shrink-0 w-[324px]" data-node-id="34:25627">
+            툴팁
+          </p>
+          <p className="flex-[1_0_0] min-w-px relative" data-node-id="34:25628">
+            접근 가능한 이름 / 속성
+          </p>
+        </div>
+        <CallaAutomate className="bg-[var(--background\/surface,white)] border-[var(--border\/subtle,#eee)] border-b border-solid content-stretch flex font-['Pretendard:Regular'] gap-[var(--space\/16,16px)] h-[64px] items-center leading-[22px] min-h-[44px] overflow-clip px-[var(--space\/12,12px)] py-[10px] relative shrink-0 text-[14px] text-[color:var(--text\/primary,#222)] w-full" prop01="사이드바" prop02="사이드바 펼치기 / 접기" prop03="aria-label 동일 · aria-expanded 갱신" />
+        <CallaAutomate className="bg-[var(--background\/surface,white)] border-[var(--border\/subtle,#eee)] border-b border-solid content-stretch flex font-['Pretendard:Regular'] gap-[var(--space\/16,16px)] h-[64px] items-center leading-[22px] min-h-[44px] overflow-clip px-[var(--space\/12,12px)] py-[10px] relative shrink-0 text-[14px] text-[color:var(--text\/primary,#222)] w-full" prop01="현재 메뉴" prop02="등록 요청 상품 · 현재 메뉴" prop03="aria-label 등록 요청 상품 · aria-current page" />
+        <CallaAutomate className="bg-[var(--background\/surface,white)] border-[var(--border\/subtle,#eee)] border-b border-solid content-stretch flex font-['Pretendard:Regular'] gap-[var(--space\/16,16px)] h-[64px] items-center leading-[22px] min-h-[44px] overflow-clip px-[var(--space\/12,12px)] py-[10px] relative shrink-0 text-[14px] text-[color:var(--text\/primary,#222)] w-full" prop01="상품 조회" prop02="상품 조회" prop03="aria-label 상품 조회" />
+        <CallaAutomate className="bg-[var(--background\/surface,white)] border-[var(--border\/subtle,#eee)] border-b border-solid content-stretch flex font-['Pretendard:Regular'] gap-[var(--space\/16,16px)] h-[64px] items-center leading-[22px] min-h-[44px] overflow-clip px-[var(--space\/12,12px)] py-[10px] relative shrink-0 text-[14px] text-[color:var(--text\/primary,#222)] w-full" prop01="모달 닫기" prop02="상품 편집 닫기" prop03="aria-label 상품 편집 닫기 · 변경 시 보호" />
+        <CallaAutomate className="bg-[var(--background\/surface,white)] border-[var(--border\/subtle,#eee)] border-b border-solid content-stretch flex font-['Pretendard:Regular'] gap-[var(--space\/16,16px)] h-[64px] items-center leading-[22px] min-h-[44px] overflow-clip px-[var(--space\/12,12px)] py-[10px] relative shrink-0 text-[14px] text-[color:var(--text\/primary,#222)] w-full" prop01="행 작업 메뉴" prop02="상품 작업 메뉴" prop03="aria-label P-001 상품 작업 메뉴 · aria-haspopup" />
+        <CallaAutomate className="bg-[var(--background\/surface,white)] border-[var(--border\/subtle,#eee)] border-b border-solid content-stretch flex font-['Pretendard:Regular'] gap-[var(--space\/16,16px)] h-[64px] items-center leading-[22px] min-h-[44px] overflow-clip px-[var(--space\/12,12px)] py-[10px] relative shrink-0 text-[14px] text-[color:var(--text\/primary,#222)] w-full" prop01="블록 재정렬" prop02="블록 위로 이동 / 아래로 이동" prop03="유형·순서 포함 · 키보드 이동 후 상태 알림" />
+        <CallaAutomate className="bg-[var(--background\/surface,white)] border-[var(--border\/subtle,#eee)] border-b border-solid content-stretch flex font-['Pretendard:Regular'] gap-[var(--space\/16,16px)] h-[64px] items-center leading-[22px] min-h-[44px] overflow-clip px-[var(--space\/12,12px)] py-[10px] relative shrink-0 text-[14px] text-[color:var(--text\/primary,#222)] w-full" prop01="결과 재조회" prop02="실제 결과 다시 확인" prop03="aria-label 실제 결과 다시 확인 · 재등록 아님" />
+        <CallaAutomate className="bg-[var(--background\/surface,white)] border-[var(--border\/subtle,#eee)] border-b border-solid content-stretch flex font-['Pretendard:Regular'] gap-[var(--space\/16,16px)] h-[64px] items-center leading-[22px] min-h-[44px] overflow-clip px-[var(--space\/12,12px)] py-[10px] relative shrink-0 text-[14px] text-[color:var(--text\/primary,#222)] w-full" prop01="행 선택" prop02="P-001 선택" prop03="aria-checked true / false / mixed · 완료와 분리" />
+      </div>
+      <div className="bg-[var(--warning\/background,#fff7dd)] content-stretch flex gap-[var(--space\/8,8px)] items-center overflow-clip p-[var(--space\/12,12px)] relative rounded-[var(--radius\/control,8px)] shrink-0 w-full" data-node-id="34:25661" data-name="안내 / warning">
+        <SfInfoCircle className="relative shrink-0 size-[20px]" />
+        <p className="[word-break:break-word] flex-[1_0_0] font-['Pretendard:Regular'] leading-[22px] min-w-px not-italic relative text-[14px] text-[color:var(--text\/primary,#222)]" data-node-id="34:25664">
+          흰색 / #F27490 약 2.64:1 · 일반 텍스트 4.5:1 미달. 요청한 기본 브랜드 조합을 유지하며 출시 전 보완 결정을 확인하세요.
+        </p>
+      </div>
+      <div className="content-stretch flex gap-[var(--space\/24,24px)] items-center overflow-clip relative shrink-0 w-full" data-node-id="34:25665" data-name="대비 대안">
+        <div className="bg-[var(--calla-brand-default,#f27490)] content-stretch flex gap-[var(--calla-spacing-8,8px)] h-[44px] items-center justify-center min-h-[44px] px-[12px] py-[var(--calla-spacing-8,8px)] relative rounded-[var(--calla-radius-8,8px)] shrink-0 w-[119px]" data-node-id="34:25666" data-name="버튼 / 주 행동 / 기본">
+          <p className="[word-break:break-word] font-['Pretendard:SemiBold'] leading-[20px] not-italic relative shrink-0 text-[14px] text-[color:var(--calla-text-inverse,white)] whitespace-nowrap" data-node-id="I34:25666;13:4438">
+            저장 · 기본
+          </p>
+        </div>
+        <div className="bg-[var(--brand\/strong,#ae3155)] content-stretch flex h-[40px] items-center justify-center overflow-clip relative rounded-[var(--radius\/control,8px)] shrink-0 w-[200px]" data-node-id="34:25670" data-name="접근성 대안 / 강한 브랜드">
+          <p className="[word-break:break-word] font-['Pretendard:SemiBold'] leading-[20px] not-italic relative shrink-0 text-[14px] text-[color:var(--background\/surface,white)] whitespace-nowrap" data-node-id="34:25671">
+            저장 · #AE3155 + 흰색
+          </p>
+        </div>
+        <div className="bg-[var(--brand\/soft,#fff0f4)] content-stretch flex h-[40px] items-center justify-center overflow-clip relative rounded-[var(--radius\/control,8px)] shrink-0 w-[280px]" data-node-id="34:25672" data-name="접근성 대안 / 옅은 브랜드">
+          <p className="[word-break:break-word] font-['Pretendard:SemiBold'] leading-[20px] not-italic relative shrink-0 text-[14px] text-[color:var(--brand\/strong,#ae3155)] whitespace-nowrap" data-node-id="34:25673">
+            저장 · #FFF0F4 + #AE3155
+          </p>
+        </div>
+      </div>
+      <div className="[word-break:break-word] border-[var(--border\/subtle,#eee)] border-b border-solid content-stretch flex flex-col gap-[var(--space\/12,12px)] items-start not-italic overflow-clip py-[var(--space\/16,16px)] relative shrink-0 w-full" data-node-id="34:25674" data-name="검수 데이터 · 통과 기준">
+        <p className="font-['Pretendard:SemiBold'] leading-[28px] relative shrink-0 text-[18px] text-[color:var(--text\/primary,#222)] w-full" data-node-id="34:25675">
+          검수 데이터 · 통과 기준
+        </p>
+        <div className="font-['Pretendard:Regular'] leading-[0] relative shrink-0 text-[14px] text-[color:var(--text\/secondary,#606876)] w-full" data-node-id="34:25676">
+          <p className="leading-[22px] mb-0">긴 상품명: AVMATRIX PTZ1271-12A White 12배 광학 줌 방송·회의·교육용 카메라 전원 어댑터 포함 → 2줄 / 상세 전체 확인.</p>
+          <p className="leading-[22px] mb-0">{`깊은 분류: 영상 > 방송 장비 > 카메라 > 원격 제어 > PTZ > 4K 화이트 → 경로 줄바꿈 / 원문 확인.`}</p>
+          <p className="leading-[22px] mb-0">큰 금액: 9,999,999,999원 → 우측 정렬, 쉼표, 옆 열 침범 없음. 빈 가격(-)과 0원은 서로 다르게 표시.</p>
+          <p className="leading-[22px] mb-0">500행 / 작은 높이 1280×800 → 머리글·식별자 고정, 표 내부 스크롤, 하단 행동 접근. 긴 오류는 2줄 이상과 초안 보존.</p>
+          <p className="leading-[22px] mb-0">부분 성공: 상품 3개 × 몰 2개 = 6건, 반영 확인 3 + 실패 1 + 결과 확인 필요 2 = 6. 미확인 재조회 우선.</p>
+          <p className="leading-[22px]">조회 전용은 변경 불가 툴팁 / 값 복사, 비활성 수량은 Tab 제외 / 이유 표시. 날짜는 항상 yyyy/mm/dd.</p>
+        </div>
+      </div>
+      <div className="[word-break:break-word] font-['Pretendard:Regular'] leading-[0] min-w-full not-italic relative shrink-0 text-[14px] text-black w-[min-content]" data-node-id="34:30203">
+        <p className="leading-[22px] mb-0">제작 범위: 토큰 안내 + 28개 화면·상태·모달·개발 가이드. 버튼·입력·탭·배지·메뉴·테이블 행은 실제 로컬 Component/Instance 및 상태 Variants로 구성했습니다.</p>
+        <p className="leading-[22px] mb-0">작은 창 1280×800에서 상품 기본 설정·이미지 설정·등록 검토의 제목과 하단 행동 영역을 유지하며 긴 본문만 스크롤하도록 크기 규칙을 구성했습니다.</p>
+        <p className="leading-[22px] mb-0">프로토타입 클릭 연결은 미설정입니다. 단계별 화면과 동작 설명을 바탕으로 별도 연결이 필요합니다. 숫자는 우측 정렬을 적용하며, 구현 시 font-variant-numeric: tabular-nums를 적용하세요.</p>
+        <p className="leading-[22px]">디자인 예시이며 실제 처리 결과가 아닙니다. 브랜드 대비 미달 조합은 가이드의 접근성 대안으로 검토하세요.</p>
+      </div>
+    </div>
+  );
+}
+
+SUPER CRITICAL: The generated React+Tailwind code MUST be converted to match the target project's technology stack and styling system.
+1. Analyze the target codebase to identify: technology stack, styling approach, component patterns, and design tokens
+2. Convert React syntax to the target framework/library
+3. Transform all Tailwind classes to the target styling system while preserving exact visual design
+4. Follow the project's existing patterns and conventions
+DO NOT install any Tailwind as a dependency unless the user instructs you to do so.
+
+
+Node ids have been added to the code as data attributes, e.g. `data-node-id="1:2"`.
+
+These styles are contained in the design: CALLA-AUTOMATE/보조: Font(family: "Pretendard", style: Regular, size: 12, weight: 400, lineHeight: 18, letterSpacing: 0), CALLA-AUTOMATE/제목: Font(family: "Pretendard", style: SemiBold, size: 26, weight: 600, lineHeight: 36, letterSpacing: 0), CALLA-AUTOMATE/본문: Font(family: "Pretendard", style: Regular, size: 14, weight: 400, lineHeight: 22, letterSpacing: 0), CALLA-AUTOMATE/라벨: Font(family: "Pretendard", style: Medium, size: 13, weight: 500, lineHeight: 20, letterSpacing: 0), CALLA-AUTOMATE/강조: Font(family: "Pretendard", style: Medium, size: 14, weight: 500, lineHeight: 22, letterSpacing: 0), CALLA-AUTOMATE/섹션: Font(family: "Pretendard", style: SemiBold, size: 18, weight: 600, lineHeight: 28, letterSpacing: 0), CALLA-AUTOMATE/주 행동: Font(family: "Pretendard", style: SemiBold, size: 14, weight: 600, lineHeight: 20, letterSpacing: 0).
+
+Component descriptions: The following components have usage descriptions or documentation links defined in Figma. These descriptions provide important context about the intended usage, best practices, and any constraints for each component. Follow these guidelines when implementing or using these components.
+
+## 유형=기본, 상태=기본, 구성=068
+**Node ID:** 34:29406
+
+CALLA-AUTOMATE · 테이블 행 / 기본 · 디자인 예시. 원문·선택·준비·몰별 결과 의미를 보존합니다.
+
+## CALLA-AUTOMATE / 테이블 행
+**Node ID:** 34:29439
+
+실제 로컬 컴포넌트와 상태별 Variants. 문구 속성은 원문을 보존하며 화면에서 인스턴스로 사용합니다.
+
+## SF/info.circle
+**Node ID:** 13:4289
+
+SF Symbols Pro plugin import. Original vector master 271:1265; 24px master with SCALE constraints.
+
+## Calla/Button
+**Node ID:** 13:4515
+
+주요·보조·텍스트·삭제 행동. Primary의 모든 활성 상태는 핑크 배경 위 흰색 글자·아이콘을 사용합니다. Label과 SF Symbols Icon 교체 가능. 저장과 외부 몰 등록 CTA는 구분.
+
+Images and SVGs will be stored as constants, e.g. const image = `${assetPathPrefix}/<asset file name>`, where assetPathPrefix is declared once at the top of the code and every asset URL interpolates it. These constants will be used in the code as the source for the image, ex: <img src={image} />. Image assets are stored on a remote server for 7 days and can be fetched using the provided URLs until they expire.

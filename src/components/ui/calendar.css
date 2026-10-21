@@ -1,0 +1,54 @@
+.date-input .date-calendar {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  transition: background var(--motion-fast) var(--ease-out), color var(--motion-fast) var(--ease-out);
+}
+.date-input .date-calendar:hover, .date-input .date-calendar[aria-expanded='true'] { color: var(--brand-strong); background: var(--brand-soft); }
+.date-input .date-calendar:focus-visible { outline-offset: -3px; }
+.date-input.is-disabled .date-calendar { background: transparent; }
+.calla-calendar-popover { width: 300px; padding: 0; }
+.calla-calendar {
+  width: 100%;
+  padding: 14px;
+  color: var(--ink);
+  font-family: Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  user-select: none;
+}
+.calla-calendar button { border: 0; background: transparent; color: inherit; font-size: 13px; font-weight: 500; transition: background var(--motion-fast) var(--ease-out), color var(--motion-fast) var(--ease-out); }
+.calla-calendar button:hover { background: var(--subtle); }
+.calla-calendar button:focus-visible { outline: 2px solid var(--brand-strong); outline-offset: 1px; }
+.calla-calendar button:disabled { opacity: .35; }
+.calla-calendar-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.calla-calendar .calla-calendar-nav { display: inline-grid; place-items: center; flex: 0 0 30px; width: 30px; height: 30px; padding: 0; color: var(--secondary); border-radius: 8px; }
+.calla-calendar-heading { display: flex; align-items: center; gap: 4px; }
+.calla-calendar-heading > span { color: var(--border-strong); }
+.calla-calendar-heading > button { padding: 5px 7px; border-radius: 7px; font-weight: 600; }
+.calla-calendar-heading > button.is-active { color: var(--brand-strong); background: var(--brand-soft); }
+.calla-calendar-week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
+.calla-calendar-week + .calla-calendar-week { margin-top: 3px; }
+.calla-calendar-weekday { display: grid; place-items: center; height: 27px; color: var(--muted); font-size: 11px; font-weight: 500; }
+.calla-calendar-weekday.is-sunday { color: var(--brand-strong); }
+.calla-calendar-week [role='gridcell'] { display: grid; place-items: center; }
+.calla-calendar .calla-calendar-day { position: relative; display: grid; place-items: center; width: 32px; max-width: 100%; height: 32px; padding: 0; border-radius: 50%; font-weight: 400; font-variant-numeric: tabular-nums; }
+.calla-calendar .calla-calendar-day.is-outside { color: var(--disabled); }
+.calla-calendar .calla-calendar-day.is-today { box-shadow: inset 0 0 0 1px #f7b0c1; color: var(--brand-strong); font-weight: 600; }
+.calla-calendar .calla-calendar-day.is-selected, .calla-calendar-picker > button.is-selected { background: var(--brand); color: white; font-weight: 600; box-shadow: none; }
+.calla-calendar .calla-calendar-day.is-selected:hover, .calla-calendar-picker > button.is-selected:hover { background: var(--brand-hover); }
+.calla-calendar-days, .calla-calendar-picker { animation: calla-calendar-view 150ms var(--ease-out); }
+.calla-calendar-picker { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 8px 0; }
+.calla-calendar-picker > button { height: 42px; padding: 4px; border-radius: 9px; font-variant-numeric: tabular-nums; }
+.calla-calendar-year-range { grid-column: 1 / -1; margin-bottom: 3px; color: var(--muted); text-align: center; font-size: 11px; font-variant-numeric: tabular-nums; }
+.calla-calendar-footer { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); }
+.calla-calendar-footer > span { color: var(--muted); font-size: 11px; }
+.calla-calendar-footer > button { padding: 4px 9px; border-radius: 7px; color: var(--brand-strong); background: var(--brand-soft); font-size: 12px; }
+.calla-calendar-footer > button:hover { background: #ffe3eb; }
+@keyframes calla-calendar-view { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .calla-calendar button, .date-input .date-calendar { transition: none; } .calla-calendar-days, .calla-calendar-picker { animation: none; } }
+@media (forced-colors: active) {
+  .calla-calendar .calla-calendar-day.is-selected, .calla-calendar-picker > button.is-selected { background: Highlight; color: HighlightText; outline: 1px solid Highlight; }
+  .calla-calendar .calla-calendar-day.is-today:not(.is-selected) { border: 1px solid CanvasText; }
+  .calla-calendar button:disabled { color: GrayText; opacity: 1; }
+}

@@ -1,0 +1,1433 @@
+{
+  "checkedAt": "2026-10-02",
+  "sources": {
+    "retail": "http://gdadmin.callamedia.kr/goods/category_tree.php",
+    "wholesale": "http://gdadmin.callamedia1.godomall.com/goods/category_tree.php"
+  },
+  "categories": {
+    "retail": [
+      {
+        "code": "001",
+        "name": "영상장비-카메라/렌즈",
+        "parentCode": ""
+      },
+      {
+        "code": "001001",
+        "name": "PANASONIC 파나소닉",
+        "parentCode": "001"
+      },
+      {
+        "code": "001002",
+        "name": "SAMYANG 삼양렌즈",
+        "parentCode": "001"
+      },
+      {
+        "code": "001003",
+        "name": "Marshall 마샬",
+        "parentCode": "001"
+      },
+      {
+        "code": "001004",
+        "name": "SONY 소니",
+        "parentCode": "001"
+      },
+      {
+        "code": "001005",
+        "name": "기타브랜드",
+        "parentCode": "001"
+      },
+      {
+        "code": "001006",
+        "name": "카메라용품",
+        "parentCode": "001"
+      },
+      {
+        "code": "002",
+        "name": "영상장비-영상용삼각대",
+        "parentCode": ""
+      },
+      {
+        "code": "002001",
+        "name": "CAMGEAR 캠기어시스템",
+        "parentCode": "002"
+      },
+      {
+        "code": "002002",
+        "name": "CAMGEAR 캠기어액세서리",
+        "parentCode": "002"
+      },
+      {
+        "code": "002003",
+        "name": "THORVIDEO 토르비디오",
+        "parentCode": "002"
+      },
+      {
+        "code": "002004",
+        "name": "기타브랜드",
+        "parentCode": "002"
+      },
+      {
+        "code": "003",
+        "name": "영상장비-틸타리그시스템",
+        "parentCode": ""
+      },
+      {
+        "code": "003001",
+        "name": "Camera Cage",
+        "parentCode": "003"
+      },
+      {
+        "code": "003002",
+        "name": "DJI Ecosystem",
+        "parentCode": "003"
+      },
+      {
+        "code": "003003",
+        "name": "Stabilization Systems",
+        "parentCode": "003"
+      },
+      {
+        "code": "003004",
+        "name": "Lens Control Systems",
+        "parentCode": "003"
+      },
+      {
+        "code": "003005",
+        "name": "Matte Boxes",
+        "parentCode": "003"
+      },
+      {
+        "code": "003006",
+        "name": "Power/Cable",
+        "parentCode": "003"
+      },
+      {
+        "code": "003007",
+        "name": "Support",
+        "parentCode": "003"
+      },
+      {
+        "code": "003008",
+        "name": "Accessories",
+        "parentCode": "003"
+      },
+      {
+        "code": "004",
+        "name": "영상장비-카메라서포트",
+        "parentCode": ""
+      },
+      {
+        "code": "004001",
+        "name": "Cart 카트",
+        "parentCode": "004"
+      },
+      {
+        "code": "004002",
+        "name": "Cable 케이블",
+        "parentCode": "004"
+      },
+      {
+        "code": "004003",
+        "name": "Power 전원/배터리",
+        "parentCode": "004"
+      },
+      {
+        "code": "004004",
+        "name": "기타상품",
+        "parentCode": "004"
+      },
+      {
+        "code": "004005",
+        "name": "무선영상송수신기",
+        "parentCode": "004"
+      },
+      {
+        "code": "005",
+        "name": "영상장비-딘컴/스탠드",
+        "parentCode": ""
+      },
+      {
+        "code": "005001",
+        "name": "Dinkum 딘컴시스템",
+        "parentCode": "005"
+      },
+      {
+        "code": "005002",
+        "name": "KUPO 쿠포스탠드",
+        "parentCode": "005"
+      },
+      {
+        "code": "005003",
+        "name": "기타브랜드",
+        "parentCode": "005"
+      },
+      {
+        "code": "006",
+        "name": "영상장비-조명/배경용품",
+        "parentCode": ""
+      },
+      {
+        "code": "006001",
+        "name": "Tolifo 톨리포",
+        "parentCode": "006"
+      },
+      {
+        "code": "006002",
+        "name": "SOKANI 소카니",
+        "parentCode": "006"
+      },
+      {
+        "code": "006003",
+        "name": "CALLA Media Works",
+        "parentCode": "006"
+      },
+      {
+        "code": "006004",
+        "name": "FOMEX 포멕스",
+        "parentCode": "006"
+      },
+      {
+        "code": "006005",
+        "name": "Background 배경용품",
+        "parentCode": "006"
+      },
+      {
+        "code": "006006",
+        "name": "기타브랜드",
+        "parentCode": "006"
+      },
+      {
+        "code": "007",
+        "name": "영상장비-모니터/색교정",
+        "parentCode": ""
+      },
+      {
+        "code": "007001",
+        "name": "BON 본모니터",
+        "parentCode": "007"
+      },
+      {
+        "code": "007002",
+        "name": "TVlogic 티비로직",
+        "parentCode": "007"
+      },
+      {
+        "code": "007003",
+        "name": "SPYDER 색교정장비",
+        "parentCode": "007"
+      },
+      {
+        "code": "007004",
+        "name": "기타브랜드",
+        "parentCode": "007"
+      },
+      {
+        "code": "007005",
+        "name": "EIZO 에이조모니터",
+        "parentCode": "007"
+      },
+      {
+        "code": "007005001",
+        "name": "ColorEdge 모니터",
+        "parentCode": "007005"
+      },
+      {
+        "code": "007005002",
+        "name": "FlexScan 모니터",
+        "parentCode": "007005"
+      },
+      {
+        "code": "008",
+        "name": "영상장비-가방/케이스",
+        "parentCode": ""
+      },
+      {
+        "code": "008001",
+        "name": "Calla Media Works 가방",
+        "parentCode": "008"
+      },
+      {
+        "code": "008002",
+        "name": "기타브랜드",
+        "parentCode": "008"
+      },
+      {
+        "code": "009",
+        "name": "시스템장비-PTZ카메라",
+        "parentCode": ""
+      },
+      {
+        "code": "009001",
+        "name": "AVMATRIX",
+        "parentCode": "009"
+      },
+      {
+        "code": "009002",
+        "name": "AVer",
+        "parentCode": "009"
+      },
+      {
+        "code": "009003",
+        "name": "Datavideo",
+        "parentCode": "009"
+      },
+      {
+        "code": "009004",
+        "name": "CALLA",
+        "parentCode": "009"
+      },
+      {
+        "code": "009005",
+        "name": "EDISTEC",
+        "parentCode": "009"
+      },
+      {
+        "code": "009006",
+        "name": "Canon",
+        "parentCode": "009"
+      },
+      {
+        "code": "010",
+        "name": "시스템장비-영상스위처",
+        "parentCode": ""
+      },
+      {
+        "code": "010001",
+        "name": "AVMATRIX",
+        "parentCode": "010"
+      },
+      {
+        "code": "010002",
+        "name": "DATAVIDEO",
+        "parentCode": "010"
+      },
+      {
+        "code": "010003",
+        "name": "BlackMagic",
+        "parentCode": "010"
+      },
+      {
+        "code": "010005",
+        "name": "기타브랜드",
+        "parentCode": "010"
+      },
+      {
+        "code": "011",
+        "name": "시스템장비-컨버터/분배기",
+        "parentCode": ""
+      },
+      {
+        "code": "011001",
+        "name": "AVMATRIX",
+        "parentCode": "011"
+      },
+      {
+        "code": "011002",
+        "name": "I-O DATA",
+        "parentCode": "011"
+      },
+      {
+        "code": "011003",
+        "name": "CALLA",
+        "parentCode": "011"
+      },
+      {
+        "code": "011004",
+        "name": "BLACKMAGIC",
+        "parentCode": "011"
+      },
+      {
+        "code": "011005",
+        "name": "기타브랜드",
+        "parentCode": "011"
+      },
+      {
+        "code": "012",
+        "name": "시스템장비-자막기/스트리밍",
+        "parentCode": ""
+      },
+      {
+        "code": "012001",
+        "name": "AVMATRIX",
+        "parentCode": "012"
+      },
+      {
+        "code": "012002",
+        "name": "I-O DATA",
+        "parentCode": "012"
+      },
+      {
+        "code": "012003",
+        "name": "기타브랜드",
+        "parentCode": "012"
+      },
+      {
+        "code": "013",
+        "name": "시스템장비-무선인터컴",
+        "parentCode": ""
+      },
+      {
+        "code": "013001",
+        "name": "단말기/세트상품",
+        "parentCode": "013"
+      },
+      {
+        "code": "013002",
+        "name": "액세서리",
+        "parentCode": "013"
+      },
+      {
+        "code": "014",
+        "name": "시스템장비-LED전광판",
+        "parentCode": ""
+      },
+      {
+        "code": "014001",
+        "name": "LED DISPLAY 전광판",
+        "parentCode": "014"
+      },
+      {
+        "code": "014002",
+        "name": "Processors / Control System",
+        "parentCode": "014"
+      },
+      {
+        "code": "014003",
+        "name": "Cloud Player",
+        "parentCode": "014"
+      },
+      {
+        "code": "014004",
+        "name": "Media Server",
+        "parentCode": "014"
+      },
+      {
+        "code": "015",
+        "name": "시스템장비-무대조명",
+        "parentCode": ""
+      },
+      {
+        "code": "015001",
+        "name": "LED PAR LIGHT",
+        "parentCode": "015"
+      },
+      {
+        "code": "015002",
+        "name": "LED SPOT LIGHT",
+        "parentCode": "015"
+      },
+      {
+        "code": "015003",
+        "name": "MOVING LIGHT",
+        "parentCode": "015"
+      },
+      {
+        "code": "015004",
+        "name": "DMX 콘솔",
+        "parentCode": "015"
+      },
+      {
+        "code": "015005",
+        "name": "특수효과",
+        "parentCode": "015"
+      },
+      {
+        "code": "015006",
+        "name": "교회조명패키지",
+        "parentCode": "015"
+      },
+      {
+        "code": "016",
+        "name": "시스템장비-케이블/기타장비",
+        "parentCode": ""
+      },
+      {
+        "code": "016001",
+        "name": "Cable 케이블",
+        "parentCode": "016"
+      },
+      {
+        "code": "016002",
+        "name": "Desk 콘솔데스크",
+        "parentCode": "016"
+      },
+      {
+        "code": "016004",
+        "name": "기타장비",
+        "parentCode": "016"
+      },
+      {
+        "code": "017",
+        "name": "음향장비-록스톤 커넥터/케이블",
+        "parentCode": ""
+      },
+      {
+        "code": "017001",
+        "name": "CONNECTER 커넥터",
+        "parentCode": "017"
+      },
+      {
+        "code": "017002",
+        "name": "SOCKET 샷시형커넥터",
+        "parentCode": "017"
+      },
+      {
+        "code": "017003",
+        "name": "Premade 완제품",
+        "parentCode": "017"
+      },
+      {
+        "code": "017004",
+        "name": "CABLE 케이블",
+        "parentCode": "017"
+      },
+      {
+        "code": "017005",
+        "name": "익스텐더/멀티 케이블",
+        "parentCode": "017"
+      },
+      {
+        "code": "017006",
+        "name": "Cable Reel 케이블릴",
+        "parentCode": "017"
+      },
+      {
+        "code": "017007",
+        "name": "Accessories 액세서리",
+        "parentCode": "017"
+      },
+      {
+        "code": "017008",
+        "name": "세트할인상품",
+        "parentCode": "017"
+      },
+      {
+        "code": "018",
+        "name": "음향장비-마이크",
+        "parentCode": ""
+      },
+      {
+        "code": "018003",
+        "name": "SUPERLUX 수퍼럭스",
+        "parentCode": "018"
+      },
+      {
+        "code": "018004",
+        "name": "Sennheiser 젠하이저",
+        "parentCode": "018"
+      },
+      {
+        "code": "018005",
+        "name": "기타브랜드",
+        "parentCode": "018"
+      },
+      {
+        "code": "018005001",
+        "name": "7RYMS 세븐림스",
+        "parentCode": "018005"
+      },
+      {
+        "code": "018005002",
+        "name": "COMICA 코미카",
+        "parentCode": "018005"
+      },
+      {
+        "code": "018006",
+        "name": "영상용 마이크",
+        "parentCode": "018"
+      },
+      {
+        "code": "018007",
+        "name": "무선마이크",
+        "parentCode": "018"
+      },
+      {
+        "code": "018008",
+        "name": "콘덴서마이크",
+        "parentCode": "018"
+      },
+      {
+        "code": "018009",
+        "name": "다이나믹마이크",
+        "parentCode": "018"
+      },
+      {
+        "code": "018010",
+        "name": "마이크액세서리",
+        "parentCode": "018"
+      },
+      {
+        "code": "018011",
+        "name": "Carol 캐롤",
+        "parentCode": "018"
+      },
+      {
+        "code": "018012",
+        "name": "KANALS 카날스",
+        "parentCode": "018"
+      },
+      {
+        "code": "019",
+        "name": "음향장비-스피커",
+        "parentCode": ""
+      },
+      {
+        "code": "019001",
+        "name": "라인어레이",
+        "parentCode": "019"
+      },
+      {
+        "code": "019002",
+        "name": "액티브 스피커",
+        "parentCode": "019"
+      },
+      {
+        "code": "019003",
+        "name": "패시브 스피커",
+        "parentCode": "019"
+      },
+      {
+        "code": "019004",
+        "name": "서브우퍼",
+        "parentCode": "019"
+      },
+      {
+        "code": "019005",
+        "name": "컬럼어레이",
+        "parentCode": "019"
+      },
+      {
+        "code": "019006",
+        "name": "포인트소스",
+        "parentCode": "019"
+      },
+      {
+        "code": "019007",
+        "name": "모니터 스피커",
+        "parentCode": "019"
+      },
+      {
+        "code": "019008",
+        "name": "오디오센터",
+        "parentCode": "019"
+      },
+      {
+        "code": "019009",
+        "name": "기타브랜드",
+        "parentCode": "019"
+      },
+      {
+        "code": "020",
+        "name": "음향장비-콘솔/프로세서",
+        "parentCode": ""
+      },
+      {
+        "code": "020001",
+        "name": "오디오 믹서",
+        "parentCode": "020"
+      },
+      {
+        "code": "020002",
+        "name": "프로세서",
+        "parentCode": "020"
+      },
+      {
+        "code": "020003",
+        "name": "기타장비",
+        "parentCode": "020"
+      },
+      {
+        "code": "021",
+        "name": "음향장비-앰프/헤드폰",
+        "parentCode": ""
+      },
+      {
+        "code": "021001",
+        "name": "앰프",
+        "parentCode": "021"
+      },
+      {
+        "code": "021002",
+        "name": "헤드폰",
+        "parentCode": "021"
+      },
+      {
+        "code": "022",
+        "name": "음향장비-케이블/커넥터",
+        "parentCode": ""
+      },
+      {
+        "code": "022001",
+        "name": "완제품",
+        "parentCode": "022"
+      },
+      {
+        "code": "022002",
+        "name": "벌크케이블",
+        "parentCode": "022"
+      },
+      {
+        "code": "022003",
+        "name": "커넥터",
+        "parentCode": "022"
+      },
+      {
+        "code": "022004",
+        "name": "샷시형커넥터",
+        "parentCode": "022"
+      },
+      {
+        "code": "023",
+        "name": "음향장비-액세서리",
+        "parentCode": ""
+      },
+      {
+        "code": "023001",
+        "name": "전원박스/순차전원기",
+        "parentCode": "023"
+      },
+      {
+        "code": "023002",
+        "name": "기타장비",
+        "parentCode": "023"
+      },
+      {
+        "code": "023003",
+        "name": "DI BOX",
+        "parentCode": "023"
+      },
+      {
+        "code": "024",
+        "name": "개인결제창",
+        "parentCode": ""
+      },
+      {
+        "code": "024001",
+        "name": "개인결제",
+        "parentCode": "024"
+      },
+      {
+        "code": "025",
+        "name": "창고개방! 다 퍼주는 세일",
+        "parentCode": ""
+      },
+      {
+        "code": "025001",
+        "name": "마이크",
+        "parentCode": "025"
+      },
+      {
+        "code": "025002",
+        "name": "이어폰/헤드폰",
+        "parentCode": "025"
+      },
+      {
+        "code": "025003",
+        "name": "케이스",
+        "parentCode": "025"
+      },
+      {
+        "code": "025004",
+        "name": "배경/액세사리",
+        "parentCode": "025"
+      },
+      {
+        "code": "025005",
+        "name": "조명",
+        "parentCode": "025"
+      },
+      {
+        "code": "026",
+        "name": "블프특가",
+        "parentCode": ""
+      },
+      {
+        "code": "027",
+        "name": "중고특가",
+        "parentCode": ""
+      }
+    ],
+    "wholesale": [
+      {
+        "code": "001",
+        "name": "영상장비-카메라/렌즈",
+        "parentCode": ""
+      },
+      {
+        "code": "001001",
+        "name": "PANASONIC 파나소닉",
+        "parentCode": "001"
+      },
+      {
+        "code": "001003",
+        "name": "Marshall 마샬",
+        "parentCode": "001"
+      },
+      {
+        "code": "001005",
+        "name": "기타브랜드",
+        "parentCode": "001"
+      },
+      {
+        "code": "001006",
+        "name": "카메라용품",
+        "parentCode": "001"
+      },
+      {
+        "code": "002",
+        "name": "영상장비-영상용삼각대",
+        "parentCode": ""
+      },
+      {
+        "code": "002001",
+        "name": "CAMGEAR 캠기어시스템",
+        "parentCode": "002"
+      },
+      {
+        "code": "002002",
+        "name": "CAMGEAR 캠기어액세서리",
+        "parentCode": "002"
+      },
+      {
+        "code": "002003",
+        "name": "THORVIDEO 토르비디오",
+        "parentCode": "002"
+      },
+      {
+        "code": "002004",
+        "name": "기타브랜드",
+        "parentCode": "002"
+      },
+      {
+        "code": "003",
+        "name": "영상장비-틸타리그시스템",
+        "parentCode": ""
+      },
+      {
+        "code": "003001",
+        "name": "Camera Cage",
+        "parentCode": "003"
+      },
+      {
+        "code": "003002",
+        "name": "DJI Ecosystem",
+        "parentCode": "003"
+      },
+      {
+        "code": "003003",
+        "name": "Stabilization Systems",
+        "parentCode": "003"
+      },
+      {
+        "code": "003004",
+        "name": "Lens Control Systems",
+        "parentCode": "003"
+      },
+      {
+        "code": "003005",
+        "name": "Matte Boxes",
+        "parentCode": "003"
+      },
+      {
+        "code": "003006",
+        "name": "Power/Cable",
+        "parentCode": "003"
+      },
+      {
+        "code": "003007",
+        "name": "Support",
+        "parentCode": "003"
+      },
+      {
+        "code": "003008",
+        "name": "Accessories",
+        "parentCode": "003"
+      },
+      {
+        "code": "004",
+        "name": "영상장비-카메라서포트",
+        "parentCode": ""
+      },
+      {
+        "code": "004001",
+        "name": "Cart 카트",
+        "parentCode": "004"
+      },
+      {
+        "code": "004002",
+        "name": "Cable 케이블",
+        "parentCode": "004"
+      },
+      {
+        "code": "004003",
+        "name": "Power 전원/배터리",
+        "parentCode": "004"
+      },
+      {
+        "code": "004004",
+        "name": "기타상품",
+        "parentCode": "004"
+      },
+      {
+        "code": "005",
+        "name": "영상장비-딘컴/스탠드",
+        "parentCode": ""
+      },
+      {
+        "code": "005001",
+        "name": "Dinkum 딘컴시스템",
+        "parentCode": "005"
+      },
+      {
+        "code": "005003",
+        "name": "기타브랜드",
+        "parentCode": "005"
+      },
+      {
+        "code": "006",
+        "name": "영상장비-조명/배경용품",
+        "parentCode": ""
+      },
+      {
+        "code": "006001",
+        "name": "Tolifo 톨리포",
+        "parentCode": "006"
+      },
+      {
+        "code": "006002",
+        "name": "SOKANI 소카니",
+        "parentCode": "006"
+      },
+      {
+        "code": "006003",
+        "name": "CALLA Media Works",
+        "parentCode": "006"
+      },
+      {
+        "code": "006004",
+        "name": "FOMEX 포멕스",
+        "parentCode": "006"
+      },
+      {
+        "code": "006005",
+        "name": "Background 배경용품",
+        "parentCode": "006"
+      },
+      {
+        "code": "006006",
+        "name": "기타브랜드",
+        "parentCode": "006"
+      },
+      {
+        "code": "007",
+        "name": "영상장비-모니터/색교정",
+        "parentCode": ""
+      },
+      {
+        "code": "007001",
+        "name": "BON 본모니터",
+        "parentCode": "007"
+      },
+      {
+        "code": "007004",
+        "name": "기타브랜드",
+        "parentCode": "007"
+      },
+      {
+        "code": "008",
+        "name": "영상장비-가방/케이스",
+        "parentCode": ""
+      },
+      {
+        "code": "008001",
+        "name": "Calla Media Works 가방",
+        "parentCode": "008"
+      },
+      {
+        "code": "008002",
+        "name": "기타브랜드",
+        "parentCode": "008"
+      },
+      {
+        "code": "009",
+        "name": "시스템장비-PTZ카메라",
+        "parentCode": ""
+      },
+      {
+        "code": "009001",
+        "name": "AVMATRIX",
+        "parentCode": "009"
+      },
+      {
+        "code": "009002",
+        "name": "AVer",
+        "parentCode": "009"
+      },
+      {
+        "code": "009003",
+        "name": "Datavideo",
+        "parentCode": "009"
+      },
+      {
+        "code": "009004",
+        "name": "CALLA",
+        "parentCode": "009"
+      },
+      {
+        "code": "009005",
+        "name": "EDISTEC",
+        "parentCode": "009"
+      },
+      {
+        "code": "009006",
+        "name": "BOLIN",
+        "parentCode": "009"
+      },
+      {
+        "code": "009007",
+        "name": "CANON",
+        "parentCode": "009"
+      },
+      {
+        "code": "009008",
+        "name": "세트 상품",
+        "parentCode": "009"
+      },
+      {
+        "code": "010",
+        "name": "시스템장비-영상스위처",
+        "parentCode": ""
+      },
+      {
+        "code": "010001",
+        "name": "AVMATRIX",
+        "parentCode": "010"
+      },
+      {
+        "code": "010002",
+        "name": "DATAVIDEO",
+        "parentCode": "010"
+      },
+      {
+        "code": "010005",
+        "name": "기타브랜드",
+        "parentCode": "010"
+      },
+      {
+        "code": "010006",
+        "name": "BLACKMAGIC",
+        "parentCode": "010"
+      },
+      {
+        "code": "011",
+        "name": "시스템장비-컨버터/분배기",
+        "parentCode": ""
+      },
+      {
+        "code": "011001",
+        "name": "AVMATRIX",
+        "parentCode": "011"
+      },
+      {
+        "code": "011002",
+        "name": "I-O DATA",
+        "parentCode": "011"
+      },
+      {
+        "code": "011003",
+        "name": "CALLA",
+        "parentCode": "011"
+      },
+      {
+        "code": "011005",
+        "name": "기타브랜드",
+        "parentCode": "011"
+      },
+      {
+        "code": "012",
+        "name": "시스템장비-자막기/스트리밍",
+        "parentCode": ""
+      },
+      {
+        "code": "012001",
+        "name": "AVMATRIX",
+        "parentCode": "012"
+      },
+      {
+        "code": "012002",
+        "name": "I-O DATA",
+        "parentCode": "012"
+      },
+      {
+        "code": "012003",
+        "name": "기타브랜드",
+        "parentCode": "012"
+      },
+      {
+        "code": "013",
+        "name": "시스템장비-무선인터컴",
+        "parentCode": ""
+      },
+      {
+        "code": "013001",
+        "name": "단말기/세트상품",
+        "parentCode": "013"
+      },
+      {
+        "code": "013002",
+        "name": "액세서리",
+        "parentCode": "013"
+      },
+      {
+        "code": "014",
+        "name": "시스템장비-LED전광판",
+        "parentCode": ""
+      },
+      {
+        "code": "014001",
+        "name": "LED DISPLAY 전광판",
+        "parentCode": "014"
+      },
+      {
+        "code": "014002",
+        "name": "Processors / Control System",
+        "parentCode": "014"
+      },
+      {
+        "code": "014003",
+        "name": "Cloud Player",
+        "parentCode": "014"
+      },
+      {
+        "code": "014004",
+        "name": "Media Server",
+        "parentCode": "014"
+      },
+      {
+        "code": "015",
+        "name": "시스템장비-무대조명",
+        "parentCode": ""
+      },
+      {
+        "code": "015001",
+        "name": "LED PAR LIGHT",
+        "parentCode": "015"
+      },
+      {
+        "code": "015002",
+        "name": "LED SPOT LIGHT",
+        "parentCode": "015"
+      },
+      {
+        "code": "015003",
+        "name": "MOVING LIGHT",
+        "parentCode": "015"
+      },
+      {
+        "code": "015004",
+        "name": "DMX 콘솔",
+        "parentCode": "015"
+      },
+      {
+        "code": "015005",
+        "name": "특수효과",
+        "parentCode": "015"
+      },
+      {
+        "code": "016",
+        "name": "시스템장비-케이블/기타장비",
+        "parentCode": ""
+      },
+      {
+        "code": "016001",
+        "name": "Cable 케이블",
+        "parentCode": "016"
+      },
+      {
+        "code": "016002",
+        "name": "Desk 콘솔데스크",
+        "parentCode": "016"
+      },
+      {
+        "code": "016004",
+        "name": "기타장비",
+        "parentCode": "016"
+      },
+      {
+        "code": "017",
+        "name": "음향장비-록스톤 커넥터/케이블",
+        "parentCode": ""
+      },
+      {
+        "code": "017001",
+        "name": "CONNECTER 커넥터",
+        "parentCode": "017"
+      },
+      {
+        "code": "017002",
+        "name": "SOCKET 샷시형커넥터",
+        "parentCode": "017"
+      },
+      {
+        "code": "017003",
+        "name": "Premade 완제품",
+        "parentCode": "017"
+      },
+      {
+        "code": "017004",
+        "name": "CABLE 케이블",
+        "parentCode": "017"
+      },
+      {
+        "code": "017005",
+        "name": "익스텐더/멀티 케이블",
+        "parentCode": "017"
+      },
+      {
+        "code": "017006",
+        "name": "Cable Reel 케이블릴",
+        "parentCode": "017"
+      },
+      {
+        "code": "017007",
+        "name": "Accessories 액세서리",
+        "parentCode": "017"
+      },
+      {
+        "code": "018",
+        "name": "음향장비-마이크",
+        "parentCode": ""
+      },
+      {
+        "code": "018003",
+        "name": "SUPERLUX 수퍼럭스",
+        "parentCode": "018"
+      },
+      {
+        "code": "018004",
+        "name": "Sennheiser 젠하이저",
+        "parentCode": "018"
+      },
+      {
+        "code": "018005",
+        "name": "기타브랜드",
+        "parentCode": "018"
+      },
+      {
+        "code": "018006",
+        "name": "영상용 마이크",
+        "parentCode": "018"
+      },
+      {
+        "code": "018007",
+        "name": "무선마이크",
+        "parentCode": "018"
+      },
+      {
+        "code": "018008",
+        "name": "콘덴서마이크",
+        "parentCode": "018"
+      },
+      {
+        "code": "018009",
+        "name": "다이나믹마이크",
+        "parentCode": "018"
+      },
+      {
+        "code": "018010",
+        "name": "마이크액세서리",
+        "parentCode": "018"
+      },
+      {
+        "code": "018011",
+        "name": "Carol 캐롤",
+        "parentCode": "018"
+      },
+      {
+        "code": "018012",
+        "name": "KANALS 카날스",
+        "parentCode": "018"
+      },
+      {
+        "code": "019",
+        "name": "음향장비-스피커",
+        "parentCode": ""
+      },
+      {
+        "code": "019001",
+        "name": "라인어레이",
+        "parentCode": "019"
+      },
+      {
+        "code": "019002",
+        "name": "액티브 스피커",
+        "parentCode": "019"
+      },
+      {
+        "code": "019003",
+        "name": "패시브 스피커",
+        "parentCode": "019"
+      },
+      {
+        "code": "019004",
+        "name": "서브우퍼",
+        "parentCode": "019"
+      },
+      {
+        "code": "019005",
+        "name": "컬럼어레이",
+        "parentCode": "019"
+      },
+      {
+        "code": "019006",
+        "name": "포인트소스",
+        "parentCode": "019"
+      },
+      {
+        "code": "019007",
+        "name": "모니터 스피커",
+        "parentCode": "019"
+      },
+      {
+        "code": "019008",
+        "name": "오디오센터",
+        "parentCode": "019"
+      },
+      {
+        "code": "019009",
+        "name": "기타브랜드",
+        "parentCode": "019"
+      },
+      {
+        "code": "020",
+        "name": "음향장비-콘솔/프로세서",
+        "parentCode": ""
+      },
+      {
+        "code": "020001",
+        "name": "오디오 믹서",
+        "parentCode": "020"
+      },
+      {
+        "code": "020002",
+        "name": "프로세서",
+        "parentCode": "020"
+      },
+      {
+        "code": "020003",
+        "name": "기타장비",
+        "parentCode": "020"
+      },
+      {
+        "code": "021",
+        "name": "음향장비-앰프/헤드폰",
+        "parentCode": ""
+      },
+      {
+        "code": "021001",
+        "name": "앰프",
+        "parentCode": "021"
+      },
+      {
+        "code": "021002",
+        "name": "헤드폰",
+        "parentCode": "021"
+      },
+      {
+        "code": "022",
+        "name": "음향장비-케이블/커넥터",
+        "parentCode": ""
+      },
+      {
+        "code": "022001",
+        "name": "완제품",
+        "parentCode": "022"
+      },
+      {
+        "code": "022002",
+        "name": "벌크케이블",
+        "parentCode": "022"
+      },
+      {
+        "code": "022003",
+        "name": "커넥터",
+        "parentCode": "022"
+      },
+      {
+        "code": "022004",
+        "name": "샷시형커넥터",
+        "parentCode": "022"
+      },
+      {
+        "code": "023",
+        "name": "음향장비-액세서리",
+        "parentCode": ""
+      },
+      {
+        "code": "023001",
+        "name": "전원박스/순차전원기",
+        "parentCode": "023"
+      },
+      {
+        "code": "023002",
+        "name": "기타장비",
+        "parentCode": "023"
+      },
+      {
+        "code": "023003",
+        "name": "DI BOX",
+        "parentCode": "023"
+      },
+      {
+        "code": "025",
+        "name": "중고/리퍼/특가상품",
+        "parentCode": ""
+      },
+      {
+        "code": "025001",
+        "name": "영상장비",
+        "parentCode": "025"
+      },
+      {
+        "code": "025002",
+        "name": "시스템장비",
+        "parentCode": "025"
+      },
+      {
+        "code": "025003",
+        "name": "음향장비",
+        "parentCode": "025"
+      },
+      {
+        "code": "025004",
+        "name": "기타상품",
+        "parentCode": "025"
+      },
+      {
+        "code": "025005",
+        "name": "만원샵",
+        "parentCode": "025"
+      },
+      {
+        "code": "026",
+        "name": "브랜드-카날스",
+        "parentCode": ""
+      },
+      {
+        "code": "027",
+        "name": "세트상품할인",
+        "parentCode": ""
+      },
+      {
+        "code": "027001",
+        "name": "이달의 프로모션",
+        "parentCode": "027"
+      },
+      {
+        "code": "027002",
+        "name": "묶음할인상품",
+        "parentCode": "027"
+      }
+    ]
+  }
+}

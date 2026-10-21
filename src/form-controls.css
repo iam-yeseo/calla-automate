@@ -1,0 +1,15 @@
+/* Shared control placement across web and the packaged Mac renderer. */
+.pagination > .calla-select { flex: 0 0 124px; width: 124px; }
+.pagination > .muted { flex: 0 1 auto; }
+.pagination > .calla-select > .calla-select-trigger { min-height: 36px; height: 36px; }
+.pagination > .calla-select > .calla-select-trigger:hover:not(:disabled) { background: var(--surface); }
+.toolbar > .calla-select { flex: 0 1 auto; width: auto; min-width: 144px; max-width: 240px; }
+.toolbar .calla-select > .calla-select-trigger { min-height: 36px; height: 36px; }
+.origin-input > .calla-select { width: 100%; min-width: 0; }
+.registration-review-table .calla-select { margin-top: 8px; width: 100%; max-width: 280px; }
+.operations-edit-table .calla-select { width: 100%; min-width: 0; }
+@media (max-width: 760px) {
+  .toolbar > .calla-select { min-width: 128px; max-width: 100%; }
+  .pagination > .calla-select { margin-right: auto; }
+  .pagination > .muted { font-size: 11px; }
+}

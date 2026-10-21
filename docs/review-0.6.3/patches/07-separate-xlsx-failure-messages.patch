@@ -1,0 +1,63 @@
+diff --git a/src/xlsx-limits.ts b/src/xlsx-limits.ts
+index 398b6baa7f28554ee44d2ca44c4e6d43bee140b5..df6ab5bd93c835edbfd8f177b9176254ca7b6d37 100644
+--- a/src/xlsx-limits.ts
++++ b/src/xlsx-limits.ts
+@@ -7,7 +7,9 @@
+ const MAX_COORDINATE_ROW = 10_000;
+ const MAX_COORDINATE_COLUMN = 2_048;
+ const MAX_CELLS = 250_000;
+-const invalid = () => new Error('XLSX 파일의 압축 해제 크기 또는 시트 구조가 안전한 처리 범위를 초과했습니다. 필요한 상품 표만 새 파일에 저장해 주세요.');
++class XlsxValidationError extends Error {}
++const invalid = () => new XlsxValidationError('XLSX 파일의 압축 해제 크기 또는 시트 구조가 안전한 처리 범위를 초과했습니다. 필요한 상품 표만 새 파일에 저장해 주세요.');
++const unreadable = () => new XlsxValidationError('XLSX 파일을 읽지 못했습니다. 암호를 해제하고 정상적인 .xlsx 파일로 다시 저장해 주세요.');
+ type Budget = { bytes: number; nodes: number; rows: number; cells: number; merges: number; sheets: number };
+ // JSZip exposes this documented API at runtime but omits it from JSZipObject's typings.
+ type StreamedEntry = JSZip.JSZipObject & { internalStream(type: 'uint8array'): JSZip.JSZipStreamHelper<Uint8Array> };
+@@ -133,10 +135,15 @@
+ 
+ export async function validateXlsxArchive(buffer: ArrayBuffer): Promise<void> {
+   try {
+-    const zip = await JSZip.loadAsync(buffer);
++    let zip: JSZip;
++    try { zip = await JSZip.loadAsync(buffer); }
++    catch { throw unreadable(); }
+     const entries = Object.values(zip.files);
+     if (entries.length > 512) throw invalid();
+     const budget: Budget = { bytes: 0, nodes: 0, rows: 0, cells: 0, merges: 0, sheets: 0 };
+     for (const entry of entries) if (!entry.dir) await inspectEntry(entry, budget);
+-  } catch { throw invalid(); }
++  } catch (error) {
++    if (error instanceof XlsxValidationError) throw error;
++    throw unreadable();
++  }
+ }
+diff --git a/tests/xlsx-security.test.ts b/tests/xlsx-security.test.ts
+index 9afaef754193bdc9a8a74d25302479811122a306..e47714a177d570ccff1f900c89e66bc6bbcb0c5c 100644
+--- a/tests/xlsx-security.test.ts
++++ b/tests/xlsx-security.test.ts
+@@ -11,6 +11,25 @@
+ }
+ const xml = (body: string) => `<worksheet xmlns="urn:unexpected">${body}</worksheet>`;
+ const rejected = /안전한 처리 범위/;
++
++test('non-ZIP and corrupt archives show the file recovery message', async () => {
++  const message = 'XLSX 파일을 읽지 못했습니다. 암호를 해제하고 정상적인 .xlsx 파일로 다시 저장해 주세요.';
++  const nonZip = new TextEncoder().encode('not an XLSX archive').buffer;
++  const corrupt = (await archive({ 'xl/workbook.xml': '<workbook/>' })).slice(0, 20);
++  for (const data of [nonZip, corrupt]) {
++    await assert.rejects(validateXlsxArchive(data), { message });
++    await assert.rejects(inspectProductImport(new File([data], 'damaged.xlsx'), '11111111-1111-4111-8111-111111111111', 1), { message });
++  }
++});
++
++test('XML parser exceptions are sanitized while budget errors retain their message', async () => {
++  await assert.rejects(validateXlsxArchive(await archive({ 'xl/workbook.xml': '<workbook><unclosed></workbook>' })), {
++    message: 'XLSX 파일을 읽지 못했습니다. 암호를 해제하고 정상적인 .xlsx 파일로 다시 저장해 주세요.',
++  });
++  await assert.rejects(validateXlsxArchive(await archive(Object.fromEntries(Array.from({ length: 513 }, (_, i) => [`${i}.bin`, ''])))), {
++    message: 'XLSX 파일의 압축 해제 크기 또는 시트 구조가 안전한 처리 범위를 초과했습니다. 필요한 상품 표만 새 파일에 저장해 주세요.',
++  });
++});
+ 
+ test('compressed and forged-size archives are bounded before workbook hydration', async () => {
+   const data = await archive({ 'unused.bin': new Uint8Array(10 * 1024 * 1024) });

@@ -4,9 +4,11 @@ import type { Product } from './types';
 const MAX_BYTES = 10 * 1024 * 1024;
 const MAX_ROWS = 1000;
 const MAX_COLUMNS = 200;
-type Cell = { value: string; link?: string; issue?: string };
+const MAX_HEADER_ROWS = 5;
+type Cell = { value: string; link?: string; issue?: string; mergedFromRow?: number };
 type SheetRow = { number: number; cells: Cell[] };
 type Mapping = { column: number; field: string; label: string };
+export type ProductImport = { products: Product[]; sheetName?: string; headerRows: number[]; missingNameRows: number[] };
 const norm = (value: string) => value.replace(/[\s.\-_()[\]/·]/g, '').toLowerCase();
 const includes = (value: string, words: string[]) => words.some(word => value.includes(norm(word)));
 const empty = (value: string) => value.trim() === '';
@@ -18,7 +20,8 @@ function fieldFor(parent: string, child = ''): string[] {
   if (includes(p, ['브랜드', '제조사', '메이커'])) return ['brand'];
   if (includes(p, ['품명', '상품명', '제품명'])) return [includes(all, ['네이버', '스마트', '스토어']) ? 'name_naver' : 'name_own'];
   if (includes(p, ['모델', '품목코드'])) return ['model'];
-  if (includes(all, ['이미지사용', '이미지여부'])) return [];
+  if (includes(all, ['이미지사용', '이미지여부'])) return ['image_usage'];
+  if (includes(p, ['내용', '작업내용', '요청사항'])) return ['content'];
   if (includes(p, ['등록'])) {
     if (includes(all, ['네이버', '스마트', '스토어'])) return ['need_naver'];
     if (includes(all, ['도매'])) return ['need_wholesale'];
@@ -94,7 +97,9 @@ function cellValue(raw: unknown): Cell {
   return { value: '', issue: '지원하지 않는 엑셀 셀 형식입니다.' };
 }
 
-async function readXlsx(buffer: ArrayBuffer): Promise<SheetRow[]> {
+async function readXlsx(buffer: ArrayBuffer): Promise<{ rows: SheetRow[]; sheetName: string }> {
+  const { validateXlsxArchive } = await import('./xlsx-limits');
+  await validateXlsxArchive(buffer);
   const module = await import('exceljs');
   const ExcelJS = module.default ?? module;
   const workbook = new ExcelJS.Workbook();
@@ -106,27 +111,36 @@ async function readXlsx(buffer: ArrayBuffer): Promise<SheetRow[]> {
   sheet.eachRow({ includeEmpty: false }, (row, number) => {
     if (row.cellCount > MAX_COLUMNS) throw issue(number, '', `열은 ${MAX_COLUMNS}개 이하여야 합니다.`);
     const cells: Cell[] = [];
-    for (let column = 1; column <= row.cellCount; column++) cells.push(cellValue(row.getCell(column).value));
-    // ExcelJS resolves merged cells to their master value, including 2-row headers.
-    rows.push({ number, cells });
+    for (let column = 1; column <= row.cellCount; column++) {
+      const cell = row.getCell(column);
+      cells.push({ ...cellValue(cell.value), ...(cell.isMerged ? { mergedFromRow: Number(cell.master.row) } : {}) });
+    }
+    // Keep merge origins as well as resolved values so header continuations stay out of product data.
+    if (cells.some(cell => !empty(cell.value) || cell.issue || cell.link)) rows.push({ number, cells });
     if (rows.length > MAX_ROWS + 30) throw new Error(`상품은 한 번에 ${MAX_ROWS}행까지 가져올 수 있습니다. 첫 시트의 행을 나눠 주세요.`);
   });
-  return rows;
+  return { rows, sheetName: sheet.name };
 }
 
-function isSubHeader(parent: SheetRow, candidate: SheetRow | undefined): boolean {
-  if (!candidate || candidate.number !== parent.number + 1) return false;
-  const subWords = ['자사몰', '소매', '도매', '스마트', '네이버', '스토어', '베이직', '마스터', '정가', '판매가', 'basic', 'master'];
+function isSubHeader(headers: SheetRow[], candidate: SheetRow | undefined): boolean {
+  if (!candidate || candidate.number !== headers.at(-1)!.number + 1) return false;
+  // Exact combinations of header qualifiers, never arbitrary product text containing those words.
+  const qualifier = /^(?:(?:기본|공통|일반|자사몰|자사|고도몰|소매몰|소매|도매몰|도매|스마트스토어|스마트|네이버스토어|네이버|스토어|베이직|마스터|정가|소비자가|판매가|공급가|단가|basic|master)(?:전용|용)?)+$/;
   let childLabels = 0;
+  let continuedMerge = false;
   for (let i = 0; i < candidate.cells.length; i++) {
-    const value = candidate.cells[i]!.value.trim();
+    const cell = candidate.cells[i]!;
+    if (cell.issue || cell.link) return false;
+    const value = cell.value.trim();
     if (!value) continue;
-    if (/^\d+(?:[,\.]\d+)*$/.test(value)) return false;
-    if (norm(value) === norm(parent.cells[i]?.value ?? '')) continue;
-    if (!includes(norm(value), subWords)) return false;
+    if (headers.some(header => norm(value) === norm(header.cells[i]?.value ?? ''))) {
+      if (cell.mergedFromRow !== undefined && headers.some(header => header.number === cell.mergedFromRow)) continuedMerge = true;
+      continue;
+    }
+    if (!headers.some(header => !empty(header.cells[i]?.value ?? '')) || !qualifier.test(norm(value))) return false;
     childLabels++;
   }
-  return childLabels > 0;
+  return childLabels > 0 || continuedMerge;
 }
 
 function price(value: string, row: number, label: string): number | null {
@@ -146,24 +160,30 @@ function need(value: string, row: number, label: string): string {
   throw issue(row, label, '등록 여부는 필요/불필요 또는 O/X로 입력해 주세요.');
 }
 
-function products(rows: SheetRow[], listId: string, startSeq: number): Product[] {
+function products(rows: SheetRow[], listId: string, startSeq: number): ProductImport {
   const headerIndex = rows.findIndex(row => {
     if (row.number > 30) return false;
     const fields = row.cells.flatMap(cell => fieldFor(cell.value));
     return fields.includes('name_own') && new Set(fields).size >= 2;
   });
   if (headerIndex < 0) throw new Error("첫 시트의 30행 안에서 머리글을 찾지 못했습니다. '브랜드 · 품명 · 모델명' 등의 머리글을 확인해 주세요.");
-  const header = rows[headerIndex]!;
-  const sub = isSubHeader(header, rows[headerIndex + 1]) ? rows[headerIndex + 1] : undefined;
+  const headers = [rows[headerIndex]!];
+  while (headers.length < MAX_HEADER_ROWS && isSubHeader(headers, rows[headerIndex + headers.length])) {
+    headers.push(rows[headerIndex + headers.length]!);
+  }
   const mappings: Mapping[] = [];
-  for (let c = 0; c < Math.max(header.cells.length, sub?.cells.length ?? 0); c++) {
-    const p = header.cells[c]?.value.trim() ?? '', s = sub?.cells[c]?.value.trim() ?? '';
-    const label = [p, s && norm(s) !== norm(p) ? s : ''].filter(Boolean).join(' / ');
-    fieldFor(p, s).forEach(field => mappings.push({ column: c, field, label }));
+  for (let c = 0; c < Math.max(...headers.map(header => header.cells.length)); c++) {
+    const labels: string[] = [];
+    for (const header of headers) {
+      const value = header.cells[c]?.value.trim() ?? '';
+      if (value && !labels.some(label => norm(label) === norm(value))) labels.push(value);
+    }
+    fieldFor(labels[0] ?? '', labels.slice(1).join(' ')).forEach(field => mappings.push({ column: c, field, label: labels.join(' / ') }));
   }
   if (!mappings.some(mapping => mapping.field === 'name_own')) throw new Error('자사몰 품명 또는 상품명 열이 필요합니다.');
   const output: Product[] = [];
-  for (const row of rows.slice(headerIndex + (sub ? 2 : 1))) {
+  const missingNameRows: number[] = [];
+  for (const row of rows.slice(headerIndex + headers.length)) {
     if (row.cells.every(cell => empty(cell.value) && !cell.issue && !cell.link)) continue;
     if (output.length >= MAX_ROWS) throw issue(row.number, '', `상품은 한 번에 ${MAX_ROWS}행까지 가져올 수 있습니다.`);
     const product = newProduct(listId, startSeq + output.length);
@@ -184,35 +204,46 @@ function products(rows: SheetRow[], listId: string, startSeq: number): Product[]
       if (seen.has(field) && seen.get(field) !== value) throw issue(row.number, label, '같은 항목으로 연결되는 여러 열의 값이 서로 다릅니다. 중복 열을 정리해 주세요.');
       seen.set(field, value); product[field] = value;
     }
-    if (!product.name_own.trim()) throw issue(row.number, '품명', '상품명이 비어 있습니다. 빈 상품 행은 가져올 수 없습니다.');
+    if (!product.name_own.trim()) {
+      if (!product.model.trim() && !product.name_naver.trim()) throw issue(row.number, '품명', '상품명 또는 모델명이 필요합니다. 상품을 구분할 수 없는 행은 가져올 수 없습니다.');
+      // Imports create editable drafts. Missing names remain blank and are blocked by registration validation.
+      missingNameRows.push(row.number);
+    }
     // The current web product contract keeps Naver price in sync with retail.
     if (!seen.has('price_naver')) product.price_naver = product.price_retail;
     output.push(product);
   }
   if (!output.length) throw new Error('머리글 아래에 가져올 상품이 없습니다.');
-  return output;
+  return { products: output, headerRows: headers.map(header => header.number), missingNameRows };
 }
 
-/** Imports every nonblank product row or throws a row-specific validation error. */
-export async function importProducts(file: File, listId: string, startSeq: number): Promise<Product[]> {
+/** Inspects every product row before any list or product is saved. */
+export async function inspectProductImport(file: File, listId: string, startSeq: number): Promise<ProductImport> {
   if (!/\.(xlsx|csv)$/i.test(file.name)) throw new Error('.xlsx 또는 UTF-8 .csv 파일만 가져올 수 있습니다.');
   if (!file.size) throw new Error('빈 파일은 가져올 수 없습니다.');
   if (file.size > MAX_BYTES) throw new Error('파일 크기는 10MB 이하여야 합니다.');
   if (!Number.isSafeInteger(startSeq) || startSeq < 1) throw new Error('상품 시작 순번은 1 이상의 정수여야 합니다.');
   const buffer = await file.arrayBuffer();
-  const rows = /\.csv$/i.test(file.name) ? parseCsv(new TextDecoder('utf-8').decode(buffer)) : await readXlsx(buffer);
-  return products(rows, listId, startSeq);
+  const source = /\.csv$/i.test(file.name) ? { rows: parseCsv(new TextDecoder('utf-8').decode(buffer)), sheetName: undefined } : await readXlsx(buffer);
+  return { ...products(source.rows, listId, startSeq), sheetName: source.sheetName };
 }
 
-export function templateCsv(): string {
-  return '\uFEFF브랜드,품명,모델명,소매 정가,소매 판매가,도매 베이직,도매 마스터,링크,비고\r\n' +
-    'AVMATRIX,예시 상품,MODEL-001,120000,100000,90000,85000,https://example.com/product,예시 행을 삭제한 뒤 상품을 입력하세요\r\n';
+/** Imports all identified products, including incomplete drafts, without inventing names or prices. */
+export async function importProducts(file: File, listId: string, startSeq: number): Promise<Product[]> {
+  return (await inspectProductImport(file, listId, startSeq)).products;
 }
 
-export function downloadTemplate(): void {
-  const url = URL.createObjectURL(new Blob([templateCsv()], { type: 'text/csv;charset=utf-8' }));
+export async function downloadTemplate(): Promise<void> {
+  const response = await fetch('/templates/calla-product-list-template.xlsx', { signal: AbortSignal.timeout(15000) });
+  if (!response.ok) throw new Error('템플릿 파일을 불러오지 못했습니다.');
+  const bytes = new Uint8Array(await response.arrayBuffer());
+  // A missing static asset can return the SPA HTML with status 200.
+  if (bytes.length < 4 || bytes[0] !== 0x50 || bytes[1] !== 0x4b || bytes[2] !== 0x03 || bytes[3] !== 0x04)
+    throw new Error('템플릿 파일을 확인하지 못했습니다.');
+  // Blob downloads also work from the desktop app's calla:// origin.
+  const url = URL.createObjectURL(new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
   const anchor = document.createElement('a');
-  anchor.href = url; anchor.download = 'CALLA_상품등록_양식.csv';
-  document.body.appendChild(anchor); anchor.click(); anchor.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  anchor.href = url; anchor.download = 'CALLA_리스트등록_빈템플릿.xlsx';
+  try { document.body.appendChild(anchor); anchor.click(); }
+  finally { anchor.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
 }

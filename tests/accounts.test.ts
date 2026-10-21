@@ -5,7 +5,8 @@ import { AccountError, accountIdentity, accountRoute, ensureAccountActive, type 
 const ADMIN_ID = '11111111-1111-4111-8111-111111111111';
 const USER_ID = '22222222-2222-4222-8222-222222222222';
 const SETUP_TOKEN = 'a-long-test-token-with-entropy-0123456789';
-const env: AccountsEnv = { SUPABASE_URL: 'https://example.supabase.co', SUPABASE_PUBLISHABLE_KEY: 'test-public', SUPABASE_SERVICE_ROLE_KEY: 'test-service', ADMIN_EMAILS: '', CALLA_SETUP_TOKEN: SETUP_TOKEN };
+const SIGNUP_CODE = 'test-only-signup-code-0123456789';
+const env: AccountsEnv = { SUPABASE_URL: 'https://example.supabase.co', SUPABASE_PUBLISHABLE_KEY: 'test-public', SUPABASE_SERVICE_ROLE_KEY: 'test-service', ADMIN_EMAILS: '', CALLA_SETUP_TOKEN: SETUP_TOKEN, CALLA_SIGNUP_CODE: SIGNUP_CODE };
 const admin = { id: ADMIN_ID, email: 'admin@example.com', role: 'admin' as const };
 const rawUser = (meta: Record<string, unknown> = {}, extra: Record<string, unknown> = {}) => ({ id: USER_ID, email: '746573742d75736572@accounts.calla.invalid', created_at: '2026-10-01T00:00:00Z', last_sign_in_at: null, app_metadata: { calla_username: 'test-user', calla_name: '사용자', ...meta }, ...extra });
 const response = (value: unknown, status = 200, headers: Record<string, string> = {}) => new Response(JSON.stringify(value), { status, headers: { 'content-type': 'application/json', ...headers } });
@@ -26,28 +27,29 @@ async function run(req: Request, fetcher: typeof fetch, actor?: typeof admin, se
   catch (error) { if (!(error instanceof AccountError)) throw error; return response({ error: { code: error.code, message: error.message } }, error.status); }
 }
 const payload = { username: 'Test-User', name: '사용자', password: 'StrongPassword123' };
+const signupPayload = { ...payload, signupCode: SIGNUP_CODE };
 
 test('signup creates only a pending trusted profile and never accepts privilege metadata', async () => {
   const a = harness(c => response(rawUser(c.body!.app_metadata), 201));
-  const result = await run(request('/api/auth/signup', 'POST', payload), a.fetcher);
+  const result = await run(request('/api/auth/signup', 'POST', signupPayload), a.fetcher);
   assert.equal(result!.status, 201); assert.deepEqual(await result!.json(), { username: 'test-user', message: '가입 신청이 완료되었습니다. 관리자 승인 후 로그인할 수 있습니다.' });
   const call = a.calls[0]!; assert.equal(call.url.pathname, '/auth/v1/admin/users'); assert.equal(call.body!.email, '746573742d75736572@accounts.calla.invalid');
   assert.equal(call.body!.email_confirm, true); assert.equal(call.body!.app_metadata.calla_status, 'pending'); assert.ok(!Object.hasOwn(call.body!.app_metadata, 'calla_role'));
   assert.equal(call.headers.get('apikey'), env.SUPABASE_SERVICE_ROLE_KEY);
   for (const extra of [{ role: 'admin' }, { status: 'active' }, { app_metadata: { calla_role: 'admin' } }, { user_metadata: { calla_role: 'admin' } }]) {
-    assert.equal((await run(request('/api/auth/signup', 'POST', { ...payload, ...extra }), a.fetcher))!.status, 422);
+    assert.equal((await run(request('/api/auth/signup', 'POST', { ...signupPayload, ...extra }), a.fetcher))!.status, 422);
   }
   assert.equal(a.calls.length, 1);
 });
 
 test('username encoding is valid and collision-free for dotted IDs and normalizes case', async () => {
   const a = harness(c => response(rawUser(c.body!.app_metadata)));
-  for (const id of ['abc.', 'a..b', 'a_b', 'a-b', 'AbC', 'x'.repeat(32)]) await run(request('/api/auth/signup', 'POST', { ...payload, username: id }), a.fetcher);
+  for (const id of ['abc.', 'a..b', 'a_b', 'a-b', 'AbC', 'x'.repeat(32)]) await run(request('/api/auth/signup', 'POST', { ...signupPayload, username: id }), a.fetcher);
   const emails = a.calls.map(c => c.body!.email as string);
   assert.equal(new Set(emails).size, emails.length); assert.ok(emails.every(email => /^[0-9a-f]{6,64}@accounts\.calla\.invalid$/.test(email))); assert.deepEqual(emails.map(email => email.toLowerCase()), emails);
   assert.equal(emails[0], '6162632e@accounts.calla.invalid'); assert.equal(emails[1], '612e2e62@accounts.calla.invalid'); assert.equal(emails[5]!.split('@')[0]!.length, 64);
   assert.equal(a.calls[4]!.body!.app_metadata.calla_username, 'abc');
-  for (const id of ['ab', '한글', '@name', 'x'.repeat(33), 'calla-admin']) assert.equal((await run(request('/api/auth/signup', 'POST', { ...payload, username: id }), a.fetcher))!.status, 422);
+  for (const id of ['ab', '한글', '@name', 'x'.repeat(33), 'calla-admin']) assert.equal((await run(request('/api/auth/signup', 'POST', { ...signupPayload, username: id }), a.fetcher))!.status, 422);
   assert.equal(a.calls.length, 6);
 });
 
@@ -179,20 +181,59 @@ test('deletion uses Auth soft delete and never touches product data', async () =
 
 test('public bodies are bounded and cross-origin, malformed and unsupported requests do not reach Auth', async () => {
   const a = harness(() => { throw Error('must not fetch'); });
-  assert.equal((await run(request('/api/auth/signup', 'POST', { ...payload, name: 'x'.repeat(17 * 1024) }), a.fetcher))!.status, 413);
-  assert.equal((await run(request('/api/auth/signup', 'POST', payload, { 'content-length': String(17 * 1024) }), a.fetcher))!.status, 413);
-  assert.equal((await run(request('/api/auth/signup', 'POST', payload, { origin: 'https://evil.test' }), a.fetcher))!.status, 403);
+  assert.equal((await run(request('/api/auth/signup', 'POST', { ...signupPayload, name: 'x'.repeat(17 * 1024) }), a.fetcher))!.status, 413);
+  assert.equal((await run(request('/api/auth/signup', 'POST', signupPayload, { 'content-length': String(17 * 1024) }), a.fetcher))!.status, 413);
+  assert.equal((await run(request('/api/auth/signup', 'POST', signupPayload, { origin: 'https://evil.test' }), a.fetcher))!.status, 403);
   assert.equal((await run(request('/api/auth/signup', 'GET'), a.fetcher))!.status, 405);
-  assert.equal((await run(request('/api/auth/signup', 'POST', payload, { 'content-type': 'text/plain' }), a.fetcher))!.status, 415);
+  assert.equal((await run(request('/api/auth/signup', 'POST', signupPayload, { 'content-type': 'text/plain' }), a.fetcher))!.status, 415);
   assert.equal((await run(new Request('https://calla.test/api/auth/signup', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{' }), a.fetcher))!.status, 400);
   assert.equal((await run(request('/api/auth/signup', 'POST', []), a.fetcher))!.status, 422); assert.equal(a.calls.length, 0);
 });
 
 test('upstream failures are sanitized and unrelated API routes return null', async () => {
   const a = harness(() => response({ code: 'unexpected', msg: 'private test-service password row' }, 500));
-  const result = await run(request('/api/auth/signup', 'POST', payload), a.fetcher);
+  const result = await run(request('/api/auth/signup', 'POST', signupPayload), a.fetcher);
   assert.equal(result!.status, 502); assert.ok(!(await result!.text()).includes('private'));
   const invalid = harness(() => response({ code: 'invalid_credentials', msg: 'private' }, 400));
   assert.equal((await run(request('/api/auth/login', 'POST', { username: 'test-user', password: 'wrong' }), invalid.fetcher))!.status, 401);
   assert.equal(await accountRoute(request('/api/lists', 'GET'), env, a.fetcher), null);
+});
+
+test('signup without a code is forbidden before contacting Auth', async () => {
+  const a = harness(() => { throw Error('must not fetch'); });
+  const result = await run(request('/api/auth/signup', 'POST', payload), a.fetcher);
+  assert.equal(result!.status, 403);
+  assert.deepEqual(await result!.json(), { error: { code: 'invalid_signup_code', message: '가입 코드가 올바르지 않습니다.' } });
+  assert.equal(a.calls.length, 0);
+});
+
+test('incorrect signup codes disclose no hints or username existence and never contact Auth', async () => {
+  const a = harness(() => { throw Error('must not fetch'); });
+  for (const signupCode of ['', null, 42, {}, 'wrong', SIGNUP_CODE.replace('0', '1'), '한'.repeat(32), 'x'.repeat(513)]) {
+    const result = await run(request('/api/auth/signup', 'POST', { ...payload, signupCode }), a.fetcher);
+    assert.equal(result!.status, 403);
+    assert.deepEqual(await result!.json(), { error: { code: 'invalid_signup_code', message: '가입 코드가 올바르지 않습니다.' } });
+  }
+  assert.equal(a.calls.length, 0);
+});
+
+test('signup is unavailable without a valid configured code', async () => {
+  const a = harness(() => { throw Error('must not fetch'); });
+  for (const CALLA_SIGNUP_CODE of [undefined, '', 'short', 'x'.repeat(513)]) {
+    const result = await run(request('/api/auth/signup', 'POST', signupPayload), a.fetcher, undefined, { ...env, CALLA_SIGNUP_CODE });
+    assert.equal(result!.status, 503);
+    assert.equal((await result!.json() as any).error.code, 'signup_unavailable');
+  }
+  assert.equal(a.calls.length, 0);
+});
+
+test('signup code is not forwarded to Auth and duplicate username wording remains unchanged', async () => {
+  const a = harness(c => {
+    assert.equal('signupCode' in c.body!, false);
+    assert.ok(!JSON.stringify(c.body).includes(SIGNUP_CODE));
+    return response({ code: 'email_exists' }, 422);
+  });
+  const result = await run(request('/api/auth/signup', 'POST', signupPayload), a.fetcher);
+  assert.equal(result!.status, 409);
+  assert.deepEqual(await result!.json(), { error: { code: 'username_exists', message: '이미 사용 중인 아이디입니다.' } });
 });

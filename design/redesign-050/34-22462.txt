@@ -1,0 +1,534 @@
+const assetPathPrefix = "https://www.figma.com/api/mcp/asset/02a05f42-163b-4c6c-b356-18d0216ce0ea";
+const imgTrack = `${assetPathPrefix}/d6c7c.svg`;
+const imgSfInfoCircle = `${assetPathPrefix}/067c8.svg`;
+const imgSfSidebarLeft = `${assetPathPrefix}/01bb8.svg`;
+const imgSfGearshape = `${assetPathPrefix}/9c74c.svg`;
+const imgLayer1 = `${assetPathPrefix}/fc341.svg`;
+const imgSfListBulletRectangle = `${assetPathPrefix}/3ca63.svg`;
+const imgNavIcon = `${assetPathPrefix}/0872f.svg`;
+const imgNavIcon1 = `${assetPathPrefix}/34b56.svg`;
+const imgNavIcon2 = `${assetPathPrefix}/faeb7.svg`;
+const imgNavIcon3 = `${assetPathPrefix}/59b46.svg`;
+const imgNavIcon4 = `${assetPathPrefix}/93fe0.svg`;
+const imgNavIcon5 = `${assetPathPrefix}/0931e.svg`;
+
+type ButtonProps = {
+  className?: string;
+  label?: string;
+  showIcon?: boolean;
+  size?: "Medium";
+  state?: "Default";
+  type?: "Neutral";
+};
+
+function Button({ className, label = "버튼", showIcon = false, size = "Medium", state = "Default", type = "Neutral" }: ButtonProps) {
+  return (
+    <div className={className || "bg-[var(----bg-surface,white)] border border-[var(----border-default,#e5e7eb)] border-solid content-stretch flex gap-[var(----spacing-8,8px)] items-center justify-center px-[var(----spacing-16,16px)] py-[var(----spacing-8,8px)] relative rounded-[var(----radius-md,8px)]"} data-node-id="11:3073">
+      {showIcon && (
+        <div className="relative shrink-0 size-[16px]" data-node-id="11:3074" data-name="icon">
+          <div className="absolute bg-[var(----text-secondary,#606876)] h-[1.6px] left-[2px] rounded-[1px] top-[7.2px] w-[12px]" data-node-id="11:3075" data-name="Rectangle" />
+          <div className="absolute bg-[var(----text-secondary,#606876)] h-[12px] left-[7.2px] rounded-[1px] top-[2px] w-[1.6px]" data-node-id="11:3076" data-name="Rectangle" />
+        </div>
+      )}
+      <p className="[word-break:break-word] font-['Pretendard:Medium'] leading-[20px] not-italic relative shrink-0 text-[14px] text-[color:var(----text-secondary,#606876)] whitespace-nowrap" data-node-id="11:3077">
+        {label}
+      </p>
+    </div>
+  );
+}
+
+type CallaAutomateProps = {
+  className?: string;
+  prop01?: string;
+  prop02?: string;
+  prop03?: string;
+  propValue?: "기본";
+  propValue1?: "기본";
+  propValue2?: "038" | "039" | "040" | "041";
+};
+
+function CallaAutomate({ className, prop01 = "기본", prop02 = "AVMATRIX PTZ1271-12A · 화이트 / 장거리 촬영용 PTZ 카메라", prop03 = "1,290,000", propValue = "기본", propValue1 = "기본", propValue2 = "038" }: CallaAutomateProps) {
+  const isAndAnd038 = propValue === "기본" && propValue1 === "기본" && propValue2 === "038";
+  const isAndAnd039 = propValue === "기본" && propValue1 === "기본" && propValue2 === "039";
+  const isAndAnd040 = propValue === "기본" && propValue1 === "기본" && propValue2 === "040";
+  const isAndAnd041 = propValue === "기본" && propValue1 === "기본" && propValue2 === "041";
+  const isAndAndIs038Or039 = propValue === "기본" && propValue1 === "기본" && ["038", "039"].includes(propValue2);
+  const isAndAndIs040Or041 = propValue === "기본" && propValue1 === "기본" && ["040", "041"].includes(propValue2);
+  return (
+    <div className={className || `${String.raw`bg-[var(--background\/surface,white)] border-[var(--border\/subtle,#eee)] border-b border-solid content-stretch flex gap-[var(--space\/16,16px)] items-center overflow-clip px-[var(--space\/12,12px)] py-[10px] relative w-[1124px] `}${isAndAndIs040Or041 ? "min-h-[56px]" : "min-h-[60px]"}`} id={isAndAnd041 ? "node-34_28335" : isAndAnd040 ? "node-34_28320" : isAndAnd039 ? "node-34_28296" : "node-34_28271"}>
+      {isAndAndIs038Or039 && (
+        <>
+          <p className="[word-break:break-word] font-['Pretendard:Regular'] leading-[22px] not-italic relative shrink-0 text-[14px] text-[color:var(--text\/primary,#222)] w-[168px]" data-node-id="34:28266">
+            {prop01}
+          </p>
+          <p className="[word-break:break-word] font-['Pretendard:Regular'] leading-[22px] not-italic relative shrink-0 text-[14px] text-[color:var(--text\/primary,#222)] w-[180px]" data-node-id="34:28267">
+            {prop02}
+          </p>
+        </>
+      )}
+      {isAndAndIs040Or041 && (
+        <>
+          <p className="[word-break:break-word] font-['Pretendard:Regular'] leading-[22px] not-italic relative shrink-0 text-[14px] text-[color:var(--text\/primary,#222)] w-[180px]" data-node-id="34:28316">
+            {prop01}
+          </p>
+          <p className="[word-break:break-word] font-['Pretendard:Regular'] leading-[22px] not-italic relative shrink-0 text-[14px] text-[color:var(--text\/primary,#222)] w-[132px]" data-node-id="34:28317">
+            {prop02}
+          </p>
+          <p className="[word-break:break-word] flex-[1_0_0] font-['Pretendard:Regular'] leading-[22px] min-w-px not-italic relative text-[14px] text-[color:var(--text\/primary,#222)]" data-node-id="34:28318">
+            {prop03}
+          </p>
+        </>
+      )}
+      {isAndAnd038 && (
+        <>
+          <div className="bg-[var(--success\/background,#eaf7ee)] content-stretch flex gap-[var(--calla-spacing-6,6px)] h-[28px] items-center justify-center px-[var(--calla-spacing-8,8px)] py-[var(--calla-spacing-4,4px)] relative rounded-[6px] shrink-0 w-[156px]" data-node-id="34:28268" data-name="배지 / 최신 상태">
+            <p className="[word-break:break-word] font-['Pretendard:Medium'] leading-[20px] not-italic relative shrink-0 text-[13px] text-[color:var(--success\/text,#166534)] whitespace-nowrap" data-node-id="I34:28268;13:4541">
+              ✓ 최신 상태
+            </p>
+          </div>
+          <p className="[word-break:break-word] flex-[1_0_0] font-['Pretendard:Regular'] leading-[22px] min-w-px not-italic relative text-[14px] text-[color:var(--text\/primary,#222)]" data-node-id="34:28269">
+            {prop03}
+          </p>
+          <Button className="bg-[var(----bg-surface,white)] border border-[var(----border-default,#e5e7eb)] border-solid content-stretch flex gap-[var(----spacing-8,8px)] h-[36px] items-center justify-center px-[var(----spacing-16,16px)] py-[var(----spacing-8,8px)] relative rounded-[var(----radius-md,8px)] shrink-0 w-[124px]" label="동기화" />
+        </>
+      )}
+      {isAndAnd039 && (
+        <>
+          <div className="bg-[var(--error\/background,#fef0ee)] content-stretch flex gap-[var(--calla-spacing-6,6px)] h-[28px] items-center justify-center px-[var(--calla-spacing-8,8px)] py-[var(--calla-spacing-4,4px)] relative rounded-[6px] shrink-0 w-[156px]" data-node-id="34:28293" data-name="배지 / 일부 실패">
+            <p className="[word-break:break-word] font-['Pretendard:Medium'] leading-[20px] not-italic relative shrink-0 text-[13px] text-[color:var(--error\/text,#b42318)] whitespace-nowrap" data-node-id="I34:28293;13:4544">
+              ! 일부 실패
+            </p>
+          </div>
+          <p className="[word-break:break-word] flex-[1_0_0] font-['Pretendard:Regular'] leading-[22px] min-w-px not-italic relative text-[14px] text-[color:var(--text\/primary,#222)]" data-node-id="34:28294">
+            {prop03}
+          </p>
+          <Button className="bg-[var(----bg-surface,white)] border border-[var(----border-default,#e5e7eb)] border-solid content-stretch flex gap-[var(----spacing-8,8px)] h-[36px] items-center justify-center px-[var(----spacing-16,16px)] py-[var(----spacing-8,8px)] relative rounded-[var(----radius-md,8px)] shrink-0 w-[124px]" label="다시 시도" />
+        </>
+      )}
+      {isAndAnd040 && (
+        <div className="bg-[var(--error\/background,#fef0ee)] content-stretch flex gap-[var(--calla-spacing-6,6px)] h-[28px] items-center justify-center px-[var(--calla-spacing-8,8px)] py-[var(--calla-spacing-4,4px)] relative rounded-[6px] shrink-0 w-[144px]" data-node-id="34:28319" data-name="배지 / 실패">
+          <p className="[word-break:break-word] font-['Pretendard:Medium'] leading-[20px] not-italic relative shrink-0 text-[13px] text-[color:var(--error\/text,#b42318)] whitespace-nowrap" data-node-id="I34:28319;13:4544">
+            ! 실패
+          </p>
+        </div>
+      )}
+      {isAndAnd041 && (
+        <div className="bg-[var(--success\/background,#eaf7ee)] content-stretch flex gap-[var(--calla-spacing-6,6px)] h-[28px] items-center justify-center px-[var(--calla-spacing-8,8px)] py-[var(--calla-spacing-4,4px)] relative rounded-[6px] shrink-0 w-[144px]" data-node-id="34:28334" data-name="배지 / 완료">
+          <p className="[word-break:break-word] font-['Pretendard:Medium'] leading-[20px] not-italic relative shrink-0 text-[13px] text-[color:var(--success\/text,#166534)] whitespace-nowrap" data-node-id="I34:28334;13:4541">
+            ✓ 완료
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+type CallaToggleProps = {
+  className?: string;
+  label?: string;
+  state?: "On";
+};
+
+function CallaToggle({ className, label = "검토 모드", state = "On" }: CallaToggleProps) {
+  return (
+    <div className={className || "content-stretch flex gap-[var(--calla-spacing-8,8px)] h-[28px] items-center p-[var(--calla-spacing-0,0px)] relative rounded-[var(--calla-radius-4,4px)] w-[148px]"} data-node-id="13:4579">
+      <div className="h-[20px] relative shrink-0 w-[32px]" data-node-id="13:4580" data-name="Track">
+        <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgTrack} />
+      </div>
+      <p className="[word-break:break-word] font-['Pretendard:Regular'] leading-[22px] not-italic relative shrink-0 text-[14px] text-[color:var(--calla-text-primary,#222)] tracking-[-0.14px] whitespace-nowrap" data-node-id="13:4582">
+        {label}
+      </p>
+    </div>
+  );
+}
+
+function SfInfoCircle({ className }: { className?: string }) {
+  return (
+    <div className={className || "relative size-[24px]"} data-node-id="13:4289" data-name="SF/info.circle">
+      <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgSfInfoCircle} />
+    </div>
+  );
+}
+
+function SfSidebarLeft({ className }: { className?: string }) {
+  return (
+    <div className={className || "relative size-[24px]"} data-node-id="13:4271" data-name="SF/sidebar.left">
+      <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgSfSidebarLeft} />
+    </div>
+  );
+}
+
+function SfGearshape({ className }: { className?: string }) {
+  return (
+    <div className={className || "relative size-[24px]"} data-node-id="13:4269" data-name="SF/gearshape">
+      <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgSfGearshape} />
+    </div>
+  );
+}
+
+function CallaLogo({ className }: { className?: string }) {
+  return (
+    <div className={className || "h-[32px] relative w-[89px]"} data-node-id="13:4311" data-name="Calla/Logo">
+      <div className="absolute h-[32px] left-0 overflow-clip top-0 w-[89px]" data-node-id="13:4312" data-name="calla 2">
+        <div className="absolute contents inset-0" data-node-id="13:4313" data-name="Layer 1">
+          <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgLayer1} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function Component14() {
+  return (
+    <div className="bg-[var(--background\/canvas,#f7f8fa)] content-stretch flex flex-col items-start relative size-full" data-node-id="34:22462" data-name="14 · 설정 · 동기화">
+      <div className="bg-[var(--background\/surface,white)] border-[var(--border\/subtle,#eee)] border-b border-solid content-stretch flex gap-[var(--space\/16,16px)] h-[64px] items-center overflow-clip px-[var(--space\/24,24px)] relative shrink-0 w-full" data-node-id="34:22463" data-name="앱 헤더">
+        <CallaLogo className="h-[32px] relative shrink-0 w-[89px]" />
+        <p className="[word-break:break-word] font-['Pretendard:Medium'] leading-[20px] not-italic relative shrink-0 text-[13px] text-[color:var(--text\/primary,#222)] w-[120px]" data-node-id="34:22472">
+          AUTOMATE
+        </p>
+        <p className="[word-break:break-word] flex-[1_0_0] font-['Pretendard:Regular'] leading-[18px] min-w-px not-italic relative text-[12px] text-[color:var(--text\/secondary,#606876)]" data-node-id="34:22473">
+          고도몰 상품 운영
+        </p>
+        <div className="flex-[1_0_0] h-px min-w-px relative" data-node-id="34:22474" data-name="유연한 공간" />
+        <p className="[word-break:break-word] font-['Pretendard:Regular'] leading-[22px] not-italic relative shrink-0 text-[14px] text-[color:var(--text\/primary,#222)] whitespace-nowrap" data-node-id="34:22475">
+          임예서
+        </p>
+        <p className="[word-break:break-word] font-['Pretendard:Medium'] leading-[20px] not-italic relative shrink-0 text-[13px] text-[color:var(--text\/secondary,#606876)] whitespace-nowrap" data-node-id="34:22476">
+          관리자
+        </p>
+        <SfGearshape className="relative shrink-0 size-[20px]" />
+      </div>
+      <div className="content-stretch flex flex-[1_0_0] items-start min-h-px overflow-clip relative w-full" data-node-id="34:22479" data-name="작업 공간">
+        <div className="bg-[var(--background\/surface,white)] border-[var(--border\/subtle,#eee)] border-r border-solid content-stretch flex flex-col gap-[var(--space\/8,8px)] h-full items-start overflow-clip relative shrink-0 w-[260px]" data-node-id="34:22480" data-name="사이드바 / 펼침">
+          <div className="content-stretch flex flex-col gap-[var(--space\/8,8px)] items-start overflow-clip px-[var(--space\/12,12px)] py-[var(--space\/16,16px)] relative shrink-0 w-full" data-node-id="34:22481" data-name="사이드바 메뉴">
+            <div className="content-stretch flex h-[40px] items-center justify-between overflow-clip px-[var(--space\/8,8px)] relative shrink-0 w-full" data-node-id="34:22482" data-name="메뉴 펼침 제어">
+              <p className="[word-break:break-word] flex-[1_0_0] font-['Pretendard:Medium'] leading-[22px] min-w-px not-italic relative text-[14px] text-[color:var(--text\/primary,#222)]" data-node-id="34:22483">
+                상품 운영
+              </p>
+              <SfSidebarLeft className="relative shrink-0 size-[20px]" />
+            </div>
+            <p className="[word-break:break-word] font-['Pretendard:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--text\/secondary,#606876)] w-full" data-node-id="34:22486">
+              상품 등록
+            </p>
+            <div className="content-stretch flex gap-[var(--calla-spacing-10,10px)] h-[40px] items-center px-[var(--calla-spacing-12,12px)] relative rounded-[var(--calla-radius-10,10px)] shrink-0 w-full" data-node-id="34:22487" data-name="메뉴 / 기본">
+              <div className="relative shrink-0 size-[20px]" data-node-id="I34:22487;13:5262" data-name="Nav icon">
+                <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgSfListBulletRectangle} />
+              </div>
+              <p className="[word-break:break-word] flex-[1_0_0] font-['Pretendard:Medium'] h-[21px] leading-[22px] min-w-px not-italic overflow-hidden relative text-[14px] text-[color:var(--calla-text-secondary,#606876)] text-ellipsis tracking-[-0.14px] whitespace-nowrap" data-node-id="I34:22487;13:5264">
+                등록 요청 상품
+              </p>
+            </div>
+            <div className="content-stretch flex gap-[var(--calla-spacing-10,10px)] h-[40px] items-center px-[var(--calla-spacing-12,12px)] relative rounded-[var(--calla-radius-10,10px)] shrink-0 w-full" data-node-id="34:22494" data-name="메뉴 / 기본">
+              <div className="relative shrink-0 size-[20px]" data-node-id="I34:22494;13:5262" data-name="Nav icon">
+                <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgNavIcon} />
+              </div>
+              <p className="[word-break:break-word] flex-[1_0_0] font-['Pretendard:Medium'] h-[21px] leading-[22px] min-w-px not-italic overflow-hidden relative text-[14px] text-[color:var(--calla-text-secondary,#606876)] text-ellipsis tracking-[-0.14px] whitespace-nowrap" data-node-id="I34:22494;13:5264">
+                자동 상품 등록
+              </p>
+            </div>
+            <div className="content-stretch flex gap-[var(--calla-spacing-10,10px)] h-[40px] items-center px-[var(--calla-spacing-12,12px)] relative rounded-[var(--calla-radius-10,10px)] shrink-0 w-full" data-node-id="34:22501" data-name="메뉴 / 기본">
+              <div className="relative shrink-0 size-[20px]" data-node-id="I34:22501;13:5262" data-name="Nav icon">
+                <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgNavIcon1} />
+              </div>
+              <p className="[word-break:break-word] flex-[1_0_0] font-['Pretendard:Medium'] h-[21px] leading-[22px] min-w-px not-italic overflow-hidden relative text-[14px] text-[color:var(--calla-text-secondary,#606876)] text-ellipsis tracking-[-0.14px] whitespace-nowrap" data-node-id="I34:22501;13:5264">
+                상품 조회
+              </p>
+            </div>
+            <div className="content-stretch flex gap-[var(--calla-spacing-10,10px)] h-[40px] items-center px-[var(--calla-spacing-12,12px)] relative rounded-[var(--calla-radius-10,10px)] shrink-0 w-full" data-node-id="34:22508" data-name="메뉴 / 기본">
+              <div className="relative shrink-0 size-[20px]" data-node-id="I34:22508;13:5262" data-name="Nav icon">
+                <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgNavIcon2} />
+              </div>
+              <p className="[word-break:break-word] flex-[1_0_0] font-['Pretendard:Medium'] h-[21px] leading-[22px] min-w-px not-italic overflow-hidden relative text-[14px] text-[color:var(--calla-text-secondary,#606876)] text-ellipsis tracking-[-0.14px] whitespace-nowrap" data-node-id="I34:22508;13:5264">
+                상품 인덱싱
+              </p>
+            </div>
+            <div className="content-stretch flex gap-[var(--calla-spacing-10,10px)] h-[40px] items-center px-[var(--calla-spacing-12,12px)] relative rounded-[var(--calla-radius-10,10px)] shrink-0 w-full" data-node-id="34:22515" data-name="메뉴 / 기본">
+              <div className="relative shrink-0 size-[20px]" data-node-id="I34:22515;13:5262" data-name="Nav icon">
+                <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgSfListBulletRectangle} />
+              </div>
+              <p className="[word-break:break-word] flex-[1_0_0] font-['Pretendard:Medium'] h-[21px] leading-[22px] min-w-px not-italic overflow-hidden relative text-[14px] text-[color:var(--calla-text-secondary,#606876)] text-ellipsis tracking-[-0.14px] whitespace-nowrap" data-node-id="I34:22515;13:5264">
+                카테고리와 브랜드
+              </p>
+            </div>
+            <div className="content-stretch flex gap-[var(--calla-spacing-10,10px)] h-[40px] items-center px-[var(--calla-spacing-12,12px)] relative rounded-[var(--calla-radius-10,10px)] shrink-0 w-full" data-node-id="34:22522" data-name="메뉴 / 기본">
+              <div className="relative shrink-0 size-[20px]" data-node-id="I34:22522;13:5262" data-name="Nav icon">
+                <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgNavIcon3} />
+              </div>
+              <p className="[word-break:break-word] flex-[1_0_0] font-['Pretendard:Medium'] h-[21px] leading-[22px] min-w-px not-italic overflow-hidden relative text-[14px] text-[color:var(--calla-text-secondary,#606876)] text-ellipsis tracking-[-0.14px] whitespace-nowrap" data-node-id="I34:22522;13:5264">
+                서버 이미지 폴더
+              </p>
+            </div>
+            <div className="bg-[var(--brand\/soft,#fff0f4)] content-stretch flex gap-[var(--calla-spacing-10,10px)] h-[40px] items-center px-[var(--calla-spacing-12,12px)] relative rounded-[var(--calla-radius-10,10px)] shrink-0 w-full" data-node-id="34:22529" data-name="메뉴 / 현재">
+              <div className="relative shrink-0 size-[20px]" data-node-id="I34:22529;13:5274" data-name="Nav icon">
+                <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgNavIcon4} />
+              </div>
+              <p className="[word-break:break-word] flex-[1_0_0] font-['Pretendard:Medium'] h-[21px] leading-[22px] min-w-px not-italic overflow-hidden relative text-[14px] text-[color:var(--brand\/strong,#ae3155)] text-ellipsis tracking-[-0.14px] whitespace-nowrap" data-node-id="I34:22529;13:5276">
+                동기화
+              </p>
+            </div>
+            <div className="content-stretch flex gap-[var(--calla-spacing-10,10px)] h-[40px] items-center px-[var(--calla-spacing-12,12px)] relative rounded-[var(--calla-radius-10,10px)] shrink-0 w-full" data-node-id="34:22540" data-name="메뉴 / 기본">
+              <div className="relative shrink-0 size-[20px]" data-node-id="I34:22540;13:5262" data-name="Nav icon">
+                <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgNavIcon5} />
+              </div>
+              <p className="[word-break:break-word] flex-[1_0_0] font-['Pretendard:Medium'] h-[21px] leading-[22px] min-w-px not-italic overflow-hidden relative text-[14px] text-[color:var(--calla-text-secondary,#606876)] text-ellipsis tracking-[-0.14px] whitespace-nowrap" data-node-id="I34:22540;13:5264">
+                사용자 계정 관리
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="content-stretch flex flex-[1_0_0] flex-col h-full items-start min-w-px overflow-clip relative" data-node-id="34:22547" data-name="본문과 고정 하단">
+          <div className="border-[var(--border\/subtle,#eee)] border-b border-solid content-stretch flex gap-[var(--space\/8,8px)] h-[48px] items-center overflow-clip px-[28px] relative shrink-0 w-full" data-node-id="34:22548" data-name="경로">
+            <p className="[word-break:break-word] flex-[1_0_0] font-['Pretendard:Regular'] leading-[18px] min-w-px not-italic relative text-[12px] text-[color:var(--text\/secondary,#606876)] whitespace-pre-wrap" data-node-id="34:22549">{`동기화  /  동기화`}</p>
+          </div>
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[var(--space\/16,16px)] items-start min-h-px overflow-clip pb-[var(--space\/16,16px)] pt-[20px] px-[28px] relative w-full" data-node-id="34:22550" data-name="본문 / 내부 스크롤">
+            <div className="content-stretch flex gap-[var(--space\/16,16px)] items-center overflow-clip relative shrink-0 w-full" data-node-id="34:22551" data-name="화면 제목과 주 행동">
+              <div className="[word-break:break-word] content-stretch flex flex-[1_0_0] flex-col gap-[var(--space\/4,4px)] items-start min-w-px not-italic overflow-clip relative" data-node-id="34:22552" data-name="내용 영역">
+                <p className="font-['Pretendard:SemiBold'] leading-[36px] relative shrink-0 text-[26px] text-[color:var(--text\/primary,#222)] w-full" data-node-id="34:22553">
+                  동기화
+                </p>
+                <p className="font-['Pretendard:Regular'] leading-[22px] relative shrink-0 text-[14px] text-[color:var(--text\/secondary,#606876)] w-full" data-node-id="34:22554">
+                  고도몰의 분류·브랜드·상품 결과를 API로 동기화합니다.
+                </p>
+              </div>
+              <div className="content-stretch flex gap-[var(--space\/8,8px)] items-start overflow-clip relative shrink-0" data-node-id="34:22555" data-name="화면 행동">
+                <div className="bg-[var(--calla-brand-default,#f27490)] content-stretch flex gap-[var(--calla-spacing-8,8px)] h-[44px] items-center justify-center min-h-[44px] px-[12px] py-[var(--calla-spacing-8,8px)] relative rounded-[var(--calla-radius-8,8px)] shrink-0 w-[106px]" data-node-id="34:22556" data-name="버튼 / 주 행동 / 기본">
+                  <p className="[word-break:break-word] font-['Pretendard:SemiBold'] leading-[20px] not-italic relative shrink-0 text-[14px] text-[color:var(--calla-text-inverse,white)] whitespace-nowrap" data-node-id="I34:22556;13:4438">
+                    지금 동기화
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-[var(--warning\/background,#fff7dd)] content-stretch flex gap-[var(--space\/8,8px)] items-center overflow-clip p-[var(--space\/12,12px)] relative rounded-[var(--radius\/control,8px)] shrink-0 w-full" data-node-id="34:22560" data-name="안내 / warning">
+              <SfInfoCircle className="relative shrink-0 size-[20px]" />
+              <p className="[word-break:break-word] flex-[1_0_0] font-['Pretendard:Regular'] leading-[22px] min-w-px not-italic relative text-[14px] text-[color:var(--text\/primary,#222)]" data-node-id="34:22563">
+                도매 브랜드 동기화에 실패했습니다. 마지막 정상 데이터는 유지되며, 실패한 항목만 다시 시도할 수 있습니다.
+              </p>
+              <Button className="bg-[var(----bg-surface,white)] border border-[var(----border-default,#e5e7eb)] border-solid content-stretch flex gap-[var(----spacing-8,8px)] h-[36px] items-center justify-center px-[var(----spacing-16,16px)] py-[var(----spacing-8,8px)] relative rounded-[var(----radius-md,8px)] shrink-0 w-[145px]" label="실패 항목 재시도" />
+            </div>
+            <div className="content-stretch flex flex-col gap-[var(--space\/12,12px)] items-start overflow-clip py-[var(--space\/8,8px)] relative shrink-0 w-full" data-node-id="34:22571" data-name="몰별 동기화 상태">
+              <p className="[word-break:break-word] font-['Pretendard:SemiBold'] leading-[28px] not-italic relative shrink-0 text-[18px] text-[color:var(--text\/primary,#222)] w-full" data-node-id="34:22572">
+                몰별 동기화 상태
+              </p>
+              <div className="bg-[var(--background\/surface,white)] border border-[var(--border\/subtle,#eee)] border-solid content-stretch flex flex-col items-start overflow-clip relative shrink-0 w-full" data-node-id="34:22573" data-name="테이블 / 머리글 고정">
+                <div className="[word-break:break-word] bg-[var(--background\/canvas,#f7f8fa)] content-stretch flex font-['Pretendard:Medium'] gap-[var(--space\/16,16px)] items-start leading-[20px] min-h-[44px] not-italic overflow-clip px-[var(--space\/12,12px)] py-[10px] relative shrink-0 text-[13px] text-[color:var(--text\/secondary,#606876)] w-full" data-node-id="34:22574" data-name="테이블 머리글">
+                  <p className="relative shrink-0 w-[168px]" data-node-id="34:22575">
+                    대상
+                  </p>
+                  <p className="relative shrink-0 w-[180px]" data-node-id="34:22576">
+                    마지막 성공
+                  </p>
+                  <p className="relative shrink-0 w-[156px]" data-node-id="34:22577">
+                    현재 상태
+                  </p>
+                  <p className="flex-[1_0_0] min-w-px relative" data-node-id="34:22578">
+                    내용
+                  </p>
+                  <p className="relative shrink-0 w-[124px]" data-node-id="34:22579">
+                    행동
+                  </p>
+                </div>
+                <CallaAutomate className="bg-[var(--background\/surface,white)] border-[var(--border\/subtle,#eee)] border-b border-solid content-stretch flex gap-[var(--space\/16,16px)] h-[86px] items-center min-h-[60px] overflow-clip px-[var(--space\/12,12px)] py-[10px] relative shrink-0 w-full" prop01="고도몰 소매" prop02="2026/10/07 14:30" prop03="카테고리 / 브랜드 / 결과 확인 정상" />
+                <CallaAutomate className="bg-[var(--background\/surface,white)] border-[var(--border\/subtle,#eee)] border-b border-solid content-stretch flex gap-[var(--space\/16,16px)] h-[86px] items-center min-h-[60px] overflow-clip px-[var(--space\/12,12px)] py-[10px] relative shrink-0 w-full" prop01="고도몰 도매" prop02="2026/10/06 17:20" prop03="브랜드 요청 시간 초과 · 기존 데이터 유지" propValue2="039" />
+              </div>
+            </div>
+            <div className="content-stretch flex flex-col gap-[var(--space\/12,12px)] items-start overflow-clip py-[var(--space\/8,8px)] relative shrink-0 w-full" data-node-id="34:22612" data-name="동기화 환경 설정">
+              <p className="[word-break:break-word] font-['Pretendard:SemiBold'] leading-[28px] not-italic relative shrink-0 text-[18px] text-[color:var(--text\/primary,#222)] w-full" data-node-id="34:22613">
+                동기화 환경 설정
+              </p>
+              <div className="content-stretch flex items-center justify-between overflow-clip relative shrink-0 w-full" data-node-id="34:22614" data-name="도구 모음">
+                <div className="[word-break:break-word] content-stretch flex flex-[1_0_0] flex-col gap-[var(--space\/4,4px)] items-start min-w-px not-italic overflow-clip relative" data-node-id="34:22615" data-name="내용 영역">
+                  <p className="font-['Pretendard:Medium'] leading-[22px] relative shrink-0 text-[14px] text-[color:var(--text\/primary,#222)] w-full" data-node-id="34:22616">
+                    앱을 열 때 분류와 브랜드 갱신
+                  </p>
+                  <p className="font-['Pretendard:Regular'] leading-[18px] relative shrink-0 text-[12px] text-[color:var(--text\/secondary,#606876)] w-full" data-node-id="34:22617">
+                    소매와 도매의 설정 데이터를 각각 불러옵니다.
+                  </p>
+                </div>
+                <CallaToggle className="content-stretch flex gap-[var(--calla-spacing-8,8px)] h-[28px] items-center p-[var(--calla-spacing-0,0px)] relative rounded-[var(--calla-radius-4,4px)] shrink-0 w-[148px]" label="자동 갱신" />
+              </div>
+              <div className="bg-[var(--border\/subtle,#eee)] h-px relative shrink-0 w-full" data-node-id="34:22625" data-name="구분선" />
+              <div className="content-stretch flex items-center justify-between overflow-clip relative shrink-0 w-full" data-node-id="34:22626" data-name="도구 모음">
+                <div className="[word-break:break-word] content-stretch flex flex-[1_0_0] flex-col gap-[var(--space\/4,4px)] items-start min-w-px not-italic overflow-clip relative" data-node-id="34:22627" data-name="내용 영역">
+                  <p className="font-['Pretendard:Medium'] leading-[22px] relative shrink-0 text-[14px] text-[color:var(--text\/primary,#222)] w-full" data-node-id="34:22628">
+                    등록 후 실제 결과 확인
+                  </p>
+                  <p className="font-['Pretendard:Regular'] leading-[18px] relative shrink-0 text-[12px] text-[color:var(--text\/secondary,#606876)] w-full" data-node-id="34:22629">
+                    실제 결과가 확인되기 전에는 반영 완료로 표시하지 않습니다.
+                  </p>
+                </div>
+                <div className="bg-[var(--progress\/background,#eff4ff)] content-stretch flex gap-[var(--calla-spacing-6,6px)] h-[28px] items-center justify-center px-[var(--calla-spacing-8,8px)] py-[var(--calla-spacing-4,4px)] relative rounded-[6px] shrink-0 w-[88px]" data-node-id="34:22630" data-name="배지 / 필수 확인">
+                  <p className="[word-break:break-word] font-['Pretendard:Medium'] leading-[20px] not-italic relative shrink-0 text-[13px] text-[color:var(--progress\/text,#175cd3)] whitespace-nowrap" data-node-id="I34:22630;13:4538">
+                    ↻ 필수 확인
+                  </p>
+                </div>
+              </div>
+              <div className="bg-[var(--border\/subtle,#eee)] h-px relative shrink-0 w-full" data-node-id="34:22635" data-name="구분선" />
+              <div className="content-stretch flex items-center justify-between overflow-clip relative shrink-0 w-full" data-node-id="34:22636" data-name="도구 모음">
+                <div className="[word-break:break-word] content-stretch flex flex-[1_0_0] flex-col gap-[var(--space\/4,4px)] items-start min-w-px not-italic overflow-clip relative" data-node-id="34:22637" data-name="내용 영역">
+                  <p className="font-['Pretendard:Medium'] leading-[22px] relative shrink-0 text-[14px] text-[color:var(--text\/primary,#222)] w-full" data-node-id="34:22638">
+                    결과 확인 알림
+                  </p>
+                  <p className="font-['Pretendard:Regular'] leading-[18px] relative shrink-0 text-[12px] text-[color:var(--text\/secondary,#606876)] w-full" data-node-id="34:22639">
+                    확인이 필요한 작업을 앱 안에서 알립니다.
+                  </p>
+                </div>
+                <CallaToggle className="content-stretch flex gap-[var(--calla-spacing-8,8px)] h-[28px] items-center p-[var(--calla-spacing-0,0px)] relative rounded-[var(--calla-radius-4,4px)] shrink-0 w-[148px]" label="알림 받기" />
+              </div>
+            </div>
+            <div className="content-stretch flex flex-col gap-[var(--space\/12,12px)] items-start overflow-clip py-[var(--space\/8,8px)] relative shrink-0 w-full" data-node-id="34:22647" data-name="최근 기록">
+              <p className="[word-break:break-word] font-['Pretendard:SemiBold'] leading-[28px] not-italic relative shrink-0 text-[18px] text-[color:var(--text\/primary,#222)] w-full" data-node-id="34:22648">
+                최근 기록
+              </p>
+              <div className="bg-[var(--background\/surface,white)] border border-[var(--border\/subtle,#eee)] border-solid content-stretch flex flex-col items-start overflow-clip relative shrink-0 w-full" data-node-id="34:22649" data-name="테이블 / 머리글 고정">
+                <div className="[word-break:break-word] bg-[var(--background\/canvas,#f7f8fa)] content-stretch flex font-['Pretendard:Medium'] gap-[var(--space\/16,16px)] items-start leading-[20px] min-h-[44px] not-italic overflow-clip px-[var(--space\/12,12px)] py-[10px] relative shrink-0 text-[13px] text-[color:var(--text\/secondary,#606876)] w-full" data-node-id="34:22650" data-name="테이블 머리글">
+                  <p className="relative shrink-0 w-[180px]" data-node-id="34:22651">
+                    일시
+                  </p>
+                  <p className="relative shrink-0 w-[132px]" data-node-id="34:22652">
+                    대상
+                  </p>
+                  <p className="flex-[1_0_0] min-w-px relative" data-node-id="34:22653">
+                    내용
+                  </p>
+                  <p className="relative shrink-0 w-[144px]" data-node-id="34:22654">
+                    상태
+                  </p>
+                </div>
+                <CallaAutomate className="bg-[var(--background\/surface,white)] border-[var(--border\/subtle,#eee)] border-b border-solid content-stretch flex gap-[var(--space\/16,16px)] h-[108px] items-center min-h-[56px] overflow-clip px-[var(--space\/12,12px)] py-[10px] relative shrink-0 w-full" prop01="2026/10/07 14:31" prop02="도매 · 브랜드" prop03="요청 시간 초과 · 재시도 가능" propValue2="040" />
+                <CallaAutomate className="bg-[var(--background\/surface,white)] border-[var(--border\/subtle,#eee)] border-b border-solid content-stretch flex gap-[var(--space\/16,16px)] h-[108px] items-center min-h-[56px] overflow-clip px-[var(--space\/12,12px)] py-[10px] relative shrink-0 w-full" prop01="2026/10/07 14:30" prop02="소매 · 전체" prop03="변경된 분류 2개 · 브랜드 0개" propValue2="041" />
+                <CallaAutomate className="bg-[var(--background\/surface,white)] border-[var(--border\/subtle,#eee)] border-b border-solid content-stretch flex gap-[var(--space\/16,16px)] h-[108px] items-center min-h-[56px] overflow-clip px-[var(--space\/12,12px)] py-[10px] relative shrink-0 w-full" prop01="2026/10/07 14:29" prop02="도매 · 카테고리" prop03="카테고리 변경 없음" propValue2="041" />
+              </div>
+            </div>
+          </div>
+          <div className="bg-[var(--background\/surface,white)] border-[var(--border\/subtle,#eee)] border-solid border-t content-stretch flex flex-col gap-[var(--space\/8,8px)] items-start overflow-clip px-[28px] py-[var(--space\/12,12px)] relative shrink-0 w-full" data-node-id="34:22682" data-name="고정 작업 하단">
+            <div className="content-stretch flex gap-[var(--space\/8,8px)] items-center overflow-clip relative shrink-0 w-full" data-node-id="34:22683" data-name="도구 모음">
+              <p className="[word-break:break-word] flex-[1_0_0] font-['Pretendard:Regular'] leading-[18px] min-w-px not-italic relative text-[12px] text-[color:var(--text\/secondary,#606876)]" data-node-id="34:22684">
+                API 통신만 사용합니다. 별도의 로컬 실행기는 필요하지 않습니다.
+              </p>
+              <Button className="bg-[var(----bg-surface,white)] border border-[var(----border-default,#e5e7eb)] border-solid content-stretch flex gap-[var(----spacing-8,8px)] h-[40px] items-center justify-center px-[var(----spacing-16,16px)] py-[var(----spacing-8,8px)] relative rounded-[var(----radius-md,8px)] shrink-0 w-[93px]" label="설정 저장" />
+            </div>
+            <p className="[word-break:break-word] font-['Pretendard:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--text\/secondary,#606876)] w-full" data-node-id="34:22692">
+              디자인 예시 · 실제 처리 결과가 아닙니다
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+SUPER CRITICAL: The generated React+Tailwind code MUST be converted to match the target project's technology stack and styling system.
+1. Analyze the target codebase to identify: technology stack, styling approach, component patterns, and design tokens
+2. Convert React syntax to the target framework/library
+3. Transform all Tailwind classes to the target styling system while preserving exact visual design
+4. Follow the project's existing patterns and conventions
+DO NOT install any Tailwind as a dependency unless the user instructs you to do so.
+
+
+Node ids have been added to the code as data attributes, e.g. `data-node-id="1:2"`.
+
+These styles are contained in the design: CALLA-AUTOMATE/라벨: Font(family: "Pretendard", style: Medium, size: 13, weight: 500, lineHeight: 20, letterSpacing: 0), CALLA-AUTOMATE/보조: Font(family: "Pretendard", style: Regular, size: 12, weight: 400, lineHeight: 18, letterSpacing: 0), CALLA-AUTOMATE/본문: Font(family: "Pretendard", style: Regular, size: 14, weight: 400, lineHeight: 22, letterSpacing: 0), CALLA-AUTOMATE/강조: Font(family: "Pretendard", style: Medium, size: 14, weight: 500, lineHeight: 22, letterSpacing: 0), Calla/Body/14 Medium: Font(family: "Pretendard", style: Medium, size: 14, weight: 500, lineHeight: 22, letterSpacing: -1), CALLA-AUTOMATE/제목: Font(family: "Pretendard", style: SemiBold, size: 26, weight: 600, lineHeight: 36, letterSpacing: 0), CALLA-AUTOMATE/주 행동: Font(family: "Pretendard", style: SemiBold, size: 14, weight: 600, lineHeight: 20, letterSpacing: 0), Body/14 Medium: Font(family: "Pretendard", style: Medium, size: 14, weight: 500, lineHeight: 20, letterSpacing: 0), CALLA-AUTOMATE/섹션: Font(family: "Pretendard", style: SemiBold, size: 18, weight: 600, lineHeight: 28, letterSpacing: 0), Calla/Body/14 Regular: Font(family: "Pretendard", style: Regular, size: 14, weight: 400, lineHeight: 22, letterSpacing: -1).
+
+Component descriptions: The following components have usage descriptions or documentation links defined in Figma. These descriptions provide important context about the intended usage, best practices, and any constraints for each component. Follow these guidelines when implementing or using these components.
+
+## Calla/Logo
+**Node ID:** 13:4311
+
+Original editable calla logo from Guide / 4:844.
+
+## SF/gearshape
+**Node ID:** 13:4269
+
+SF Symbols Pro plugin import. Original vector master 271:1225; 24px master with SCALE constraints.
+
+## SF/sidebar.left
+**Node ID:** 13:4271
+
+SF Symbols Pro plugin import. Original vector master 271:1229; 24px master with SCALE constraints.
+
+## Calla/NavItem
+**Node ID:** 13:5306
+
+Default, hover, active, keyboard focus and disabled states. Solid #F27490 active background always has #FFFFFF label, icon and count. Optional count and icon swap.
+
+## SF/list.bullet.rectangle
+**Node ID:** 13:4261
+
+SF Symbols Pro plugin import. Original vector master 271:1209; 24px master with SCALE constraints.
+
+## SF/bolt
+**Node ID:** 13:4263
+
+SF Symbols Pro plugin import. Original vector master 271:1213; 24px master with SCALE constraints.
+
+## SF/magnifyingglass
+**Node ID:** 13:4273
+
+SF Symbols Pro plugin import. Original vector master 271:1233; 24px master with SCALE constraints.
+
+## SF/shippingbox
+**Node ID:** 13:4259
+
+SF Symbols Pro plugin import. Original vector master 271:1205; 24px master with SCALE constraints.
+
+## SF/photo
+**Node ID:** 13:4293
+
+SF Symbols Pro plugin import. Original vector master 271:1273; 24px master with SCALE constraints.
+
+## SF/arrow.clockwise
+**Node ID:** 13:4281
+
+SF Symbols Pro plugin import. Original vector master 271:1249; 24px master with SCALE constraints.
+
+## Calla/Button
+**Node ID:** 13:4515
+
+주요·보조·텍스트·삭제 행동. Primary의 모든 활성 상태는 핑크 배경 위 흰색 글자·아이콘을 사용합니다. Label과 SF Symbols Icon 교체 가능. 저장과 외부 몰 등록 CTA는 구분.
+
+## SF/info.circle
+**Node ID:** 13:4289
+
+SF Symbols Pro plugin import. Original vector master 271:1265; 24px master with SCALE constraints.
+
+## Button
+**Node ID:** 11:3012
+
+기본 액션 버튼. Type(Primary/Secondary/Neutral/Ghost) × Size(Medium 36px/Small 28px) × State. Label 텍스트와 아이콘 표시 여부는 컴포넌트 속성으로 제어.
+
+## 유형=기본, 상태=기본, 구성=038
+**Node ID:** 34:28271
+
+CALLA-AUTOMATE · 테이블 행 / 기본 · 디자인 예시. 원문·선택·준비·몰별 결과 의미를 보존합니다.
+
+## CALLA-AUTOMATE / 테이블 행
+**Node ID:** 34:29439
+
+실제 로컬 컴포넌트와 상태별 Variants. 문구 속성은 원문을 보존하며 화면에서 인스턴스로 사용합니다.
+
+## Calla/Badge
+**Node ID:** 13:4557
+
+상품과 채널의 운영 상태. 완료는 핑크 바탕에 흰 글자·점 표시를 사용합니다. 상태별 기본 문구를 보존하며 실행 상태와 선택 여부는 구분합니다.
+
+## 유형=기본, 상태=기본, 구성=039
+**Node ID:** 34:28296
+
+CALLA-AUTOMATE · 테이블 행 / 기본 · 디자인 예시. 원문·선택·준비·몰별 결과 의미를 보존합니다.
+
+## Calla/Toggle
+**Node ID:** 13:4587
+
+즉시 켜고 끄는 설정. 기본 검토 모드는 켜짐. 중단 요청처럼 확인이 필요한 행동에는 사용하지 않음.
+
+## 유형=기본, 상태=기본, 구성=040
+**Node ID:** 34:28320
+
+CALLA-AUTOMATE · 테이블 행 / 기본 · 디자인 예시. 원문·선택·준비·몰별 결과 의미를 보존합니다.
+
+## 유형=기본, 상태=기본, 구성=041
+**Node ID:** 34:28335
+
+CALLA-AUTOMATE · 테이블 행 / 기본 · 디자인 예시. 원문·선택·준비·몰별 결과 의미를 보존합니다.
+
+Images and SVGs will be stored as constants, e.g. const image = `${assetPathPrefix}/<asset file name>`, where assetPathPrefix is declared once at the top of the code and every asset URL interpolates it. These constants will be used in the code as the source for the image, ex: <img src={image} />. Image assets are stored on a remote server for 7 days and can be fetched using the provided URLs until they expire.

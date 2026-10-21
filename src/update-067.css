@@ -1,0 +1,7 @@
+.product-name-prefix { color: #ef4036; }
+.app-sidebar .workspace-toggle { justify-content: flex-end; min-height: 28px; height: 28px; margin-bottom: 8px; }
+.app-sidebar .sidebar-nav { gap: 20px; }
+.app-sidebar .sidebar-heading { margin-bottom: 2px; }
+.is-collapsed .app-sidebar .workspace-toggle { justify-content: center; }
+.is-collapsed .app-sidebar .sidebar-nav { gap: 14px; }
+.is-collapsed .app-sidebar .sidebar-section + .sidebar-section { padding-top: 14px; border-top: 1px solid var(--border); }

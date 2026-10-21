@@ -1,0 +1,662 @@
+{
+  "reviewVersion": "0.6.3",
+  "applicationOrder": "01 through 11",
+  "notes": [
+    "한 패치는 한 작업에 해당하며 번호 순서대로 적용합니다. 각 suggestedCommitSubject는 독립 커밋용 한국어 제목입니다.",
+    "운영 배포와 운영 DB 마이그레이션은 수행하지 않았습니다. 작업 02 마이그레이션은 대응 Worker 배포 전에 별도로 적용해야 합니다.",
+    "Python 캐시와 바이너리 생성물은 패치에서 제외했습니다. .dev.vars.example 외 실제 환경설정 및 시크릿 파일은 포함하지 않습니다."
+  ],
+  "tasks": [
+    {
+      "task": 1,
+      "patch": "01-remove-local-runner.patch",
+      "suggestedCommitSubject": "죽은 로컬 러너 경로 제거 (공식 API 전환 잔여물)",
+      "files": [
+        {
+          "path": "desktop/config.cjs",
+          "change": "modified",
+          "added": 1,
+          "deleted": 10
+        },
+        {
+          "path": "desktop/main.cjs",
+          "change": "modified",
+          "added": 1,
+          "deleted": 3
+        },
+        {
+          "path": "desktop/preload.cjs",
+          "change": "modified",
+          "added": 0,
+          "deleted": 6
+        },
+        {
+          "path": "desktop/runner-service.cjs",
+          "change": "deleted",
+          "added": 0,
+          "deleted": 104
+        },
+        {
+          "path": "desktop/tests/config.test.cjs",
+          "change": "modified",
+          "added": 1,
+          "deleted": 16
+        },
+        {
+          "path": "desktop/tests/runner-service.test.cjs",
+          "change": "deleted",
+          "added": 0,
+          "deleted": 45
+        },
+        {
+          "path": "desktop/tests/ui/app.spec.ts",
+          "change": "modified",
+          "added": 0,
+          "deleted": 4
+        },
+        {
+          "path": "package.json",
+          "change": "modified",
+          "added": 0,
+          "deleted": 2
+        },
+        {
+          "path": "runner/.gitignore",
+          "change": "deleted",
+          "added": 0,
+          "deleted": 7
+        },
+        {
+          "path": "runner/README.md",
+          "change": "deleted",
+          "added": 0,
+          "deleted": 90
+        },
+        {
+          "path": "runner/__init__.py",
+          "change": "deleted",
+          "added": 0,
+          "deleted": 1
+        },
+        {
+          "path": "runner/__main__.py",
+          "change": "deleted",
+          "added": 0,
+          "deleted": 3
+        },
+        {
+          "path": "runner/bridge.py",
+          "change": "deleted",
+          "added": 0,
+          "deleted": 859
+        },
+        {
+          "path": "runner/browser_tests/test_form.py",
+          "change": "deleted",
+          "added": 0,
+          "deleted": 236
+        },
+        {
+          "path": "runner/engine/__init__.py",
+          "change": "deleted",
+          "added": 0,
+          "deleted": 1
+        },
+        {
+          "path": "runner/engine/browser.py",
+          "change": "deleted",
+          "added": 0,
+          "deleted": 86
+        },
+        {
+          "path": "runner/engine/config.py",
+          "change": "deleted",
+          "added": 0,
+          "deleted": 98
+        },
+        {
+          "path": "runner/engine/db.py",
+          "change": "deleted",
+          "added": 0,
+          "deleted": 129
+        },
+        {
+          "path": "runner/engine/godomall.py",
+          "change": "deleted",
+          "added": 0,
+          "deleted": 827
+        },
+        {
+          "path": "runner/native_engine.py",
+          "change": "deleted",
+          "added": 0,
+          "deleted": 90
+        },
+        {
+          "path": "runner/requirements.txt",
+          "change": "deleted",
+          "added": 0,
+          "deleted": 2
+        },
+        {
+          "path": "runner/tests/fixtures/godomall-save-completed.html",
+          "change": "deleted",
+          "added": 0,
+          "deleted": 54
+        },
+        {
+          "path": "runner/tests/test_bridge.py",
+          "change": "deleted",
+          "added": 0,
+          "deleted": 618
+        },
+        {
+          "path": "runner/tests/test_prices.py",
+          "change": "deleted",
+          "added": 0,
+          "deleted": 80
+        },
+        {
+          "path": "runner/tests/test_save_verification.py",
+          "change": "deleted",
+          "added": 0,
+          "deleted": 427
+        },
+        {
+          "path": "runner/tests/test_security_limits.py",
+          "change": "deleted",
+          "added": 0,
+          "deleted": 78
+        },
+        {
+          "path": "runner/tests/test_stock_detail.py",
+          "change": "deleted",
+          "added": 0,
+          "deleted": 126
+        },
+        {
+          "path": "runner/tests/test_worker_client.py",
+          "change": "deleted",
+          "added": 0,
+          "deleted": 163
+        },
+        {
+          "path": "scripts/build-runner.mjs",
+          "change": "deleted",
+          "added": 0,
+          "deleted": 22
+        },
+        {
+          "path": "src/RunnerConnection.tsx",
+          "change": "deleted",
+          "added": 0,
+          "deleted": 19
+        },
+        {
+          "path": "src/desktop.ts",
+          "change": "modified",
+          "added": 0,
+          "deleted": 5
+        },
+        {
+          "path": "src/runner-client.ts",
+          "change": "deleted",
+          "added": 0,
+          "deleted": 28
+        }
+      ],
+      "excludedBinaryFiles": [
+        {
+          "path": "runner/__pycache__/__init__.cpython-313.pyc",
+          "beforeBytes": 289,
+          "afterBytes": 0,
+          "reason": "Python cache or generated binary"
+        },
+        {
+          "path": "runner/__pycache__/bridge.cpython-313.pyc",
+          "beforeBytes": 73709,
+          "afterBytes": 0,
+          "reason": "Python cache or generated binary"
+        },
+        {
+          "path": "runner/__pycache__/native_engine.cpython-313.pyc",
+          "beforeBytes": 7885,
+          "afterBytes": 0,
+          "reason": "Python cache or generated binary"
+        },
+        {
+          "path": "runner/browser_tests/__pycache__/test_form.cpython-313.pyc",
+          "beforeBytes": 22553,
+          "afterBytes": 0,
+          "reason": "Python cache or generated binary"
+        },
+        {
+          "path": "runner/engine/__pycache__/__init__.cpython-313.pyc",
+          "beforeBytes": 197,
+          "afterBytes": 0,
+          "reason": "Python cache or generated binary"
+        },
+        {
+          "path": "runner/engine/__pycache__/browser.cpython-313.pyc",
+          "beforeBytes": 4646,
+          "afterBytes": 0,
+          "reason": "Python cache or generated binary"
+        },
+        {
+          "path": "runner/engine/__pycache__/config.cpython-313.pyc",
+          "beforeBytes": 4207,
+          "afterBytes": 0,
+          "reason": "Python cache or generated binary"
+        },
+        {
+          "path": "runner/engine/__pycache__/db.cpython-313.pyc",
+          "beforeBytes": 8345,
+          "afterBytes": 0,
+          "reason": "Python cache or generated binary"
+        },
+        {
+          "path": "runner/engine/__pycache__/godomall.cpython-313.pyc",
+          "beforeBytes": 58932,
+          "afterBytes": 0,
+          "reason": "Python cache or generated binary"
+        },
+        {
+          "path": "runner/tests/__pycache__/test_bridge.cpython-313.pyc",
+          "beforeBytes": 63620,
+          "afterBytes": 0,
+          "reason": "Python cache or generated binary"
+        },
+        {
+          "path": "runner/tests/__pycache__/test_prices.cpython-313.pyc",
+          "beforeBytes": 7217,
+          "afterBytes": 0,
+          "reason": "Python cache or generated binary"
+        },
+        {
+          "path": "runner/tests/__pycache__/test_save_verification.cpython-313.pyc",
+          "beforeBytes": 42289,
+          "afterBytes": 0,
+          "reason": "Python cache or generated binary"
+        },
+        {
+          "path": "runner/tests/__pycache__/test_security_limits.cpython-313.pyc",
+          "beforeBytes": 8330,
+          "afterBytes": 0,
+          "reason": "Python cache or generated binary"
+        },
+        {
+          "path": "runner/tests/__pycache__/test_stock_detail.cpython-313.pyc",
+          "beforeBytes": 10400,
+          "afterBytes": 0,
+          "reason": "Python cache or generated binary"
+        },
+        {
+          "path": "runner/tests/__pycache__/test_worker_client.cpython-313.pyc",
+          "beforeBytes": 18239,
+          "afterBytes": 0,
+          "reason": "Python cache or generated binary"
+        }
+      ],
+      "totals": {
+        "files": 32,
+        "added": 3,
+        "deleted": 4239,
+        "excludedBinaryFiles": 15
+      }
+    },
+    {
+      "task": 2,
+      "patch": "02-database-list-summaries.patch",
+      "suggestedCommitSubject": "목록 집계를 DB로 옮겨 전체 상품 조회 제거",
+      "files": [
+        {
+          "path": "server/index.ts",
+          "change": "modified",
+          "added": 2,
+          "deleted": 6
+        },
+        {
+          "path": "tests/server.test.ts",
+          "change": "modified",
+          "added": 13,
+          "deleted": 5
+        },
+        {
+          "path": "supabase/migrations/20261019000000_product_list_summaries.sql",
+          "change": "added",
+          "added": 34,
+          "deleted": 0
+        },
+        {
+          "path": "tests/list-summaries-database.sql",
+          "change": "added",
+          "added": 36,
+          "deleted": 0
+        },
+        {
+          "path": "tests/list-summaries-database.mjs",
+          "change": "added",
+          "added": 103,
+          "deleted": 0
+        }
+      ],
+      "excludedBinaryFiles": [],
+      "totals": {
+        "files": 5,
+        "added": 188,
+        "deleted": 11,
+        "excludedBinaryFiles": 0
+      }
+    },
+    {
+      "task": 3,
+      "patch": "03-log-unhandled-api-errors.patch",
+      "suggestedCommitSubject": "예상하지 못한 Worker 오류에 최소 진단 로그 추가",
+      "files": [
+        {
+          "path": "server/index.ts",
+          "change": "modified",
+          "added": 5,
+          "deleted": 1
+        },
+        {
+          "path": "tests/server.test.ts",
+          "change": "modified",
+          "added": 21,
+          "deleted": 0
+        }
+      ],
+      "excludedBinaryFiles": [],
+      "totals": {
+        "files": 2,
+        "added": 26,
+        "deleted": 1,
+        "excludedBinaryFiles": 0
+      }
+    },
+    {
+      "task": 4,
+      "patch": "04-require-signup-code.patch",
+      "suggestedCommitSubject": "공개 회원가입에 공유 가입 코드 검증 추가",
+      "files": [
+        {
+          "path": "server/accounts.ts",
+          "change": "modified",
+          "added": 5,
+          "deleted": 1
+        },
+        {
+          "path": "src/Auth.tsx",
+          "change": "modified",
+          "added": 4,
+          "deleted": 3
+        },
+        {
+          "path": "tests/accounts.test.ts",
+          "change": "modified",
+          "added": 51,
+          "deleted": 10
+        },
+        {
+          "path": ".dev.vars.example",
+          "change": "modified",
+          "added": 2,
+          "deleted": 0
+        },
+        {
+          "path": "desktop/tests/ui/signup-code.spec.ts",
+          "change": "added",
+          "added": 99,
+          "deleted": 0
+        }
+      ],
+      "excludedBinaryFiles": [],
+      "totals": {
+        "files": 5,
+        "added": 161,
+        "deleted": 14,
+        "excludedBinaryFiles": 0
+      }
+    },
+    {
+      "task": 5,
+      "patch": "05-fix-desktop-proxy-and-session.patch",
+      "suggestedCommitSubject": "데스크톱 프록시 헤더와 본문 및 세션 검증 보완",
+      "files": [
+        {
+          "path": "desktop/main.cjs",
+          "change": "modified",
+          "added": 9,
+          "deleted": 3
+        },
+        {
+          "path": "desktop/tests/main.test.cjs",
+          "change": "added",
+          "added": 154,
+          "deleted": 0
+        }
+      ],
+      "excludedBinaryFiles": [],
+      "totals": {
+        "files": 2,
+        "added": 163,
+        "deleted": 3,
+        "excludedBinaryFiles": 0
+      }
+    },
+    {
+      "task": 6,
+      "patch": "06-unify-preview-csp.patch",
+      "suggestedCommitSubject": "상품 상세 미리보기 iframe CSP 통일",
+      "files": [
+        {
+          "path": "src/ProductEditor.tsx",
+          "change": "modified",
+          "added": 2,
+          "deleted": 1
+        },
+        {
+          "path": "src/Godomall.tsx",
+          "change": "modified",
+          "added": 2,
+          "deleted": 1
+        },
+        {
+          "path": "src/ProductRegistrationPreview.tsx",
+          "change": "modified",
+          "added": 2,
+          "deleted": 1
+        },
+        {
+          "path": "src/preview-csp.ts",
+          "change": "added",
+          "added": 2,
+          "deleted": 0
+        }
+      ],
+      "excludedBinaryFiles": [],
+      "totals": {
+        "files": 4,
+        "added": 8,
+        "deleted": 3,
+        "excludedBinaryFiles": 0
+      }
+    },
+    {
+      "task": 7,
+      "patch": "07-separate-xlsx-failure-messages.patch",
+      "suggestedCommitSubject": "XLSX 파일 손상과 처리 한도 초과 안내 분리",
+      "files": [
+        {
+          "path": "src/xlsx-limits.ts",
+          "change": "modified",
+          "added": 10,
+          "deleted": 3
+        },
+        {
+          "path": "tests/xlsx-security.test.ts",
+          "change": "modified",
+          "added": 19,
+          "deleted": 0
+        }
+      ],
+      "excludedBinaryFiles": [],
+      "totals": {
+        "files": 2,
+        "added": 29,
+        "deleted": 3,
+        "excludedBinaryFiles": 0
+      }
+    },
+    {
+      "task": 8,
+      "patch": "08-verify-automation-core-contract.patch",
+      "suggestedCommitSubject": "공유 automation-core 선언과 실제 export 계약 검증",
+      "files": [
+        {
+          "path": "src/lib/automation-core.d.ts",
+          "change": "modified",
+          "added": 3,
+          "deleted": 0
+        },
+        {
+          "path": "tests/automation-core-contract.test.ts",
+          "change": "added",
+          "added": 33,
+          "deleted": 0
+        },
+        {
+          "path": "server/index.ts",
+          "change": "modified",
+          "added": 2,
+          "deleted": 2
+        },
+        {
+          "path": "tests/server.test.ts",
+          "change": "modified",
+          "added": 2,
+          "deleted": 2
+        }
+      ],
+      "excludedBinaryFiles": [],
+      "totals": {
+        "files": 4,
+        "added": 40,
+        "deleted": 4,
+        "excludedBinaryFiles": 0
+      }
+    },
+    {
+      "task": 9,
+      "patch": "09-preserve-catalog-search-punctuation.patch",
+      "suggestedCommitSubject": "상품 검색 문장부호를 보존하고 필터 값을 안전하게 인용",
+      "files": [
+        {
+          "path": "server/index.ts",
+          "change": "modified",
+          "added": 10,
+          "deleted": 1
+        },
+        {
+          "path": "tests/server.test.ts",
+          "change": "modified",
+          "added": 30,
+          "deleted": 0
+        },
+        {
+          "path": "tests/catalog-search-database.mjs",
+          "change": "added",
+          "added": 108,
+          "deleted": 0
+        }
+      ],
+      "excludedBinaryFiles": [],
+      "totals": {
+        "files": 3,
+        "added": 148,
+        "deleted": 1,
+        "excludedBinaryFiles": 0
+      }
+    },
+    {
+      "task": 10,
+      "patch": "10-extract-navigation-hook.patch",
+      "suggestedCommitSubject": "기존 탐색 동작을 유지하며 history 관리를 훅으로 분리",
+      "files": [
+        {
+          "path": "src/App.tsx",
+          "change": "modified",
+          "added": 6,
+          "deleted": 43
+        },
+        {
+          "path": "src/use-navigation.ts",
+          "change": "added",
+          "added": 59,
+          "deleted": 0
+        }
+      ],
+      "excludedBinaryFiles": [],
+      "totals": {
+        "files": 2,
+        "added": 65,
+        "deleted": 43,
+        "excludedBinaryFiles": 0
+      }
+    },
+    {
+      "task": 11,
+      "patch": "11-centralize-supabase-project-ref.patch",
+      "suggestedCommitSubject": "데스크톱 Supabase 프로젝트 참조값 상수화",
+      "files": [
+        {
+          "path": "desktop/config.cjs",
+          "change": "modified",
+          "added": 3,
+          "deleted": 1
+        },
+        {
+          "path": "desktop/main.cjs",
+          "change": "modified",
+          "added": 4,
+          "deleted": 3
+        },
+        {
+          "path": "desktop/tests/main.test.cjs",
+          "change": "modified",
+          "added": 25,
+          "deleted": 1
+        },
+        {
+          "path": "desktop/tests/ui/fixture.ts",
+          "change": "modified",
+          "added": 2,
+          "deleted": 1
+        }
+      ],
+      "excludedBinaryFiles": [],
+      "totals": {
+        "files": 4,
+        "added": 34,
+        "deleted": 6,
+        "excludedBinaryFiles": 0
+      }
+    }
+  ],
+  "totals": {
+    "tasks": 11,
+    "uniqueFiles": 55,
+    "fileChanges": 65,
+    "added": 865,
+    "deleted": 4328,
+    "excludedBinaryFiles": 15
+  },
+  "validation": {
+    "status": "passed",
+    "log": "test-results/review-063/patch-validation.log",
+    "patchesCheckedAndApplied": 11,
+    "sourcePathsCompared": 3400,
+    "comparison": "byte-for-byte against current workspace; generated binary/cache artifacts excluded",
+    "validationDirectory": "/tmp/calla-review-patch-validation-ymky6oly"
+  }
+}

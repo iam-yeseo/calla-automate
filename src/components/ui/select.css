@@ -1,0 +1,124 @@
+.calla-select {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.calla-select > .calla-select-native {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+  clip-path: inset(50%);
+  overflow: hidden;
+}
+
+.calla-select > .calla-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  min-height: 40px;
+  height: auto;
+  padding: 9px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  outline: none;
+  color: var(--ink);
+  background: var(--surface);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  text-align: left;
+  box-shadow: none;
+  transform: none;
+  transition: border-color var(--motion-base) var(--ease-out), box-shadow var(--motion-base) var(--ease-out), background-color var(--motion-base) var(--ease-out);
+}
+
+.calla-select > .calla-select-trigger:hover:not(:disabled) { border-color: #a7aeb9; background: var(--surface); }
+.calla-select > .calla-select-trigger:focus-visible,
+.calla-select[data-state='open'] > .calla-select-trigger { border-color: var(--brand-strong); box-shadow: 0 0 0 3px #f274901f; }
+.calla-select > .calla-select-trigger[aria-invalid='true'] { border-color: var(--danger-text); }
+.calla-select > .calla-select-trigger:disabled { color: var(--disabled); border-color: #e5e7eb; background: var(--disabled-bg, #f1f2f4); cursor: not-allowed; }
+.calla-select-value { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.calla-select-chevron { flex: none; width: 18px; height: 18px; color: var(--secondary); transition: transform var(--motion-base) var(--ease-out), color var(--motion-base) var(--ease-out); }
+.calla-select[data-state='open'] .calla-select-chevron { transform: rotate(180deg); color: var(--brand-strong); }
+.calla-select[data-disabled='true'] .calla-select-chevron { color: var(--disabled); }
+
+.calla-select-menu {
+  padding: 5px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 10px 32px #22222214, 0 2px 6px #2222220a;
+  font-family: Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  transform-origin: top left;
+  animation: calla-select-open 200ms var(--ease-out) both;
+}
+.calla-select-menu[data-side='top'] { transform-origin: bottom left; }
+.calla-select-menu::-webkit-scrollbar-thumb { background-color: #22222224; }
+.calla-select-group { padding: 9px 10px 5px; color: var(--muted); font-size: 12px; font-weight: 500; }
+.calla-select-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 36px;
+  max-width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color var(--motion-fast) var(--ease-out), background-color var(--motion-fast) var(--ease-out);
+  animation: calla-select-option-in 180ms var(--ease-out) var(--option-delay, 0ms) both;
+}
+.calla-select-option + .calla-select-option { margin-top: 2px; }
+.calla-select-option[data-active='true']:not([aria-disabled='true']) { background: var(--subtle); }
+.calla-select-option[aria-selected='true'] { color: var(--brand-strong); font-weight: 500; background: var(--brand-soft); }
+.calla-select-option[aria-selected='true'][data-active='true'] { background: #ffe4ec; }
+.calla-select-option[aria-disabled='true'] { color: var(--disabled); cursor: not-allowed; }
+.calla-select-option-label { min-width: 0; max-width: 416px; white-space: normal; overflow-wrap: anywhere; }
+.calla-select-check { flex: none; width: 18px; height: 18px; color: var(--brand-strong); animation: calla-select-check-in 220ms var(--ease-out) both; }
+
+@keyframes calla-select-open {
+  from { opacity: 0; transform: translateY(-5px) scaleY(.97); }
+  to { opacity: 1; transform: translateY(0) scaleY(1); }
+}
+@keyframes calla-select-option-in {
+  from { opacity: 0; transform: translateX(-4px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes calla-select-check-in {
+  from { opacity: 0; transform: scale(.65); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .calla-select > .calla-select-trigger, .calla-select-chevron, .calla-select-option { transition: none; }
+  .calla-select-menu, .calla-select-option, .calla-select-check { animation: none; }
+}
+@media (forced-colors: active) {
+  .calla-select > .calla-select-trigger:focus-visible, .calla-select[data-state='open'] > .calla-select-trigger { outline: 2px solid Highlight; outline-offset: 2px; }
+  .calla-select-option[aria-selected='true'] { color: HighlightText; background: Highlight; }
+  .calla-select-option[data-active='true']:not([aria-disabled='true']) { outline: 1px solid Highlight; }
+  .calla-select-option[aria-disabled='true'], .calla-select > .calla-select-trigger:disabled { color: GrayText; }
+  .calla-select-check { color: currentColor; }
+}

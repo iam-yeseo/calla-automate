@@ -1,3 +1,5 @@
+-- HISTORICAL REVIEW: superseded by migrations/20261008024948_close_direct_product_access.sql.
+-- The applied migration also covers product_indexing; do not use this incomplete historical script for new cutovers.
 -- REVIEW ONLY. Not applied by this task. This is a coordinated access cutover,
 -- not a data migration and not an automatically executed migration file.
 -- Preconditions:

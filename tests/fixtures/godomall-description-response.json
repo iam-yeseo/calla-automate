@@ -1,0 +1,18 @@
+[
+  {
+    "mall": "retail",
+    "goodsNo": "1000008214",
+    "checkedAt": "2026-10-15 04:25:01.038+00",
+    "expected": "  <img src=\"https://calla.hgodo.com/product/used/used-top-notice.jpg\">\n\n\n\n<!-- 중고상품안내 가운데정렬 -->\n\n<div align=\"center\" style=\"padding:20px 0 20px 0; font-size:20px; font-weight:600;\">▶ 제품 안내사항 ◀</div>\n<div align=\"center\" style=\"line-height:23px;; font-size:15px; font-weight:400;\">\n데모용으로 사용했던 제품입니다.<br>\n거의 사용하지 않았습니다.<br>\n\n\n<br><br><br><br>\n</div>\n\n<!-- 중고상품안내 가운데정렬 끝 -->\n\n  <img src=\"https://calla.hgodo.com/product/used/used-261006-13-01.jpg\">",
+    "actualPc": "<div align=\\\"center\\\">\\r\\n\\r\\n<img src=\\\"https://calla.hgodo.com/product/used/used-top-notice.jpg\\\">\\r\\n\\r\\n\\r\\n\\r\\n<!-- 중고상품안내 가운데정렬 -->\\r\\n\\r\\n<div align=\\\"center\\\" style=\\\"padding:20px 0 20px 0; font-size:20px; font-weight:600;\\\">▶ 제품 안내사항 ◀</div>\\r\\n<div align=\\\"center\\\" style=\\\"line-height:23px;; font-size:15px; font-weight:400;\\\">\\r\\n데모용으로 사용했던 제품입니다.<br>\\r\\n거의 사용하지 않았습니다.<br>\\r\\n\\r\\n\\r\\n<br><br><br><br>\\r\\n</div>\\r\\n\\r\\n<!-- 중고상품안내 가운데정렬 끝 -->\\r\\n\\r\\n  <img src=\\\"https://calla.hgodo.com/product/used/used-261006-13-01.jpg\\\">\\r\\n\\r\\n</div>",
+    "actualMobile": "<img src=\\\"https://calla.hgodo.com/product/used/used-top-notice.jpg\\\">\\r\\n\\r\\n\\r\\n\\r\\n<!-- 중고상품안내 가운데정렬 -->\\r\\n\\r\\n<div align=\\\"center\\\" style=\\\"padding:20px 0 20px 0; font-size:20px; font-weight:600;\\\">▶ 제품 안내사항 ◀</div>\\r\\n<div align=\\\"center\\\" style=\\\"line-height:23px;; font-size:15px; font-weight:400;\\\">\\r\\n데모용으로 사용했던 제품입니다.<br>\\r\\n거의 사용하지 않았습니다.<br>\\r\\n\\r\\n\\r\\n<br><br><br><br>\\r\\n</div>\\r\\n\\r\\n<!-- 중고상품안내 가운데정렬 끝 -->\\r\\n\\r\\n  <img src=\\\"https://calla.hgodo.com/product/used/used-261006-13-01.jpg\\\">"
+  },
+  {
+    "mall": "wholesale",
+    "goodsNo": "1000008305",
+    "checkedAt": "2026-10-15 04:26:01.403+00",
+    "expected": "  <img src=\"https://calla.hgodo.com/product/used/used-top-notice.jpg\">\n\n\n\n<!-- 중고상품안내 가운데정렬 -->\n\n<div align=\"center\" style=\"padding:20px 0 20px 0; font-size:20px; font-weight:600;\">▶ 제품 안내사항 ◀</div>\n<div align=\"center\" style=\"line-height:23px;; font-size:15px; font-weight:400;\">\n데모용으로 사용했던 제품입니다.<br>\n거의 사용하지 않았습니다.<br>\n\n\n<br><br><br><br>\n</div>\n\n<!-- 중고상품안내 가운데정렬 끝 -->\n\n  <img src=\"https://calla.hgodo.com/product/used/used-261006-13-01.jpg\">",
+    "actualPc": "<div align=\\\"center\\\">\\r\\n<img src=\\\"https://calla.hgodo.com/product/used/used-top-notice.jpg\\\">\\r\\n\\r\\n\\r\\n\\r\\n<!-- 중고상품안내 가운데정렬 -->\\r\\n\\r\\n<div align=\\\"center\\\" style=\\\"padding:20px 0 20px 0; font-size:20px; font-weight:600;\\\">▶ 제품 안내사항 ◀</div>\\r\\n<div align=\\\"center\\\" style=\\\"line-height:23px;; font-size:15px; font-weight:400;\\\">\\r\\n데모용으로 사용했던 제품입니다.<br>\\r\\n거의 사용하지 않았습니다.<br>\\r\\n\\r\\n\\r\\n<br><br><br><br>\\r\\n</div>\\r\\n\\r\\n<!-- 중고상품안내 가운데정렬 끝 -->\\r\\n\\r\\n  <img src=\\\"https://calla.hgodo.com/product/used/used-261006-13-01.jpg\\\">\\r\\n</div>",
+    "actualMobile": "<img src=\\\"https://calla.hgodo.com/product/used/used-top-notice.jpg\\\">\\r\\n\\r\\n\\r\\n\\r\\n<!-- 중고상품안내 가운데정렬 -->\\r\\n\\r\\n<div align=\\\"center\\\" style=\\\"padding:20px 0 20px 0; font-size:20px; font-weight:600;\\\">▶ 제품 안내사항 ◀</div>\\r\\n<div align=\\\"center\\\" style=\\\"line-height:23px;; font-size:15px; font-weight:400;\\\">\\r\\n데모용으로 사용했던 제품입니다.<br>\\r\\n거의 사용하지 않았습니다.<br>\\r\\n\\r\\n\\r\\n<br><br><br><br>\\r\\n</div>\\r\\n\\r\\n<!-- 중고상품안내 가운데정렬 끝 -->\\r\\n\\r\\n  <img src=\\\"https://calla.hgodo.com/product/used/used-261006-13-01.jpg\\\">"
+  }
+]

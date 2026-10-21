@@ -1,0 +1,36 @@
+{
+  "appId": "im.yeseo.calla",
+  "productName": "CALLA",
+  "directories": {
+    "output": "release",
+    "buildResources": "desktop/assets"
+  },
+  "files": [
+    "dist/**/*",
+    "desktop/*.cjs",
+    "desktop/assets/*.png",
+    "package.json",
+    "!node_modules/**/*"
+  ],
+  "asar": true,
+  "npmRebuild": false,
+  "mac": {
+    "category": "public.app-category.productivity",
+    "target": [
+      {
+        "target": "dir",
+        "arch": [
+          "arm64"
+        ]
+      }
+    ],
+    "icon": "desktop/assets/icon.icns",
+    "identity": "-",
+    "hardenedRuntime": false,
+    "minimumSystemVersion": "13.0",
+    "extendInfo": {
+      "NSHumanReadableCopyright": "CALLA",
+      "LSApplicationCategoryType": "public.app-category.productivity"
+    }
+  }
+}

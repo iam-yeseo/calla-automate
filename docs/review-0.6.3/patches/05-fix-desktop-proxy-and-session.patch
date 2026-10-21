@@ -1,0 +1,195 @@
+diff --git a/desktop/main.cjs b/desktop/main.cjs
+index eff91ed19bc3525eb5c8a2fdd4f1c08ae6124d30..0f5714472c7d8a40f087f49c148755ef6bf85243 100644
+--- a/desktop/main.cjs
++++ b/desktop/main.cjs
+@@ -65,13 +65,16 @@
+     if (url.pathname.startsWith('/api/')) {
+       const headers = new Headers();
+       for (const name of ['authorization', 'content-type', 'accept']) if (request.headers.has(name)) headers.set(name, request.headers.get(name));
+-      headers.set('Origin', WEB_ORIGIN);
+       try {
++        const declared = request.headers.get('content-length');
++        if (declared && (!/^\d+$/.test(declared) || Number(declared) > 20 * 1024 * 1024)) return Response.json({ error: '파일이 너무 큽니다.' }, { status: 413 });
+         const body = ['GET', 'HEAD'].includes(request.method) ? undefined : await request.arrayBuffer();
+         if (body?.byteLength > 20 * 1024 * 1024) return Response.json({ error: '파일이 너무 큽니다.' }, { status: 413 });
+         headers.set('Origin', apiOrigin);
+         const response = await fetch(apiOrigin + url.pathname + url.search, { method: request.method, headers, body, redirect: 'error', signal: AbortSignal.timeout(60000) });
+-        return new Response(response.body, { status: response.status, headers: { 'Content-Type': response.headers.get('content-type') || 'application/json', 'Cache-Control': 'no-store' } });
++        const responseHeaders = new Headers({ 'Content-Type': response.headers.get('content-type') || 'application/json', 'Cache-Control': 'no-store' });
++        if (response.headers.has('retry-after')) responseHeaders.set('Retry-After', response.headers.get('retry-after'));
++        return new Response(response.body, { status: response.status, headers: responseHeaders });
+       } catch { return Response.json({ error: '웹 서버에 연결할 수 없습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.' }, { status: 502 }); }
+     }
+     if (request.method !== 'GET' && request.method !== 'HEAD') return new Response('Method not allowed', { status: 405 });
+@@ -97,7 +100,10 @@
+     session.defaultSession.setPermissionCheckHandler(() => false);
+     session.defaultSession.on('will-download', (_event, item) => { item.setSaveDialogOptions({ defaultPath: path.join(app.getPath('downloads'), path.basename(item.getFilename())) }); });
+     if (safeStorage.isEncryptionAvailable()) {
+-      try { storedAuth = JSON.parse(safeStorage.decryptString(await fs.readFile(authFile()))); } catch { storedAuth = {}; }
++      try {
++        const parsed = JSON.parse(safeStorage.decryptString(await fs.readFile(authFile())));
++        storedAuth = parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
++      } catch { storedAuth = {}; }
+     }
+     window = new BrowserWindow({
+       title: 'CALLA', width: 1440, height: 960, minWidth: 1040, minHeight: 700, show: false,
+diff --git a/desktop/tests/main.test.cjs b/desktop/tests/main.test.cjs
+new file mode 100644
+index 0000000000000000000000000000000000000000..fa3f94ca312ad518d20b07f159795f0ba357cefe
+--- /dev/null
++++ b/desktop/tests/main.test.cjs
+@@ -0,0 +1,154 @@
++const { test } = require('node:test');
++const assert = require('node:assert/strict');
++const { readFileSync } = require('node:fs');
++const path = require('node:path');
++const vm = require('node:vm');
++const config = require('../config.cjs');
++
++const mainFile = path.resolve(__dirname, '../main.cjs');
++const source = readFileSync(mainFile, 'utf8');
++const authKey = 'sb-giuqapykceosroauaijq-auth-token';
++
++// Execute the real startup, protocol and IPC handlers without opening windows,
++// using a real keychain, or sending requests to the production service.
++async function launch({ storedJSON = '{}', upstream = () => new Response('{}') } = {}) {
++  const handlers = new Map(), files = new Map(), writes = [], errors = [], requests = [];
++  const authFile = '/fixture/userData/session.enc';
++  files.set(authFile, Buffer.from(storedJSON));
++  let startup, window, protocolHandler;
++  const noop = () => {};
++  const electron = {
++    app: {
++      isPackaged: false, setName: noop, setPath: noop, on: noop, quit: noop,
++      requestSingleInstanceLock: () => true, getAppPath: () => '/fixture/app',
++      getPath: name => '/fixture/' + name, getVersion: () => '0.6.3',
++      whenReady: () => ({ then: callback => (startup = Promise.resolve().then(callback)) }),
++    },
++    BrowserWindow: class {
++      constructor(options) {
++        this.options = options;
++        this.webContents = { mainFrame: { url: config.APP_ORIGIN + '/' }, on: noop, setWindowOpenHandler: noop };
++        window = this;
++      }
++      on() {}
++      once() {}
++      async loadURL(url) { this.loadedURL = url; }
++    },
++    Tray: class { on() {} setToolTip() {} setContextMenu() {} },
++    Menu: { buildFromTemplate: value => value, setApplicationMenu: noop },
++    nativeImage: { createFromPath: () => ({ setTemplateImage: noop }) },
++    ipcMain: { handle: (name, handler) => handlers.set(name, handler), on: noop },
++    protocol: { registerSchemesAsPrivileged: noop, handle: (_scheme, handler) => { protocolHandler = handler; } },
++    session: { defaultSession: { setPermissionRequestHandler: noop, setPermissionCheckHandler: noop, on: noop } },
++    safeStorage: { isEncryptionAvailable: () => true, decryptString: bytes => bytes.toString(), encryptString: value => Buffer.from(value) },
++    dialog: { showErrorBox: (...args) => errors.push(args) },
++    shell: {}, powerSaveBlocker: {}, clipboard: {},
++  };
++  const fs = {
++    readFile: async filename => files.get(filename) || Buffer.from('<!doctype html>'),
++    stat: async () => ({ isFile: () => true }),
++    writeFile: async (filename, data, options) => { writes.push({ filename, options }); files.set(filename, data); },
++    rename: async (from, to) => { files.set(to, files.get(from)); files.delete(from); },
++  };
++  vm.runInNewContext(source, {
++    require: name => {
++      if (name === 'electron') return electron;
++      if (name === 'node:fs/promises') return fs;
++      if (name === './config.cjs') return config;
++      if (name === 'node:path') return path;
++      throw new Error('Unexpected dependency: ' + name);
++    },
++    __dirname: path.dirname(mainFile),
++    process: { env: { CALLA_DESKTOP_TEST: '1', CALLA_TEST_API_ORIGIN: 'http://127.0.0.1:32123' } },
++    URL, Headers, Response, AbortSignal,
++    fetch: async (url, options) => { requests.push({ url, ...options }); return upstream(url, options); },
++  }, { filename: mainFile });
++  await startup;
++  assert.deepEqual(errors, []);
++  assert.equal(window.loadedURL, config.APP_ORIGIN + '/');
++  const event = { sender: window.webContents, senderFrame: window.webContents.mainFrame };
++  return {
++    request: protocolHandler, requests, writes, window,
++    storage: (...args) => handlers.get('desktop:storage')(event, ...args),
++    saved: () => JSON.parse(files.get(authFile).toString()),
++  };
++}
++
++test('API proxy preserves retry timing while keeping both header allowlists narrow', async () => {
++  for (const status of [429, 409]) {
++    const app = await launch({ upstream: () => new Response('{"waiting":true}', {
++      status, headers: { 'content-type': 'application/problem+json', 'retry-after': '17', 'cache-control': 'public', 'set-cookie': 'private=1', 'x-upstream-secret': 'private' },
++    }) });
++    const response = await app.request(new Request('calla://app/api/godomall/execute?step=1', {
++      headers: { authorization: 'Bearer fixture', accept: 'application/json', 'content-type': 'application/json', cookie: 'renderer=1', origin: 'https://untrusted.test', 'x-untrusted': '1' },
++    }));
++    assert.equal(response.status, status);
++    assert.equal(await response.text(), '{"waiting":true}');
++    assert.deepEqual(Object.fromEntries(response.headers), { 'cache-control': 'no-store', 'content-type': 'application/problem+json', 'retry-after': '17' });
++    assert.equal(app.requests.length, 1);
++    assert.equal(app.requests[0].url, 'http://127.0.0.1:32123/api/godomall/execute?step=1');
++    assert.equal(app.requests[0].redirect, 'error');
++    assert.deepEqual(Object.fromEntries(app.requests[0].headers), { accept: 'application/json', authorization: 'Bearer fixture', 'content-type': 'application/json', origin: 'http://127.0.0.1:32123' });
++  }
++});
++
++test('API proxy does not invent a retry header when the upstream omits one', async () => {
++  const app = await launch();
++  const response = await app.request(new Request('calla://app/api/me'));
++  assert.equal(response.status, 200);
++  assert.equal(response.headers.get('retry-after'), null);
++});
++
++test('declared oversized or invalid API bodies are rejected before buffering or fetching', async () => {
++  const app = await launch();
++  for (const length of [String(20 * 1024 * 1024 + 1), '-1', 'invalid']) {
++    const response = await app.request({
++      url: 'calla://app/api/upload', method: 'POST', headers: new Headers({ 'content-length': length }),
++      arrayBuffer: async () => { assert.fail('body must not be consumed'); },
++    });
++    assert.equal(response.status, 413);
++  }
++  assert.equal(app.requests.length, 0);
++});
++
++test('actual body size is still checked when content-length is missing or understated', async () => {
++  const app = await launch();
++  for (const headers of [{}, { 'content-length': '1' }]) {
++    const response = await app.request({
++      url: 'calla://app/api/upload', method: 'POST', headers: new Headers(headers),
++      arrayBuffer: async () => new ArrayBuffer(20 * 1024 * 1024 + 1),
++    });
++    assert.equal(response.status, 413);
++  }
++  assert.equal(app.requests.length, 0);
++});
++
++test('a body at the declared size limit remains accepted', async () => {
++  const app = await launch();
++  const body = new ArrayBuffer(20 * 1024 * 1024);
++  const response = await app.request({
++    url: 'calla://app/api/upload', method: 'POST', headers: new Headers({ 'content-length': String(body.byteLength) }),
++    arrayBuffer: async () => body,
++  });
++  assert.equal(response.status, 200);
++  assert.equal(app.requests[0].body, body);
++});
++
++test('valid non-object saved JSON permits startup and later session writes', async () => {
++  for (const value of ['x', [], [1], 42, true, null]) {
++    const app = await launch({ storedJSON: JSON.stringify(value) });
++    assert.equal(await app.storage('get', authKey), null);
++    await app.storage('set', authKey, 'new-session');
++    assert.equal(await app.storage('get', authKey), 'new-session');
++    assert.deepEqual(app.saved(), { [authKey]: 'new-session' });
++    assert.equal(app.writes[0].options.mode, 0o600);
++  }
++});
++
++test('existing object sessions survive startup and subsequent session writes', async () => {
++  const verifierKey = authKey + '-code-verifier';
++  const app = await launch({ storedJSON: JSON.stringify({ [authKey]: 'existing', [verifierKey]: 'verifier' }) });
++  assert.equal(await app.storage('get', authKey), 'existing');
++  await app.storage('set', authKey, 'updated');
++  assert.deepEqual(app.saved(), { [authKey]: 'updated', [verifierKey]: 'verifier' });
++});

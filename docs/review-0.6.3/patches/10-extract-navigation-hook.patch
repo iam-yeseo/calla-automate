@@ -1,0 +1,157 @@
+diff --git a/src/App.tsx b/src/App.tsx
+index 1a2572e0ca9f05de06d0091f20a3bebe88a56d79..22c09b396d3078d91379fd7dc8d7b540094e2ea7 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -9,7 +9,7 @@
+ import ProductEditor from './ProductEditor';
+ import ProductThumbnail from './ProductThumbnail';
+ import OriginInput from './OriginInput';
+-import { installHistoryMouseButtons } from './navigation';
++import { useNavigation } from './use-navigation';
+ import GodomallPage, { ApiRegistration, RegistrationSummary } from './Godomall';
+ import CategorySelect from './CategorySelect';
+ import Settings from './Settings';
+@@ -19,18 +19,13 @@
+ import CreateList from './CreateList';
+ import { DateInput } from './DateInput';
+ import { desktop } from './desktop';
+-type Route={page:string;listId:string|null;view:boolean};
+-function readRoute():Route{const path=location.pathname.split('/').filter(Boolean)[0]||'requests';return {page:['edit','view','requests'].includes(path)?'requests':path,listId:new URLSearchParams(location.search).get('list'),view:path==='view'};}
+ const TITLES:Record<string,string>={requests:'등록 요청 상품',automation:'자동 상품 등록',catalog:'상품 인덱싱',goods:'상품 조회',categories:'카테고리와 브랜드',folders:'서버 이미지 폴더',sync:'동기화',admin:'사용자 계정 관리'};
+ const statusLabel={pending:'등록 대기',running:'진행 중',warning:'확인 필요',success:'작업 완료'};
+-const HISTORY_KEY='__callaHistoryIndex';
+ const PAGE_SIZES=[10,20,30,50,100] as const;
+ function savedPageSize(){try{const value=Number(localStorage.getItem('calla-request-page-size'));return PAGE_SIZES.some(size=>size===value)?value:20;}catch{return 20;}}
+-const currentUrl=()=>location.pathname+location.search+location.hash;
+-const historyIndex=(state:unknown):number|null=>{const value=(state as Record<string,unknown>|null)?.[HISTORY_KEY];return typeof value==='number'&&Number.isFinite(value)?value:null;};
+ export default function App(){
+  const [user,setUser]=useState<User|null>(null),[booting,setBooting]=useState(true),[authError,setAuthError]=useState('');
+- const [route,setRoute]=useState(readRoute),[lists,setLists]=useState<ProductList[]>([]),[settings,setSettings]=useState<SettingsData|null>(null),[revision,setRevision]=useState('');
++ const [lists,setLists]=useState<ProductList[]>([]),[settings,setSettings]=useState<SettingsData|null>(null),[revision,setRevision]=useState('');
+  const [list,setList]=useState<ProductList|null>(null),[items,setItems]=useState<Product[]>([]),[registrations,setRegistrations]=useState<Registration[]>([]),[baseIds,setBaseIds]=useState<string[]>([]),[pendingFiles,setPendingFiles]=useState<Record<string,File>>({});
+  const [loading,setLoading]=useState(false),[error,setError]=useState(''),[toast,setToast]=useState(''),[dirty,setDirty]=useState(false),[saving,setSaving]=useState(false);
+  const [query,setQuery]=useState(''),[filter,setFilter]=useState('all'),[page,setPage]=useState(1),[selected,setSelected]=useState<string[]>([]),[editing,setEditing]=useState<Product|null>(null),[creating,setCreating]=useState(false),[bulk,setBulk]=useState(false),[confirm,setConfirm]=useState<{title:string;description:string;action:()=>Promise<void>}|null>(null);
+@@ -38,54 +33,22 @@
+  const [automationSelection,setAutomationSelection]=useState<{listId:string;itemIds:string[]}|undefined>();
+  const [apiProduct,setApiProduct]=useState<Product|null>(null);
+  const [perPage,setPerPage]=useState(savedPageSize);
+- const historyCommand=useRef<(direction:-1|1)=>void>(()=>{});
+  const [catalog,setCatalog]=useState<Product[]>([]),[catalogOffset,setCatalogOffset]=useState(0),[catalogNext,setCatalogNext]=useState<number|null>(null);
+  const [reloadKey,setReloadKey]=useState(0),[confirmBusy,setConfirmBusy]=useState(false),[duplicating,setDuplicating]=useState(false);
+  const savingLock=useRef(false),confirmLock=useRef(false),duplicateLock=useRef(false),creatingLock=useRef(false);
+- const navigation=useRef({index:historyIndex(history.state)??0,url:currentUrl()});
+- const restoring=useRef<{after:()=>void}|null>(null),allowedTraversal=useRef<number|null>(null),popHandler=useRef<(event:PopStateEvent)=>void>(()=>{});
+  const [syncAt,setSyncAt]=useState(''),[registrationBusy,setRegistrationBusy]=useState(false);
+  const uploadCache=useRef(new Map<string,{file:File;upload:Record<string,unknown>}>());
+  const importRef=useRef<HTMLInputElement>(null);const loadRevision=useRef(0),toastTimer=useRef<ReturnType<typeof setTimeout>|undefined>(undefined);
+  const desktopCommand=useRef<(command:string)=>void>(()=>{});
+- const admin=user?.role==='admin',editable=admin&&!route.view,accountPage=route.page==='admin';
+  const notify=useCallback((message:string)=>{setToast(message);clearTimeout(toastTimer.current);toastTimer.current=setTimeout(()=>setToast(''),5000);},[]);
+  useEffect(()=>()=>clearTimeout(toastTimer.current),[]);
+  const loadUser=useCallback(async()=>{setBooting(true);try{setUser(await currentUser());setAuthError('');}catch(e){setUser(null);if((e as Error).message!=='로그인이 필요합니다.')setAuthError((e as Error).message);}finally{setBooting(false);}},[]);
+  useEffect(()=>{if(DEMO){setBooting(false);return;}void loadUser();},[loadUser]);
+- useEffect(()=>{const handler=(e:BeforeUnloadEvent)=>{if(dirty||registrationBusy||savingLock.current||confirmLock.current||duplicateLock.current||creatingLock.current){e.preventDefault();e.returnValue='';}};window.addEventListener('beforeunload',handler);return()=>window.removeEventListener('beforeunload',handler);},[dirty,registrationBusy]);
+- useEffect(()=>{history.replaceState({...history.state,[HISTORY_KEY]:navigation.current.index},'',navigation.current.url);const handler=(event:PopStateEvent)=>popHandler.current(event);window.addEventListener('popstate',handler);return()=>window.removeEventListener('popstate',handler);},[]);
+- useEffect(()=>installHistoryMouseButtons(window,direction=>historyCommand.current(direction)),[]);
+- historyCommand.current=direction=>{if(restoring.current||savingLock.current||confirmLock.current||duplicateLock.current||creatingLock.current||registrationBusy||document.querySelector('dialog[open]'))return;history.go(direction);};
++ const {route,go,requestDiscard,historyCommand,restoring}=useNavigation({dirty,registrationBusy,savingLock,confirmLock,duplicateLock,creatingLock,clearDraft,setConfirm,onNavigate:nextRoute=>{
++  if(nextRoute.page!=='automation')setAutomationSelection(undefined);setQuery('');setFilter('all');setPage(1);setCatalogOffset(0);setSelected([]);setMetaOpen(false);setCatalogSelected(null);setConfirm(null);setError('');setReloadKey(n=>n+1);
++ }});
++ const admin=user?.role==='admin',editable=admin&&!route.view,accountPage=route.page==='admin';
+  function clearDraft(){setDirty(false);setPendingFiles({});uploadCache.current.clear();setEditing(null);setBulk(false);}
+- function applyNavigation(index:number){navigation.current={index,url:currentUrl()};clearDraft();setRoute(readRoute());if(readRoute().page!=='automation')setAutomationSelection(undefined);setQuery('');setFilter('all');setPage(1);setCatalogOffset(0);setSelected([]);setMetaOpen(false);setCatalogSelected(null);setConfirm(null);setError('');setReloadKey(n=>n+1);}
+- function requestDiscard(action:()=>void,description='페이지를 이동하면 현재 초안이 사라집니다. 변경사항을 버리고 이동할까요?'){
+-  if(registrationBusy||savingLock.current||confirmLock.current||duplicateLock.current||creatingLock.current||restoring.current)return;
+-  if(dirty)setConfirm({title:'저장하지 않은 변경사항이 있습니다',description,action:async()=>action()});else action();
+- }
+- popHandler.current=event=>{
+-  const previous=navigation.current,targetUrl=currentUrl();let targetIndex=historyIndex(event.state);
+-  if(restoring.current){
+-   if(targetIndex===previous.index){const after=restoring.current.after;restoring.current=null;after();}
+-   else if(targetIndex!==null)history.go(previous.index-targetIndex);
+-   return;
+-  }
+-  if(allowedTraversal.current!==null&&targetIndex===allowedTraversal.current){allowedTraversal.current=null;applyNavigation(targetIndex);return;}
+-  const blocked=registrationBusy||savingLock.current||confirmLock.current||duplicateLock.current||creatingLock.current||!!document.querySelector('dialog[open]');
+-  if(!dirty&&!blocked){targetIndex??=previous.index-1;history.replaceState({...history.state,[HISTORY_KEY]:targetIndex},'',targetUrl);applyNavigation(targetIndex);return;}
+-  // Restore the accepted entry before asking. Cancelling never changes the draft or URL.
+-  const after=()=>{if(blocked)return;requestDiscard(()=>{allowedTraversal.current=targetIndex;setConfirm(null);history.go(targetIndex!-previous.index);});};
+-  if(targetIndex===null||targetIndex===previous.index){
+-   // Older entries created before this app session do not have an index yet.
+-   targetIndex=previous.index-1;history.replaceState({...history.state,[HISTORY_KEY]:targetIndex},'',targetUrl);
+-   history.pushState({[HISTORY_KEY]:previous.index},'',previous.url);after();
+-  }else{restoring.current={after};history.go(previous.index-targetIndex);}
+- };
+- function go(pageName:string,id?:string){
+-  const url=id?`/edit/?list=${encodeURIComponent(id)}`:pageName==='requests'?'/':`/${pageName}/`;
+-  if(url===navigation.current.url)return;
+-  requestDiscard(()=>{const index=navigation.current.index+1;history.pushState({[HISTORY_KEY]:index},'',url);applyNavigation(index);});
+- }
+  function reload(){requestDiscard(()=>{clearDraft();setConfirm(null);setError('');setReloadKey(n=>n+1);},'다시 불러오면 저장하지 않은 초안이 사라집니다. 변경사항을 버리고 최신 데이터를 불러올까요?');}
+  async function runConfirmation(){if(!confirm||confirmLock.current)return;confirmLock.current=true;setConfirmBusy(true);try{await confirm.action();}catch(e){notify((e as Error).message);}finally{confirmLock.current=false;setConfirmBusy(false);}}
+  const loadLists=useCallback(async()=>{const result=await api<{lists:ProductList[]}>('/lists');setLists(result.lists);setSyncAt(new Date().toISOString());},[]);
+diff --git a/src/use-navigation.ts b/src/use-navigation.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..a98cf5364ff1579ad320c12c06477db513ca01c8
+--- /dev/null
++++ b/src/use-navigation.ts
+@@ -0,0 +1,59 @@
++import { useEffect, useRef, useState, type RefObject } from 'react';
++import { installHistoryMouseButtons } from './navigation';
++
++type Route={page:string;listId:string|null;view:boolean};
++function readRoute():Route{const path=location.pathname.split('/').filter(Boolean)[0]||'requests';return {page:['edit','view','requests'].includes(path)?'requests':path,listId:new URLSearchParams(location.search).get('list'),view:path==='view'};}
++type Options={
++ dirty:boolean;
++ registrationBusy:boolean;
++ savingLock:RefObject<boolean>;
++ confirmLock:RefObject<boolean>;
++ duplicateLock:RefObject<boolean>;
++ creatingLock:RefObject<boolean>;
++ clearDraft:()=>void;
++ setConfirm:(confirmation:{title:string;description:string;action:()=>Promise<void>}|null)=>void;
++ onNavigate:(route:Route)=>void;
++};
++const HISTORY_KEY='__callaHistoryIndex';
++const currentUrl=()=>location.pathname+location.search+location.hash;
++const historyIndex=(state:unknown):number|null=>{const value=(state as Record<string,unknown>|null)?.[HISTORY_KEY];return typeof value==='number'&&Number.isFinite(value)?value:null;};
++
++export function useNavigation({dirty,registrationBusy,savingLock,confirmLock,duplicateLock,creatingLock,clearDraft,setConfirm,onNavigate}:Options){
++ const [route,setRoute]=useState(readRoute);
++ const historyCommand=useRef<(direction:-1|1)=>void>(()=>{});
++ const navigation=useRef({index:historyIndex(history.state)??0,url:currentUrl()});
++ const restoring=useRef<{after:()=>void}|null>(null),allowedTraversal=useRef<number|null>(null),popHandler=useRef<(event:PopStateEvent)=>void>(()=>{});
++ useEffect(()=>{const handler=(e:BeforeUnloadEvent)=>{if(dirty||registrationBusy||savingLock.current||confirmLock.current||duplicateLock.current||creatingLock.current){e.preventDefault();e.returnValue='';}};window.addEventListener('beforeunload',handler);return()=>window.removeEventListener('beforeunload',handler);},[dirty,registrationBusy]);
++ useEffect(()=>{history.replaceState({...history.state,[HISTORY_KEY]:navigation.current.index},'',navigation.current.url);const handler=(event:PopStateEvent)=>popHandler.current(event);window.addEventListener('popstate',handler);return()=>window.removeEventListener('popstate',handler);},[]);
++ useEffect(()=>installHistoryMouseButtons(window,direction=>historyCommand.current(direction)),[]);
++ historyCommand.current=direction=>{if(restoring.current||savingLock.current||confirmLock.current||duplicateLock.current||creatingLock.current||registrationBusy||document.querySelector('dialog[open]'))return;history.go(direction);};
++ function applyNavigation(index:number){navigation.current={index,url:currentUrl()};clearDraft();setRoute(readRoute());onNavigate(readRoute());}
++ function requestDiscard(action:()=>void,description='페이지를 이동하면 현재 초안이 사라집니다. 변경사항을 버리고 이동할까요?'){
++  if(registrationBusy||savingLock.current||confirmLock.current||duplicateLock.current||creatingLock.current||restoring.current)return;
++  if(dirty)setConfirm({title:'저장하지 않은 변경사항이 있습니다',description,action:async()=>action()});else action();
++ }
++ popHandler.current=event=>{
++  const previous=navigation.current,targetUrl=currentUrl();let targetIndex=historyIndex(event.state);
++  if(restoring.current){
++   if(targetIndex===previous.index){const after=restoring.current.after;restoring.current=null;after();}
++   else if(targetIndex!==null)history.go(previous.index-targetIndex);
++   return;
++  }
++  if(allowedTraversal.current!==null&&targetIndex===allowedTraversal.current){allowedTraversal.current=null;applyNavigation(targetIndex);return;}
++  const blocked=registrationBusy||savingLock.current||confirmLock.current||duplicateLock.current||creatingLock.current||!!document.querySelector('dialog[open]');
++  if(!dirty&&!blocked){targetIndex??=previous.index-1;history.replaceState({...history.state,[HISTORY_KEY]:targetIndex},'',targetUrl);applyNavigation(targetIndex);return;}
++  // Restore the accepted entry before asking. Cancelling never changes the draft or URL.
++  const after=()=>{if(blocked)return;requestDiscard(()=>{allowedTraversal.current=targetIndex;setConfirm(null);history.go(targetIndex!-previous.index);});};
++  if(targetIndex===null||targetIndex===previous.index){
++   // Older entries created before this app session do not have an index yet.
++   targetIndex=previous.index-1;history.replaceState({...history.state,[HISTORY_KEY]:targetIndex},'',targetUrl);
++   history.pushState({[HISTORY_KEY]:previous.index},'',previous.url);after();
++  }else{restoring.current={after};history.go(previous.index-targetIndex);}
++ };
++ function go(pageName:string,id?:string){
++  const url=id?`/edit/?list=${encodeURIComponent(id)}`:pageName==='requests'?'/':`/${pageName}/`;
++  if(url===navigation.current.url)return;
++  requestDiscard(()=>{const index=navigation.current.index+1;history.pushState({[HISTORY_KEY]:index},'',url);applyNavigation(index);});
++ }
++ return {route,go,requestDiscard,historyCommand,restoring};
++}

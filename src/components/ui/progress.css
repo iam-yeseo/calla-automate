@@ -1,0 +1,11 @@
+.calla-progress { display: grid; gap: 12px; padding: 18px 20px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+.calla-progress-heading, .calla-progress-caption { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
+.calla-progress-heading { font-size: 14px; }
+.calla-progress-heading > span { color: var(--brand-strong); font-weight: 600; font-variant-numeric: tabular-nums; }
+.calla-progress-track { overflow: hidden; height: 6px; border-radius: 4px; background: var(--border); box-shadow: inset 0 0 0 1px #00000004; }
+.calla-progress-indicator { display: block; height: 100%; border-radius: inherit; background: var(--brand); transition: width 350ms ease; }
+.calla-progress-caption { color: var(--secondary); font-size: 12px; }
+.calla-progress-caption > :last-child { text-align: right; }
+.calla-progress[data-paused] .calla-progress-caption > :last-child { color: var(--brand-strong); }
+@media (max-width: 600px) { .calla-progress-caption { align-items: flex-start; flex-direction: column; gap: 4px; } .calla-progress-caption > :last-child { text-align: left; } }
+@media (prefers-reduced-motion: reduce) { .calla-progress-indicator { transition: none; } }

@@ -290,6 +290,20 @@
         "active": true
       },
       {
+        "code": "007005001",
+        "name": "ColorEdge 모니터",
+        "parentCode": "007005",
+        "folder": "",
+        "active": true
+      },
+      {
+        "code": "007005002",
+        "name": "FlexScan 모니터",
+        "parentCode": "007005",
+        "folder": "",
+        "active": true
+      },
+      {
         "code": "007003",
         "name": "SPYDER 색교정장비",
         "parentCode": "007",
@@ -720,6 +734,20 @@
         "code": "018005",
         "name": "기타브랜드",
         "parentCode": "018",
+        "folder": "",
+        "active": true
+      },
+      {
+        "code": "018005001",
+        "name": "7RYMS 세븐림스",
+        "parentCode": "018005",
+        "folder": "",
+        "active": true
+      },
+      {
+        "code": "018005002",
+        "name": "COMICA 코미카",
+        "parentCode": "018005",
         "folder": "",
         "active": true
       },
@@ -1344,6 +1372,13 @@
       {
         "code": "009006",
         "name": "BOLIN",
+        "parentCode": "009",
+        "folder": "",
+        "active": true
+      },
+      {
+        "code": "009008",
+        "name": "세트 상품",
         "parentCode": "009",
         "folder": "",
         "active": true
@@ -1980,6 +2015,7 @@
     "thor",
     "tilta",
     "tripod",
+    "used",
     "videolight"
   ],
   "brands": [

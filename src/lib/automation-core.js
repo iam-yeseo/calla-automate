@@ -41,13 +41,13 @@ var AutomationCore = (function () {
      결과는 항상 텍스트로만 출력해야 하며 DOM에 그대로 삽입하지 않습니다. */
   var ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ' };
   function decodeEntities(text) {
-    return String(text).replace(/&(#x?[0-9a-fA-F]+|[a-zA-Z]+);/g, function (whole, body) {
+    return String(text).replace(/&(#(?:[xX][0-9a-fA-F]+|[0-9]+)|[a-zA-Z][a-zA-Z0-9]*);/g, function (whole, body) {
       if (body.charAt(0) === '#') {
         var code = body.charAt(1) === 'x' || body.charAt(1) === 'X' ? parseInt(body.slice(2), 16) : parseInt(body.slice(1), 10);
-        if (!isFinite(code) || code < 1 || code > 0x10ffff) return whole;
+        if (!isFinite(code) || code < 1 || code > 0x10ffff || (code >= 0xd800 && code <= 0xdfff)) return whole;
         try { return String.fromCodePoint(code); } catch (e) { return whole; }
       }
-      var named = ENTITIES[body.toLowerCase()];
+      var key = body.toLowerCase(), named = Object.prototype.hasOwnProperty.call(ENTITIES, key) ? ENTITIES[key] : undefined;
       return named === undefined ? whole : named;
     });
   }
@@ -71,17 +71,76 @@ var AutomationCore = (function () {
       .replace(/<[^>]*>/g, '');
     return decodeEntities(text).replace(/\s+/g, ' ').trim();
   }
+  /* Only a standalone, styled leading text fragment is a legacy prefix.
+     Whole-name wrappers, nested markup and unknown attributes remain raw. */
+  function namePrefix(value) {
+    var raw = String(value == null ? '' : value), fallback = { enabled: false, text: '', name: raw };
+    var match = /^\s*<(font|span)\s+([^>]+)>([^<>]+)<\/\1\s*>\s*([\s\S]+)$/i.exec(raw);
+    if (!match || !match[4].trim()) return fallback;
+    var attributes = match[2].trim(), color = '(?:#[0-9a-f]{3,8}|[a-z]+)';
+    var styled = match[1].toLowerCase() === 'font'
+      ? new RegExp('^color\\s*=\\s*(?:"' + color + '"|\'' + color + '\'|' + color + ')$', 'i').test(attributes)
+      : new RegExp('^style\\s*=\\s*(["\'])\\s*color\\s*:\\s*' + color + '\\s*;?\\s*\\1$', 'i').test(attributes);
+    // Check the original tokens once. Unknown or incomplete entities must not
+    // become literal text after re-escaping; &amp;trade; intentionally stays
+    // the literal text "&trade;" and must not be decoded a second time.
+    var entities = match[3].match(/&(?:#[^;\s&]*|[a-zA-Z][a-zA-Z0-9]*);?/g) || [];
+    if (entities.some(function (entity) { return decodeEntities(entity) === entity; })) return fallback;
+    var text = decodeEntities(match[3]);
+    if (!styled || !text.trim() || text.length > 80) return fallback;
+    return { enabled: true, text: text, name: match[4] };
+  }
+  function withNamePrefix(name, prefix) {
+    if (!prefix || !prefix.enabled || !String(prefix.text || '').trim()) return String(name || '');
+    return '<font color="#EF4036">' + htmlAttribute(String(prefix.text).trim()) + '</font> ' + String(name || '');
+  }
+  function originCountry(value) {
+    var country = String(value == null ? '' : value).trim().replace(/^made\s+in(?:\s+|$)/i, '').trim();
+    var aliases = { '대한민국': 'Korea', '한국': 'Korea', '국산': 'Korea', '국내산': 'Korea', 'korea': 'Korea', 'south korea': 'Korea', 'republic of korea': 'Korea', '중국': 'China', 'china': 'China', 'prc': 'China', '일본': 'Japan', 'japan': 'Japan', '미국': 'USA', 'usa': 'USA', 'us': 'USA', 'u.s.a.': 'USA', 'united states': 'USA', 'united states of america': 'USA' };
+    return Object.prototype.hasOwnProperty.call(aliases, country.toLowerCase()) ? aliases[country.toLowerCase()] : country;
+  }
+  function originIssue(value) {
+    if (!String(value == null ? '' : value).trim()) return '';
+    var country = originCountry(value);
+    return /^[A-Za-z]+(?:[ '-][A-Za-z]+)*$/.test(country) && !/^made\s+in\b/i.test(country) ? '' : '원산지는 영어 국가명만 입력해 주세요. 예: Germany';
+  }
+  function normalizeOrigin(value) {
+    var raw = String(value == null ? '' : value).trim(), country = originCountry(raw);
+    // Unknown legacy values remain visible for correction instead of being silently lost.
+    return raw && !originIssue(raw) ? 'Made in ' + country : raw;
+  }
+  function wholesaleRegularPrice(item) {
+    var config = item && item.automation && item.automation.wholesaleRegularPrice;
+    var value = config && config.mode === 'manual' ? config.value : item && item.price_retail;
+    return value == null ? null : value;
+  }
   function normalize(value) {
     var a = value && typeof value === 'object' && !Array.isArray(value) ? clone(value) : {};
     a.categoryCodes = Object.assign({ retail: '', wholesale: '' }, a.categoryCodes);
+    var selections = a.categorySelections && typeof a.categorySelections === 'object' ? a.categorySelections : {};
+    a.categorySelections = {};
+    ['retail', 'wholesale'].forEach(function (mall) {
+      var codes = Array.isArray(selections[mall]) ? selections[mall].filter(function (code) { return typeof code === 'string' && code.trim(); }).map(function (code) { return code.trim(); }) : [];
+      var primary = typeof a.categoryCodes[mall] === 'string' ? a.categoryCodes[mall].trim() : '';
+      // Older clients can still change categoryCodes. Replace the primary slot
+      // while retaining explicitly added categories in their original order.
+      if (primary) codes = [primary].concat(codes.slice(codes.length ? 1 : 0));
+      codes = Array.from(new Set(codes));
+      a.categorySelections[mall] = codes;
+      a.categoryCodes[mall] = codes[0] || '';
+    });
     a.detailImages = Array.isArray(a.detailImages) ? a.detailImages : [];
+    if (Array.isArray(a.detailBlocks)) a.detailImages = a.detailBlocks.filter(function (b) { return b.type === 'image'; }).map(function (b) { return b.image; });
+    a.stock = Object.assign({ mode: 'unlimited', quantity: 0 }, a.stock);
     a.generator = Object.assign({ brand: '', product: '', folder: '', extension: 'jpg', count: 1 }, a.generator);
     /* 생성용 브랜드·모델명은 기본 설정값을 따르고 '직접 입력'일 때만 따로 보관합니다.
        기존 데이터는 값이 남아 있으면 직접 입력으로 봅니다. */
     a.generator.brandManual = typeof a.generator.brandManual === 'boolean' ? a.generator.brandManual : !!a.generator.brand;
     a.generator.productManual = typeof a.generator.productManual === 'boolean' ? a.generator.productManual : !!a.generator.product;
     a.naverNameMode = a.naverNameMode === 'manual' ? 'manual' : 'auto';
-    a.origin = typeof a.origin === 'string' ? a.origin.trim() : '';
+    a.origin = normalizeOrigin(a.origin);
+    var wholesalePrice = a.wholesaleRegularPrice;
+    a.wholesaleRegularPrice = wholesalePrice && wholesalePrice.mode === 'manual' ? { mode: 'manual', value: wholesalePrice.value == null ? null : wholesalePrice.value } : { mode: 'retail', value: null };
     a.schemaVersion = 1;
     return a;
   }
@@ -152,16 +211,47 @@ var AutomationCore = (function () {
     if (!v || v.url !== imageUrl(image) || v.status === 'checking') return { status: 'unchecked' };
     return clone(v);
   }
+  function detailBlocks(a) {
+    if (Array.isArray(a.detailBlocks)) return a.detailBlocks;
+    if (a.detailImages && a.detailImages.length) return a.detailImages.map(function (image, index) { return { id: image.id || 'image-' + index, type: 'image', image: image }; });
+    return a.detailHtml ? [{ id: 'existing-html', type: 'text', text: a.detailHtml }] : [];
+  }
+  function detailHtml(a) {
+    var blocks = detailBlocks(a), parts = [], images = [];
+    if (blocks.some(function (b) { return b.type === 'image' && (!imageUrl(b.image) || imageLinkIssue(b.image)); })) return '';
+    function flush() { if (images.length) { parts.push(html(images)); images = []; } }
+    blocks.forEach(function (b) {
+      if (b.type === 'image') images.push(b.image);
+      else { flush(); parts.push(b.text); } // Raw code/text must never be trimmed, escaped or rendered here.
+    });
+    flush();
+    return parts.join('');
+  }
+  function withDetailBlocks(a, blocks) {
+    var next = Object.assign({}, a, { detailBlocks: blocks, detailImages: blocks.filter(function (b) { return b.type === 'image'; }).map(function (b) { return b.image; }) });
+    next.detailHtml = detailHtml(next);
+    return next;
+  }
+  function stockIssue(a) {
+    var stock = a.stock || { mode: 'unlimited', quantity: 0 };
+    if (!['unlimited', 'limited'].includes(stock.mode)) return '판매 재고 설정을 확인해 주세요.';
+    return !Number.isSafeInteger(stock.quantity) || stock.quantity < 0 ? '상품 재고는 0 이상의 정수로 입력해 주세요.' : '';
+  }
   function readyIssues(item, settings) {
     var a = normalize(item.automation), issues = [];
     ['retail', 'wholesale'].forEach(function (store) {
       if (item['need_' + store] !== '필요') return;
-      var c = settings.categories[store].find(function (c) { return c.code === a.categoryCodes[store]; });
-      if (!c || c.active === false) issues.push((store === 'retail' ? '소매몰' : '도매몰') + ' 카테고리 미선택 또는 사용 중지');
+      var codes = a.categorySelections[store];
+      if (!codes.length || codes.some(function (code) { var c = settings.categories[store].find(function (c) { return c.code === code; }); return !c || c.active === false; })) issues.push((store === 'retail' ? '소매몰' : '도매몰') + ' 카테고리 미선택 또는 사용 중지');
     });
-    if (!item.name_own) issues.push('자사몰 상품명 미입력');
+    if (!String(item.name_own || '').trim()) issues.push('자사몰 상품명 미입력');
     if (!item.image_url && !(item.done && a.thumbnail && a.thumbnail.deletedAt)) issues.push('썸네일 미등록');
-    if (!a.detailImages.length) issues.push('상세 이미지 미등록');
+    if (stockIssue(a)) issues.push(stockIssue(a));
+    if (originIssue(a.origin)) issues.push(originIssue(a.origin));
+    var wholesalePrice = wholesaleRegularPrice(item);
+    if (wholesalePrice != null && (!Number.isSafeInteger(wholesalePrice) || wholesalePrice < 0)) issues.push('도매 정가는 0 이상의 정수로 입력해 주세요.');
+    var blocks = detailBlocks(a);
+    if (!blocks.length || !blocks.some(function (b) { return b.type === 'image' || b.text.trim(); })) issues.push('상세 이미지 또는 텍스트 미등록');
     a.detailImages.forEach(function (img, i) {
       if (imageLinkIssue(img)) issues.push((i + 1) + '번 이미지 ' + imageLinkIssue(img));
       if (!imageUrl(img)) issues.push((i + 1) + '번 이미지 주소 형식 오류');
@@ -170,13 +260,17 @@ var AutomationCore = (function () {
     return issues;
   }
   function exportItem(item, settings) {
-    var a = normalize(item.automation), brand = matchBrand(settings.brands, item.brand);
-    return Object.assign({}, item, { automation: undefined, brand_custom: undefined, link_np: undefined, content: undefined, categoryCodes: a.categoryCodes, origin: a.origin,
-      brandCode: brand ? brand.code : '', brandRegistered: !!brand,
+    var a = normalize(item.automation), brand = matchBrand(settings.brands, item.brand), brandCodes = {};
+    ['retail', 'wholesale'].forEach(function (mall) {
+      var brands = (settings.brandsByMall || {})[mall] || [], explicit = (a.brandCodes || {})[mall], matches = brands.filter(function (b) { return brandKey(b.name) === brandKey(item.brand); });
+      brandCodes[mall] = explicit !== undefined ? (brands.some(function (b) { return b.code === explicit; }) ? explicit : '') : matches.length === 1 ? matches[0].code : '';
+    });
+    return Object.assign({}, item, { automation: undefined, brand_custom: undefined, link_np: undefined, content: undefined, categoryCodes: a.categoryCodes, categorySelections: clone(a.categorySelections), origin: a.origin, stock: clone(a.stock), price_wholesale_regular: wholesaleRegularPrice(item), wholesaleRegularPrice: clone(a.wholesaleRegularPrice),
+      brandCode: brand ? brand.code : '', brandRegistered: !!brand, brandCodes: brandCodes,
       categoryPaths: { retail: path(settings.categories.retail, a.categoryCodes.retail), wholesale: path(settings.categories.wholesale, a.categoryCodes.wholesale) },
       thumbnail: Object.assign({}, a.thumbnail, { url: item.image_url || '' }),
       detailImages: a.detailImages.map(function (img, i) { return { order: i + 1, folder: img.folder, filename: img.filename, url: imageUrl(img), linkEnabled: img.linkEnabled === true, linkUrl: String(img.linkUrl || ''), validation: validation(img) }; }),
-      detailHtml: html(a.detailImages), issues: readyIssues(item, settings) });
+      detailBlocks: clone(detailBlocks(a)), detailHtml: detailHtml(a), issues: readyIssues(item, settings) });
   }
   function validateSettings(s) {
     if (!s || !s.categories || !Array.isArray(s.folders)) throw new Error('설정 형식이 올바르지 않습니다.');
@@ -218,6 +312,6 @@ var AutomationCore = (function () {
     });
     return s;
   }
-  return { BASE: BASE, EXTENSIONS: EXTENSIONS, clone: clone, slug: slug, brandKey: brandKey, hangulInitials: hangulInitials, brandSearchText: brandSearchText, brandMatches: brandMatches, matchBrand: matchBrand, normalizeSettings: normalizeSettings, normalize: normalize, path: path, defaultFolder: defaultFolder, imageUrl: imageUrl, imageLinkUrl: imageLinkUrl, imageLinkIssue: imageLinkIssue, generate: generate, generatorValues: generatorValues, displayName: displayName, hasMarkup: hasMarkup, smartName: smartName, smartNameInput: smartNameInput, html: html, validation: validation, readyIssues: readyIssues, exportItem: exportItem, validateSettings: validateSettings };
+  return { BASE: BASE, EXTENSIONS: EXTENSIONS, clone: clone, slug: slug, brandKey: brandKey, hangulInitials: hangulInitials, brandSearchText: brandSearchText, brandMatches: brandMatches, matchBrand: matchBrand, normalizeSettings: normalizeSettings, normalizeOrigin: normalizeOrigin, originCountry: originCountry, originIssue: originIssue, wholesaleRegularPrice: wholesaleRegularPrice, normalize: normalize, path: path, defaultFolder: defaultFolder, imageUrl: imageUrl, imageLinkUrl: imageLinkUrl, imageLinkIssue: imageLinkIssue, generate: generate, generatorValues: generatorValues, displayName: displayName, namePrefix: namePrefix, withNamePrefix: withNamePrefix, hasMarkup: hasMarkup, smartName: smartName, smartNameInput: smartNameInput, html: html, detailBlocks: detailBlocks, detailHtml: detailHtml, withDetailBlocks: withDetailBlocks, stockIssue: stockIssue, validation: validation, readyIssues: readyIssues, exportItem: exportItem, validateSettings: validateSettings };
 })();
 export default AutomationCore;

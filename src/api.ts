@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { User } from './types';
+import { desktop } from './desktop';
 export const DEMO = import.meta.env.DEV && import.meta.env.MODE === 'demo';
 let client: SupabaseClient | undefined;
 let previewRole: 'admin'|'viewer' = 'admin';
@@ -13,7 +14,9 @@ export async function authClient() {
   const url=config.supabaseUrl || config.url;
   const key=config.supabasePublishableKey || config.publishableKey;
   if(!url||!key)throw new Error('Supabase 인증 설정을 확인해 주세요.');
-  client=createClient(url,key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+  client=createClient(url,key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:!desktop,...(desktop?{storage:desktop.storage}:{})}});
+  // A hidden macOS window must continue renewing the runner's login session.
+  if(desktop) await client.auth.startAutoRefresh();
   return client;
 }
 export async function accessToken(): Promise<string> {

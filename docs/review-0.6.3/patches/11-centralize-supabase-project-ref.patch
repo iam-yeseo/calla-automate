@@ -1,0 +1,107 @@
+diff --git a/desktop/config.cjs b/desktop/config.cjs
+index 3739e7c0ee392a4e28421493cb41916f14d0d741..462f35d6e2f6894e3f0de73e16625ac1fe1f383e 100644
+--- a/desktop/config.cjs
++++ b/desktop/config.cjs
+@@ -2,6 +2,8 @@
+ 
+ const WEB_ORIGIN = 'https://cauto.yeseo.im';
+ const APP_ORIGIN = 'calla://app';
++// wrangler.jsonc의 SUPABASE_URL과 일치해야 함.
++const SUPABASE_PROJECT_REF = 'giuqapykceosroauaijq';
+ 
+ function trustedPage(value) {
+   try { const url = new URL(value); return url.protocol === 'calla:' && url.host === 'app' && !url.username && !url.password; }
+@@ -18,4 +20,4 @@
+   const target = path.resolve(root, '.' + decoded);
+   return target.startsWith(path.resolve(root) + path.sep) ? target : null;
+ }
+-module.exports = { WEB_ORIGIN, APP_ORIGIN, trustedPage, externalURL, assetPath };
++module.exports = { WEB_ORIGIN, APP_ORIGIN, SUPABASE_PROJECT_REF, trustedPage, externalURL, assetPath };
+diff --git a/desktop/main.cjs b/desktop/main.cjs
+index 0f5714472c7d8a40f087f49c148755ef6bf85243..64618d3d2883f75a52d071749536bd74b1d7a850 100644
+--- a/desktop/main.cjs
++++ b/desktop/main.cjs
+@@ -1,7 +1,8 @@
+ const { app, BrowserWindow, Menu, Tray, nativeImage, ipcMain, protocol, shell, dialog, session, safeStorage, powerSaveBlocker, clipboard } = require('electron');
+ const fs = require('node:fs/promises');
+ const path = require('node:path');
+-const { WEB_ORIGIN, APP_ORIGIN, trustedPage, externalURL, assetPath } = require('./config.cjs');
++const { WEB_ORIGIN, APP_ORIGIN, SUPABASE_PROJECT_REF, trustedPage, externalURL, assetPath } = require('./config.cjs');
++const authStorageKey = new RegExp(`^sb-${SUPABASE_PROJECT_REF}-auth-token(?:-code-verifier|-user)?$`);
+ 
+ protocol.registerSchemesAsPrivileged([{ scheme: 'calla', privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, stream: true } }]);
+ app.setName('CALLA');
+@@ -86,7 +87,7 @@
+         if (path.extname(filename)) return new Response('Not found', { status: 404 });
+         filename = path.join(dist, 'index.html');
+       }
+-      const csp = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self'; connect-src 'self' https://giuqapykceosroauaijq.supabase.co wss://giuqapykceosroauaijq.supabase.co; frame-src 'self' blob:; object-src 'none'; base-uri 'none'";
++      const csp = `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self'; connect-src 'self' https://${SUPABASE_PROJECT_REF}.supabase.co wss://${SUPABASE_PROJECT_REF}.supabase.co; frame-src 'self' blob:; object-src 'none'; base-uri 'none'`;
+       return new Response(await fs.readFile(filename), { headers: { 'Content-Type': mime[path.extname(filename)] || 'application/octet-stream', 'Content-Security-Policy': csp, 'X-Content-Type-Options': 'nosniff' } });
+     } catch { return new Response('앱 파일을 읽지 못했습니다.', { status: 500 }); }
+   }
+@@ -134,7 +135,7 @@
+     ipcMain.on('desktop:draft', (event, value) => { if (trusted(event) && value && typeof value === 'object') { draft = { dirty: value.dirty === true, busy: value.busy === true }; updateTray(); } });
+     ipcMain.handle('desktop:storage', async (event, operation, key, value) => {
+       requireTrusted(event);
+-      if (typeof key !== 'string' || !/^sb-giuqapykceosroauaijq-auth-token(?:-code-verifier|-user)?$/.test(key)) throw new Error('허용되지 않는 로그인 저장 항목입니다.');
++      if (typeof key !== 'string' || !authStorageKey.test(key)) throw new Error('허용되지 않는 로그인 저장 항목입니다.');
+       if (operation === 'get') return storedAuth[key] ?? null;
+       if (operation === 'set' && typeof value === 'string' && value.length <= 50000) storedAuth[key] = value;
+       else if (operation === 'remove') delete storedAuth[key];
+diff --git a/desktop/tests/main.test.cjs b/desktop/tests/main.test.cjs
+index fa3f94ca312ad518d20b07f159795f0ba357cefe..27ae7ab4cb12048086344a2a9c4395fe2ac439f1 100644
+--- a/desktop/tests/main.test.cjs
++++ b/desktop/tests/main.test.cjs
+@@ -7,7 +7,7 @@
+ 
+ const mainFile = path.resolve(__dirname, '../main.cjs');
+ const source = readFileSync(mainFile, 'utf8');
+-const authKey = 'sb-giuqapykceosroauaijq-auth-token';
++const authKey = `sb-${config.SUPABASE_PROJECT_REF}-auth-token`;
+ 
+ // Execute the real startup, protocol and IPC handlers without opening windows,
+ // using a real keychain, or sending requests to the production service.
+@@ -152,3 +152,27 @@
+   await app.storage('set', authKey, 'updated');
+   assert.deepEqual(app.saved(), { [authKey]: 'updated', [verifierKey]: 'verifier' });
+ });
++
++test('packaged CSP only connects to this project and preserves renderer isolation', async () => {
++  const app = await launch();
++  const response = await app.request(new Request('calla://app/'));
++  const connect = response.headers.get('content-security-policy').split('; ').find(value => value.startsWith('connect-src '));
++  assert.equal(connect, `connect-src 'self' https://${config.SUPABASE_PROJECT_REF}.supabase.co wss://${config.SUPABASE_PROJECT_REF}.supabase.co`);
++  assert.equal(app.window.options.webPreferences.contextIsolation, true);
++  assert.equal(app.window.options.webPreferences.sandbox, true);
++  assert.equal(app.window.options.webPreferences.nodeIntegration, false);
++});
++
++test('session storage accepts exactly the three project auth keys', async () => {
++  const app = await launch();
++  for (const key of [authKey, authKey + '-code-verifier', authKey + '-user']) {
++    await app.storage('set', key, 'fixture');
++    assert.equal(await app.storage('get', key), 'fixture');
++    await app.storage('remove', key);
++    assert.equal(await app.storage('get', key), null);
++  }
++  for (const key of ['sb-otherproject-auth-token', 'prefix-' + authKey, authKey + '-extra', authKey + '-code-verifier-user', '__proto__', 42, null]) {
++    await assert.rejects(app.storage('set', key, 'fixture'), /허용되지 않는 로그인 저장 항목/);
++  }
++  assert.deepEqual(app.saved(), {});
++});
+diff --git a/desktop/tests/ui/fixture.ts b/desktop/tests/ui/fixture.ts
+index 690c317b7e95c645861c3076e33f9560b82f8668..7974d138384b36260c17cfc8016dccfcde6a41ff 100644
+--- a/desktop/tests/ui/fixture.ts
++++ b/desktop/tests/ui/fixture.ts
+@@ -3,8 +3,9 @@
+ import { apiHarness, API_LIST, remoteNode, sourceProduct } from '../../../tests/fixtures/godomall';
+ import { setValue } from '../../../server/godomall-xml';
+ const { demoApi } = tsxRequire('../../../src/demo.ts', import.meta.url);
++const { SUPABASE_PROJECT_REF } = tsxRequire('../../config.cjs', import.meta.url);
+ 
+-export const AUTH_URL = 'https://giuqapykceosroauaijq.supabase.co';
++export const AUTH_URL = `https://${SUPABASE_PROJECT_REF}.supabase.co`;
+ const part = (value: unknown) => Buffer.from(JSON.stringify(value)).toString('base64url');
+ export const TOKEN = `${part({ alg: 'HS256', typ: 'JWT' })}.${part({ sub: 'preview-admin', role: 'authenticated', exp: Math.floor(Date.now() / 1000) + 3600 })}.${part('fixture-signature')}`;
+ export const AUTH_USER = { id: 'preview-admin', aud: 'authenticated', email: 'fixture@example.test', role: 'authenticated', app_metadata: { calla_role: 'admin' }, user_metadata: {}, created_at: '2026-10-02T00:00:00Z' };

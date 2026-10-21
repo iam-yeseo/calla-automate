@@ -1,0 +1,167 @@
+const assetPathPrefix = "https://www.figma.com/api/mcp/asset/96feb8fe-76c7-4400-b525-9aeb6ca889b6";
+const imgSfInfoCircle = `${assetPathPrefix}/067c8.svg`;
+const imgLayer1 = `${assetPathPrefix}/fc341.svg`;
+
+type ButtonProps = {
+  className?: string;
+  label?: string;
+  showIcon?: boolean;
+  size?: "Medium";
+  state?: "Default";
+  type?: "Ghost";
+};
+
+function Button({ className, label = "버튼", showIcon = false, size = "Medium", state = "Default", type = "Ghost" }: ButtonProps) {
+  return (
+    <div className={className || "content-stretch flex gap-[var(----spacing-8,8px)] items-center justify-center px-[var(----spacing-16,16px)] py-[var(----spacing-8,8px)] relative rounded-[var(----radius-md,8px)]"} data-node-id="11:3103">
+      {showIcon && (
+        <div className="relative shrink-0 size-[16px]" data-node-id="11:3104" data-name="icon">
+          <div className="absolute bg-[var(----text-secondary,#606876)] h-[1.6px] left-[2px] rounded-[1px] top-[7.2px] w-[12px]" data-node-id="11:3105" data-name="Rectangle" />
+          <div className="absolute bg-[var(----text-secondary,#606876)] h-[12px] left-[7.2px] rounded-[1px] top-[2px] w-[1.6px]" data-node-id="11:3106" data-name="Rectangle" />
+        </div>
+      )}
+      <p className="[word-break:break-word] font-['Pretendard:Medium'] leading-[20px] not-italic relative shrink-0 text-[14px] text-[color:var(----text-secondary,#606876)] whitespace-nowrap" data-node-id="11:3107">
+        {label}
+      </p>
+    </div>
+  );
+}
+
+function SfInfoCircle({ className }: { className?: string }) {
+  return (
+    <div className={className || "relative size-[24px]"} data-node-id="13:4289" data-name="SF/info.circle">
+      <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgSfInfoCircle} />
+    </div>
+  );
+}
+
+function CallaLogo({ className }: { className?: string }) {
+  return (
+    <div className={className || "h-[32px] relative w-[89px]"} data-node-id="13:4311" data-name="Calla/Logo">
+      <div className="absolute h-[32px] left-0 overflow-clip top-0 w-[89px]" data-node-id="13:4312" data-name="calla 2">
+        <div className="absolute contents inset-0" data-node-id="13:4313" data-name="Layer 1">
+          <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgLayer1} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function Component17() {
+  return (
+    <div className="bg-[var(--background\/canvas,#f7f8fa)] content-stretch flex flex-col items-start relative size-full" data-node-id="34:22854" data-name="17 · 계정 · 승인 대기">
+      <div className="bg-[var(--background\/surface,white)] border-[var(--border\/subtle,#eee)] border-b border-solid content-stretch flex gap-[var(--space\/16,16px)] h-[72px] items-center overflow-clip px-[var(--space\/32,32px)] relative shrink-0 w-full" data-node-id="34:22855" data-name="계정 헤더">
+        <CallaLogo className="h-[32px] relative shrink-0 w-[89px]" />
+        <p className="[word-break:break-word] flex-[1_0_0] font-['Pretendard:Medium'] leading-[20px] min-w-px not-italic relative text-[13px] text-[color:var(--text\/primary,#222)]" data-node-id="34:22864">
+          AUTOMATE · 계정
+        </p>
+      </div>
+      <div className="content-stretch flex flex-[1_0_0] flex-col gap-[var(--space\/24,24px)] items-center min-h-px overflow-clip pb-[var(--space\/32,32px)] pt-[56px] relative w-full" data-node-id="34:22865" data-name="계정 작업 영역">
+        <div className="bg-[var(--background\/surface,white)] border border-[var(--border\/subtle,#eee)] border-solid content-stretch flex flex-col gap-[20px] items-start overflow-clip p-[var(--space\/24,24px)] relative rounded-[var(--radius\/panel,12px)] shrink-0 w-[480px]" data-node-id="34:22866" data-name="계정 양식">
+          <div className="[word-break:break-word] content-stretch flex flex-col gap-[var(--space\/8,8px)] items-start not-italic overflow-clip relative shrink-0 w-full" data-node-id="34:22867" data-name="내용 영역">
+            <p className="font-['Pretendard:SemiBold'] leading-[36px] relative shrink-0 text-[26px] text-[color:var(--text\/primary,#222)] w-full" data-node-id="34:22868">
+              관리자 승인을 기다리고 있습니다
+            </p>
+            <p className="font-['Pretendard:Regular'] leading-[22px] relative shrink-0 text-[14px] text-[color:var(--text\/secondary,#606876)] w-full" data-node-id="34:22869">
+              가입 신청이 접수되었습니다. 승인 완료 후 다시 로그인하세요.
+            </p>
+          </div>
+          <div className="bg-[var(--warning\/background,#fff7dd)] content-stretch flex gap-[var(--calla-spacing-6,6px)] h-[28px] items-center justify-center px-[var(--calla-spacing-8,8px)] py-[var(--calla-spacing-4,4px)] relative rounded-[6px] shrink-0 w-[88px]" data-node-id="34:22870" data-name="배지 / 승인 대기">
+            <p className="[word-break:break-word] font-['Pretendard:Medium'] leading-[20px] not-italic relative shrink-0 text-[13px] text-[color:var(--warning\/text,#854d0e)] whitespace-nowrap" data-node-id="I34:22870;13:4547">
+              ⚠ 승인 대기
+            </p>
+          </div>
+          <div className="[word-break:break-word] content-stretch flex flex-col font-['Pretendard:Regular'] gap-[var(--space\/12,12px)] items-start leading-[22px] not-italic overflow-clip relative shrink-0 text-[14px] w-full" data-node-id="34:22875" data-name="내용 영역">
+            <div className="content-stretch flex gap-[var(--space\/8,8px)] items-center overflow-clip relative shrink-0 w-full" data-node-id="34:22876" data-name="도구 모음">
+              <p className="relative shrink-0 text-[color:var(--text\/secondary,#606876)] w-[100px]" data-node-id="34:22877">
+                이름
+              </p>
+              <p className="flex-[1_0_0] min-w-px relative text-[color:var(--text\/primary,#222)]" data-node-id="34:22878">
+                정서윤
+              </p>
+            </div>
+            <div className="content-stretch flex gap-[var(--space\/8,8px)] items-center overflow-clip relative shrink-0 w-full" data-node-id="34:22879" data-name="도구 모음">
+              <p className="relative shrink-0 text-[color:var(--text\/secondary,#606876)] w-[100px]" data-node-id="34:22880">
+                이메일
+              </p>
+              <p className="flex-[1_0_0] min-w-px relative text-[color:var(--text\/primary,#222)]" data-node-id="34:22881">
+                seoyun@calla.co.kr
+              </p>
+            </div>
+            <div className="content-stretch flex gap-[var(--space\/8,8px)] items-center overflow-clip relative shrink-0 w-full" data-node-id="34:22882" data-name="도구 모음">
+              <p className="relative shrink-0 text-[color:var(--text\/secondary,#606876)] w-[100px]" data-node-id="34:22883">
+                소속
+              </p>
+              <p className="flex-[1_0_0] min-w-px relative text-[color:var(--text\/primary,#222)]" data-node-id="34:22884">
+                상품 운영팀
+              </p>
+            </div>
+            <div className="content-stretch flex gap-[var(--space\/8,8px)] items-center overflow-clip relative shrink-0 w-full" data-node-id="34:22885" data-name="도구 모음">
+              <p className="relative shrink-0 text-[color:var(--text\/secondary,#606876)] w-[100px]" data-node-id="34:22886">
+                신청일
+              </p>
+              <p className="flex-[1_0_0] min-w-px relative text-[color:var(--text\/primary,#222)]" data-node-id="34:22887">
+                2026/10/07 15:10
+              </p>
+            </div>
+          </div>
+          <div className="bg-[var(--warning\/background,#fff7dd)] content-stretch flex gap-[var(--space\/8,8px)] items-center overflow-clip p-[var(--space\/12,12px)] relative rounded-[var(--radius\/control,8px)] shrink-0 w-full" data-node-id="34:22888" data-name="안내 / warning">
+            <SfInfoCircle className="relative shrink-0 size-[20px]" />
+            <p className="[word-break:break-word] flex-[1_0_0] font-['Pretendard:Regular'] leading-[22px] min-w-px not-italic relative text-[14px] text-[color:var(--text\/primary,#222)]" data-node-id="34:22891">
+              승인 전에는 상품 운영에 접근할 수 없습니다. 상품 조회·편집·등록도 사용할 수 없습니다.
+            </p>
+          </div>
+          <div className="bg-[var(--calla-brand-default,#f27490)] content-stretch flex gap-[var(--calla-spacing-8,8px)] h-[44px] items-center justify-center min-h-[44px] px-[12px] py-[var(--calla-spacing-8,8px)] relative rounded-[var(--calla-radius-8,8px)] shrink-0 w-full" data-node-id="34:22892" data-name="버튼 / 주 행동 / 기본">
+            <p className="[word-break:break-word] font-['Pretendard:SemiBold'] leading-[20px] not-italic relative shrink-0 text-[14px] text-[color:var(--calla-text-inverse,white)] whitespace-nowrap" data-node-id="I34:22892;13:4438">
+              승인 상태 다시 확인
+            </p>
+          </div>
+          <div className="bg-[var(--border\/subtle,#eee)] h-px relative shrink-0 w-full" data-node-id="34:22896" data-name="구분선" />
+          <p className="[word-break:break-word] font-['Pretendard:Regular'] leading-[18px] min-w-full not-italic relative shrink-0 text-[12px] text-[color:var(--text\/secondary,#606876)] w-[min-content]" data-node-id="34:22897">
+            승인 문의 · 계정 관리자에게 이름과 신청 이메일을 알려주세요.
+          </p>
+          <Button className="content-stretch flex gap-[var(----spacing-8,8px)] h-[40px] items-center justify-center px-[var(----spacing-16,16px)] py-[var(----spacing-8,8px)] relative rounded-[var(----radius-md,8px)] shrink-0 w-full" label="로그아웃" />
+        </div>
+        <p className="[word-break:break-word] font-['Pretendard:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--text\/secondary,#606876)] w-[480px]" data-node-id="34:22905">
+          디자인 예시 · 실제 처리 결과가 아닙니다
+        </p>
+      </div>
+    </div>
+  );
+}
+SUPER CRITICAL: The generated React+Tailwind code MUST be converted to match the target project's technology stack and styling system.
+1. Analyze the target codebase to identify: technology stack, styling approach, component patterns, and design tokens
+2. Convert React syntax to the target framework/library
+3. Transform all Tailwind classes to the target styling system while preserving exact visual design
+4. Follow the project's existing patterns and conventions
+DO NOT install any Tailwind as a dependency unless the user instructs you to do so.
+
+Node ids have been added to the code as data attributes, e.g. `data-node-id="1:2"`.
+These styles are contained in the design: CALLA-AUTOMATE/라벨: Font(family: "Pretendard", style: Medium, size: 13, weight: 500, lineHeight: 20, letterSpacing: 0), CALLA-AUTOMATE/제목: Font(family: "Pretendard", style: SemiBold, size: 26, weight: 600, lineHeight: 36, letterSpacing: 0), CALLA-AUTOMATE/본문: Font(family: "Pretendard", style: Regular, size: 14, weight: 400, lineHeight: 22, letterSpacing: 0), CALLA-AUTOMATE/주 행동: Font(family: "Pretendard", style: SemiBold, size: 14, weight: 600, lineHeight: 20, letterSpacing: 0), CALLA-AUTOMATE/보조: Font(family: "Pretendard", style: Regular, size: 12, weight: 400, lineHeight: 18, letterSpacing: 0), Body/14 Medium: Font(family: "Pretendard", style: Medium, size: 14, weight: 500, lineHeight: 20, letterSpacing: 0).
+Component descriptions: The following components have usage descriptions or documentation links defined in Figma. These descriptions provide important context about the intended usage, best practices, and any constraints for each component. Follow these guidelines when implementing or using these components.
+
+## Calla/Logo
+**Node ID:** 13:4311
+
+Original editable calla logo from Guide / 4:844.
+
+## Calla/Badge
+**Node ID:** 13:4557
+
+상품과 채널의 운영 상태. 완료는 핑크 바탕에 흰 글자·점 표시를 사용합니다. 상태별 기본 문구를 보존하며 실행 상태와 선택 여부는 구분합니다.
+
+## SF/info.circle
+**Node ID:** 13:4289
+
+SF Symbols Pro plugin import. Original vector master 271:1265; 24px master with SCALE constraints.
+
+## Calla/Button
+**Node ID:** 13:4515
+
+주요·보조·텍스트·삭제 행동. Primary의 모든 활성 상태는 핑크 배경 위 흰색 글자·아이콘을 사용합니다. Label과 SF Symbols Icon 교체 가능. 저장과 외부 몰 등록 CTA는 구분.
+
+## Button
+**Node ID:** 11:3012
+
+기본 액션 버튼. Type(Primary/Secondary/Neutral/Ghost) × Size(Medium 36px/Small 28px) × State. Label 텍스트와 아이콘 표시 여부는 컴포넌트 속성으로 제어.
+Images and SVGs will be stored as constants, e.g. const image = `${assetPathPrefix}/<asset file name>`, where assetPathPrefix is declared once at the top of the code and every asset URL interpolates it. These constants will be used in the code as the source for the image, ex: <img src={image} />. Image assets are stored on a remote server for 7 days and can be fetched using the provided URLs until they expire.

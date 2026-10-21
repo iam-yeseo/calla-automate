@@ -1,0 +1,46 @@
+diff --git a/server/index.ts b/server/index.ts
+index 79f6c6e0567ec48fdb6d2b2d80c9f41dcfbcd92d..93646c6a9b9ee0985307dd4351a88397384e8fb0 100644
+--- a/server/index.ts
++++ b/server/index.ts
+@@ -310,7 +310,11 @@
+       if (godomallResponse) return godomallResponse;
+       const accountResponse = await accountRoute(request, env, fetcher, { ...context.user, role: context.role });
+       return accountResponse || await route(context, url.pathname.replace(/\/$/, ''), request.method, url);
+-    } catch (error) { if (error instanceof ApiError || error instanceof AccountError || error instanceof GodomallError) { const response = json({ error: { code: error.code, message: error.message } }, error.status); if (error instanceof GodomallError && error.retryAfter) response.headers.set('retry-after', String(error.retryAfter)); return response; } return json({ error: { code: 'internal_error', message: '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.' } }, 500); }
++    } catch (error) {
++      if (error instanceof ApiError || error instanceof AccountError || error instanceof GodomallError) { const response = json({ error: { code: error.code, message: error.message } }, error.status); if (error instanceof GodomallError && error.retryAfter) response.headers.set('retry-after', String(error.retryAfter)); return response; }
++      console.error('api_unhandled', { path: url.pathname, method: request.method, name: error instanceof Error ? error.name : 'UnknownError', message: error instanceof Error ? error.message : 'Non-Error exception' });
++      return json({ error: { code: 'internal_error', message: '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.' } }, 500);
++    }
+   } };
+ }
+ export default createWorker();
+diff --git a/tests/server.test.ts b/tests/server.test.ts
+index 1c95c522a1b0f686b6255ec3cf627604ad4b1c21..7ea028cbea3bf3847bb590b42eebc71a6343d80a 100644
+--- a/tests/server.test.ts
++++ b/tests/server.test.ts
+@@ -482,3 +482,24 @@
+   }
+   assert.ok(calls.every(c=>c.method==='GET'));
+ });
++
++test('unexpected failures log only error identity and request path once without exposing it to clients', async t => {
++  const logged = t.mock.method(console, 'error', () => {});
++  const { worker } = harness('admin', () => { throw new TypeError('unexpected parser failure'); });
++  const result = await worker.fetch(request('/api/lists?q=private-search'), env);
++  assert.equal(result.status, 500);
++  assert.deepEqual(await result.json(), { error: { code: 'internal_error', message: '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.' } });
++  assert.equal(logged.mock.callCount(), 1);
++  assert.deepEqual(logged.mock.calls[0]!.arguments, ['api_unhandled', { path: '/api/lists', method: 'GET', name: 'TypeError', message: 'unexpected parser failure' }]);
++});
++
++test('known validation, account and Godomall failures do not emit unhandled logs', async t => {
++  const logged = t.mock.method(console, 'error', () => {});
++  const validation = harness();
++  assert.equal((await validation.worker.fetch(request('/api/lists/bad-id'), env)).status, 422);
++  const account = harness('viewer', undefined, { app_metadata: { calla_status: 'pending' } });
++  assert.equal((await account.worker.fetch(request('/api/me'), env)).status, 403);
++  const godomall = harness('viewer', () => response({ code: 'PT429' }, 429));
++  assert.equal((await godomall.worker.fetch(request('/api/godomall/retail/goods'), { ...env, GODOMALL_PARTNER_KEY: 'partner', GODOMALL_CALLAMEDIA_API_USER_KEY: 'mall' } as Env)).status, 429);
++  assert.equal(logged.mock.callCount(), 0);
++});

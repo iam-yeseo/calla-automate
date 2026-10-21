@@ -1,14 +1,24 @@
-import type { Automation, Brand, Category, DetailImage, Generator, ImageValidation, Product, Settings } from '../types';
+import type { Automation, Brand, Category, DetailBlock, DetailImage, Generator, ImageValidation, Product, Settings } from '../types';
 declare const core: {
   BASE: string; EXTENSIONS: string[];
   clone<T>(value: T): T;
   slug(value: string): string;
   displayName(value: string): string;
+  namePrefix(value: string): { enabled: boolean; text: string; name: string };
+  withNamePrefix(name: string, prefix: { enabled: boolean; text: string }): string;
+  hasMarkup(value: string): boolean;
   smartName(value: string): string;
   smartNameInput(value: string): string;
+  brandKey(value: string): string;
+  hangulInitials(value: string): string;
+  brandSearchText(brand: Brand): string;
   brandMatches(brand: Brand, query: string): boolean;
   matchBrand(brands: Brand[], query: string): Brand | null;
   normalize(value: unknown): Automation;
+  normalizeOrigin(value: unknown): string;
+  originCountry(value: unknown): string;
+  originIssue(value: unknown): string;
+  wholesaleRegularPrice(item: Product): number | null;
   normalizeSettings(settings: Settings): Settings;
   path(categories: Category[], code: string): string;
   defaultFolder(categories: Category[], code: string): string;
@@ -18,6 +28,10 @@ declare const core: {
   generatorValues(item: Product): Generator;
   generate(generator: Generator): DetailImage[];
   html(images: DetailImage[]): string;
+  detailBlocks(automation: Automation): DetailBlock[];
+  detailHtml(automation: Automation): string;
+  withDetailBlocks(automation: Automation, blocks: DetailBlock[]): Automation;
+  stockIssue(automation: Automation): string;
   validation(image: DetailImage): ImageValidation;
   readyIssues(item: Product, settings: Settings): string[];
   exportItem(item: Product, settings: Settings): Record<string, unknown>;

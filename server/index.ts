@@ -1,4 +1,9 @@
+import core from '../src/lib/automation-core.js';
+import type { DetailBlock, DetailImage, Settings } from '../src/types';
 import { accountRoute, AccountError, ensureAccountActive } from './accounts';
+import { godomallPayload, godomallRoute } from './godomall';
+import { GodomallError } from './godomall-xml';
+import { sameManagedTaxonomy } from './godomall-taxonomy';
 type Row = Record<string, any>;
 type Role = 'admin' | 'viewer';
 type Context = { env: Env; request: Request; fetch: typeof fetch; user: { id: string; email: string; username: string; name: string }; role: Role };
@@ -48,13 +53,13 @@ async function auth(request: Request, env: Env, fetcher: typeof fetch): Promise<
   if (resolved !== 'admin' && resolved !== 'viewer') fail(403, '이 작업 공간에 등록된 사용자만 접근할 수 있습니다.', 'membership_required');
   return { env, request, fetch: fetcher, user: { id, email: identity.email, username: identity.username, name: identity.name }, role: resolved };
 }
-async function db(c: Context, resource: string, query: Record<string, string> = {}, method = 'GET', payload?: unknown, prefer?: string) {
+async function db(c: Pick<Context, 'env' | 'fetch'>, resource: string, query: Record<string, string> = {}, method = 'GET', payload?: unknown, prefer?: string) {
   const { url } = config(c.env, true); const target = new URL(`${url}/rest/v1/${resource}`);
   for (const [key, value] of Object.entries(query)) target.searchParams.set(key, value);
   const headers: Record<string, string> = { apikey: c.env.SUPABASE_SERVICE_ROLE_KEY, authorization: `Bearer ${c.env.SUPABASE_SERVICE_ROLE_KEY}`, 'content-type': 'application/json' };
   if (prefer) headers.prefer = prefer;
   const response = await c.fetch(target.toString(), { method, headers, signal: AbortSignal.timeout(20000), ...(payload !== undefined ? { body: JSON.stringify(payload) } : {}) });
-  if (!response.ok) { const error = await response.json().catch(() => ({})) as Row; if (error.code === '23505') fail(409, '이미 존재하는 데이터와 충돌했습니다.', 'conflict'); fail(502, '데이터베이스 요청을 완료하지 못했습니다.', 'database_error'); }
+  if (!response.ok) { const error = await response.json().catch(() => ({})) as Row; if (error.code === '23505') fail(409, '이미 존재하거나 결과 확인 중인 작업과 충돌했습니다.', 'conflict'); if (resource === 'rpc/godomall_reserve_call' && error.code === 'PT429') throw new GodomallError(429, '고도몰 호출이 대기 중입니다. 잠시 후 다시 조회해 주세요.', 'godomall_rate_limited', false, 6); if (resource.includes('godomall') && error.code === 'P0001') fail(409, '상품 또는 작업 상태가 변경되었거나 이미 실행 중입니다. 최신 결과를 확인해 주세요.', 'godomall_conflict'); if (resource.includes('godomall') && ['42P01', 'PGRST202', 'PGRST205'].includes(error.code)) fail(503, '고도몰 API 저장소 마이그레이션이 필요합니다.', 'godomall_schema_required'); fail(502, '데이터베이스 요청을 완료하지 못했습니다.', 'database_error'); }
   const data: any = response.status === 204 ? null : await response.json().catch(() => null);
   return { data, headers: response.headers };
 }
@@ -65,7 +70,21 @@ async function allRows(c: Context, table: string, query: Record<string, string>)
 }
 async function one(c: Context, table: string, id: string) { const { data } = await db(c, table, { id: `eq.${id}`, select: '*', limit: '1' }); if (!Array.isArray(data) || !data[0]) fail(404, '데이터를 찾을 수 없습니다.', 'not_found'); return data[0] as Row; }
 async function settings(c: Context) { const { data } = await db(c, 'app_settings', { key: 'eq.product_automation_v1', select: 'value,updated_at', limit: '1' }); if (!Array.isArray(data) || !data[0]) fail(503, '상품 자동화 설정이 없습니다.', 'settings_missing'); return data[0] as { value: Row; updated_at: string }; }
-async function registrations(c: Context, listId: string) { return allRows(c, 'product_registrations', { select: 'item_id,channel,status,goods_no,error_message,warnings,attempted_at,updated_at,product_items!inner(list_id)', 'product_items.list_id': `eq.${listId}`, order: 'item_id,channel' }); }
+async function registrations(c: Context, listId: string) {
+  const [rows, links] = await Promise.all([
+    allRows(c, 'product_registrations', { select: 'item_id,channel,status,goods_no,error_message,warnings,attempted_at,updated_at,product_items!inner(list_id)', 'product_items.list_id': `eq.${listId}`, order: 'item_id,channel' }),
+    allRows(c, 'godomall_links', { select: '*,product_items!inner(list_id)', 'product_items.list_id': `eq.${listId}`, order: 'item_id,mall_id' }),
+  ]);
+  const snapshots: Row[] = [];
+  for (const channel of CHANNELS) {
+    const numbers = [...new Set(links.filter(l => l.mall_id === channel && /^\d{1,20}$/.test(l.goods_no || '')).map(l => l.goods_no))];
+    for (let start = 0; start < numbers.length; start += 100) {
+      const { data } = await db(c, 'godomall_products', { mall_id: `eq.${channel}`, goods_no: `in.(${numbers.slice(start, start + 100).join(',')})`, select: 'mall_id,goods_no,display:snapshot->>display,displayMobile:snapshot->>displayMobile,sell:snapshot->>sell,sellMobile:snapshot->>sellMobile' });
+      if (Array.isArray(data)) snapshots.push(...data);
+    }
+  }
+  return rows.map(row => { const link = links.find(l => l.item_id === row.item_id && l.mall_id === row.channel), remote = snapshots.find(s => s.mall_id === row.channel && s.goods_no === row.goods_no); return { ...row, api_state: link?.api_state || 'unknown', checked_at: link?.checked_at || null, last_action: link?.last_action || null, last_operation_id: link?.last_operation_id || null, api_error: link?.error_message || null, remote_status: remote ? { display: remote.display, displayMobile: remote.displayMobile, sell: remote.sell, sellMobile: remote.sellMobile } : null }; });
+}
 function listInput(input: Row, current?: Row) {
   const title = string(input.title, '리스트 이름', 200, current?.title || '').trim(); if (!title) fail(422, '리스트 이름을 입력해 주세요.', 'title_required');
   const date = string(input.work_date, '작성일', 10, current?.work_date || new Date().toISOString().slice(0, 10));
@@ -88,9 +107,58 @@ function itemInput(value: unknown, listId: string, seq: number, old?: Row): Row 
   const auto: Row = { ...previous, ...incoming, schemaVersion: 1 };
   const codes = object(auto.categoryCodes || {}, '카테고리'); auto.categoryCodes = { ...codes };
   for (const ch of CHANNELS) { const code = string(codes[ch], '카테고리 코드', 12); if (code && !/^(?:\d{3}){1,4}$/.test(code)) fail(422, '카테고리 코드는 3·6·9·12자리 문자열이어야 합니다.', 'invalid_category'); auto.categoryCodes[ch] = code; }
-  auto.origin = string(auto.origin, '원산지', 200);
+  if (auto.categorySelections !== undefined) {
+    const selections = object(auto.categorySelections, '몰별 카테고리');
+    for (const ch of CHANNELS) {
+      const selected = array(selections[ch] || [], '카테고리', 1000).map(value => string(value, '카테고리 코드', 12));
+      if (selected.some(code => !/^(?:\d{3}){1,4}$/.test(code)) || new Set(selected).size !== selected.length) fail(422, '추가 카테고리는 중복 없는 3·6·9·12자리 코드여야 합니다.', 'invalid_category');
+    }
+  }
+  const normalizedCategories = core.normalize(auto);
+  auto.categoryCodes = normalizedCategories.categoryCodes;
+  auto.categorySelections = normalizedCategories.categorySelections;
+  if (auto.namePrefix !== undefined) {
+    const prefix = object(auto.namePrefix, '상품명 머리말');
+    if (typeof prefix.enabled !== 'boolean') fail(422, '머리말 사용 여부를 확인해 주세요.', 'invalid_name_prefix');
+    auto.namePrefix = { enabled: prefix.enabled, text: string(prefix.text, '상품명 머리말', 80) };
+  }
+  const origin = string(auto.origin, '원산지', 200);
+  if (origin !== (previous.origin || '')) {
+    const issue = core.originIssue(origin);
+    if (issue) fail(422, issue, 'invalid_origin');
+  }
+  auto.origin = core.normalizeOrigin(origin);
+  if (auto.manufacturer !== undefined) auto.manufacturer = string(auto.manufacturer, '제조사', 200);
+  const wholesaleRegularPrice = auto.wholesaleRegularPrice === undefined ? { mode: 'retail', value: null } : object(auto.wholesaleRegularPrice, '도매 정가');
+  if (!['retail', 'manual'].includes(wholesaleRegularPrice.mode) || (wholesaleRegularPrice.value !== null && (!Number.isSafeInteger(wholesaleRegularPrice.value) || wholesaleRegularPrice.value < 0 || wholesaleRegularPrice.value > 1_000_000_000_000))) fail(422, '도매 정가는 0 이상의 정수 또는 빈 값이어야 합니다.', 'invalid_price');
+  auto.wholesaleRegularPrice = { ...wholesaleRegularPrice };
   auto.detailHtml = string(auto.detailHtml, '상세 HTML', 300000);
-  auto.detailImages = array(auto.detailImages || [], '상세 이미지', 50).map(value => { const image = object(value, '상세 이미지'); for (const key of ['id', 'folder', 'filename']) if (image[key] !== undefined) string(image[key], key, key === 'filename' ? 500 : 200); if (image.url) httpUrl(string(image.url, '이미지 URL', 4000), '이미지'); return image; });
+  const validateImage = (value: unknown) => { const image = object(value, '상세 이미지'); for (const key of ['id', 'folder', 'filename']) if (image[key] !== undefined) string(image[key], key, key === 'filename' ? 500 : 200); if (image.url) httpUrl(string(image.url, '이미지 URL', 4000), '이미지'); return image; };
+  auto.detailImages = array(auto.detailImages || [], '상세 이미지', 50).map(validateImage);
+  const stock = auto.stock === undefined ? { mode: 'unlimited', quantity: 0 } : object(auto.stock, '재고');
+  if (!['unlimited', 'limited'].includes(stock.mode) || !Number.isSafeInteger(stock.quantity) || stock.quantity < 0) fail(422, '판매 재고와 0 이상의 상품 재고 수량을 확인해 주세요.', 'invalid_stock');
+  auto.stock = { ...stock };
+  if (auto.detailBlocks !== undefined) {
+    const ids = new Set<string>();
+    const blocks = array(auto.detailBlocks, '상세페이지 내용', 100).map(value => {
+      const block = object(value, '상세페이지 항목');
+      const id = string(block.id, '상세페이지 항목 ID', 200);
+      if (!id || ids.has(id)) fail(422, '상세페이지 항목 ID를 확인해 주세요.', 'invalid_detail_block');
+      ids.add(id);
+      if (block.type === 'text') {
+        if (typeof block.text !== 'string') fail(422, '상세페이지 텍스트 형식을 확인해 주세요.', 'invalid_detail_block');
+        return { ...block, id, type: 'text', text: string(block.text, '상세페이지 텍스트', 300000) };
+      }
+      if (block.type !== 'image') fail(422, '상세페이지 항목 유형을 확인해 주세요.', 'invalid_detail_block');
+      const rawImage = validateImage(block.image);
+      const image: DetailImage = { ...rawImage, folder: string(rawImage.folder, '이미지 폴더', 200), filename: string(rawImage.filename, '이미지 파일명', 500) };
+      return { ...block, id, type: 'image', image };
+    }) as DetailBlock[];
+    const detail = core.withDetailBlocks(core.normalize(auto), blocks);
+    auto.detailBlocks = blocks;
+    auto.detailImages = array(detail.detailImages, '상세 이미지', 50);
+    auto.detailHtml = string(detail.detailHtml, '상세 HTML', 300000);
+  }
   if (source.image_url === '' && !Object.hasOwn(incoming, 'thumbnail')) delete auto.thumbnail;
   if (auto.thumbnail === null) delete auto.thumbnail;
   if (auto.thumbnail !== undefined) { object(auto.thumbnail, '썸네일'); if (auto.thumbnail.path !== undefined) string(auto.thumbnail.path, '썸네일 경로', 1000); }
@@ -98,7 +166,7 @@ function itemInput(value: unknown, listId: string, seq: number, old?: Row): Row 
   out.automation = auto; // Completion fields and UI-only fields are deliberately omitted.
   return out;
 }
-export function validateSettings(value: unknown): Row {
+export function validateSettingsPayload(value: unknown): Row {
   const v = object(value, '설정'); if (v.schemaVersion !== undefined && v.schemaVersion !== 1) fail(422, '지원하지 않는 설정 버전입니다.', 'invalid_settings_version'); const cats = object(v.categories, '카테고리');
   const folders = array(v.folders, '폴더', 1000).map(x => string(x, '폴더', 100));
   if (new Set(folders).size !== folders.length || folders.some(x => !/^[a-z0-9][a-z0-9_-]*$/.test(x))) fail(422, '폴더 이름과 중복을 확인해 주세요.', 'invalid_folders');
@@ -110,12 +178,8 @@ export function validateSettings(value: unknown): Row {
 async function route(c: Context, path: string, method: string, url: URL): Promise<Response> {
   if (path === '/api/me' && method === 'GET') return json({ user: c.user, role: c.role });
   if (path === '/api/lists' && method === 'GET') {
-    const [lists, items, regs] = await Promise.all([allRows(c, 'product_lists', { select: '*', order: 'created_at.desc' }), allRows(c, 'product_items', { select: 'id,list_id,done,need_retail,need_wholesale', order: 'id' }), allRows(c, 'product_registrations', { select: 'item_id,channel,status', order: 'id' })]);
-    const byItem = new Map(items.map(x => [x.id, x])); const totals = new Map<string, Row>();
-    const empty = () => ({ total: 0, doneCount: 0, retailSuccess: 0, wholesaleSuccess: 0, retailTotal: 0, wholesaleTotal: 0, runningCount: 0, failedCount: 0 });
-    for (const it of items) { if (!totals.has(it.list_id)) totals.set(it.list_id, empty()); const t = totals.get(it.list_id)!; t.total++; if (it.done) t.doneCount++; for (const ch of CHANNELS) if (it[`need_${ch}`] === '필요') t[`${ch}Total`]++; }
-    for (const r of regs) { const it = byItem.get(r.item_id); const t = it ? totals.get(it.list_id) : undefined; if (!t) continue; if (r.status === 'success' && CHANNELS.includes(r.channel) && it![`need_${r.channel}`] === '필요') t[`${r.channel}Success`]++; if (r.status === 'running') t.runningCount++; if (r.status === 'failed') t.failedCount++; }
-    return json({ lists: lists.map(l => ({ ...l, ...(totals.get(l.id) || empty()) })) });
+    const { data } = await db(c, 'rpc/product_list_summaries', {}, 'POST', {});
+    return json({ lists: data || [] });
   }
   if (path === '/api/lists' && method === 'POST') { admin(c); const payload = listInput(await body(c.request)); const { data } = await db(c, 'product_lists', {}, 'POST', payload, 'return=representation'); return json({ list: data?.[0] }, 201); }
   const listRoute = path.match(/^\/api\/lists\/([^/]+)(?:\/(items|draft|registrations))?$/);
@@ -137,6 +201,24 @@ async function route(c: Context, path: string, method: string, url: URL): Promis
       await db(c, 'rpc/save_product_draft', {}, 'POST', { p_list: listInput(list, current), p_items: items, p_removed_ids: removed }); return json({ ok: true });
     }
   }
+  const itemRoute = path.match(/^\/api\/items\/([^/]+)$/);
+  if (itemRoute && (method === 'GET' || method === 'PUT')) {
+    if (method === 'PUT') admin(c);
+    const id = uuid(itemRoute[1], '상품 ID'), current = await one(c, 'product_items', id);
+    if (method === 'GET') return json({ item: current });
+    const input = await body(c.request), source = object(input.item, '상품');
+    if (source.id !== id) fail(422, '상품 ID가 일치하지 않습니다.', 'item_ownership');
+    const revision = string(input.revision, '상품 버전', 100);
+    if (!revision || Number.isNaN(Date.parse(revision))) fail(422, '상품 버전이 필요합니다. 최신 상품을 다시 불러와 주세요.', 'revision_required');
+    if (revision !== current.updated_at) fail(409, '다른 곳에서 상품을 변경했습니다. 최신 상품을 다시 불러온 뒤 수정해 주세요.', 'revision_conflict');
+    const validated = itemInput(source, current.list_id, current.seq, current);
+    // A preview edit changes only this draft. Completion, registration results,
+    // list membership and sequence remain under their existing workflows.
+    const { id: _id, list_id: _listId, seq: _seq, ...fields } = validated;
+    const { data } = await db(c, 'product_items', { id: `eq.${id}`, updated_at: `eq.${revision}` }, 'PATCH', { ...fields, updated_at: new Date().toISOString() }, 'return=representation');
+    if (!data?.[0]) fail(409, '저장 중 상품이 변경되었습니다. 최신 상품을 다시 불러온 뒤 수정해 주세요.', 'revision_conflict');
+    return json({ item: data[0] });
+  }
   const completionRoute = path.match(/^\/api\/items\/([^/]+)\/completion$/);
   if (completionRoute && method === 'POST') {
     admin(c); const id = uuid(completionRoute[1], '상품 ID'), input = await body(c.request);
@@ -151,10 +233,19 @@ async function route(c: Context, path: string, method: string, url: URL): Promis
     fail(409, '완료 상태가 변경되었습니다. 최신 상태를 확인해 주세요.', 'completion_conflict');
   }
   if (path === '/api/settings' && method === 'GET') return json(await settings(c));
-  if (path === '/api/settings' && method === 'PUT') { admin(c); const input = await body(c.request); const value = validateSettings(input.value); const revision = string(input.revision ?? input.updated_at, '설정 버전', 100); if (!revision || Number.isNaN(Date.parse(revision))) fail(422, '설정 버전이 필요합니다.', 'revision_required'); const updated = new Date().toISOString(); const { data } = await db(c, 'app_settings', { key: 'eq.product_automation_v1', updated_at: `eq.${revision}` }, 'PATCH', { value, updated_at: updated }, 'return=representation'); if (!data?.[0]) fail(409, '다른 사용자가 설정을 변경했습니다. 다시 불러와 주세요.', 'revision_conflict'); return json({ value: data[0].value, updated_at: data[0].updated_at }); }
+  if (path === '/api/settings' && method === 'PUT') { admin(c); const input = await body(c.request); const value = validateSettingsPayload(input.value); const current = await settings(c); if (!sameManagedTaxonomy(current.value as Settings, value as Settings)) fail(422, '카테고리와 브랜드는 고도몰에서 관리하고 API 업데이트로 불러와 주세요.', 'taxonomy_readonly'); const revision = string(input.revision ?? input.updated_at, '설정 버전', 100); if (!revision || Number.isNaN(Date.parse(revision))) fail(422, '설정 버전이 필요합니다.', 'revision_required'); const updated = new Date().toISOString(); const { data } = await db(c, 'app_settings', { key: 'eq.product_automation_v1', updated_at: `eq.${revision}` }, 'PATCH', { value, updated_at: updated }, 'return=representation'); if (!data?.[0]) fail(409, '다른 사용자가 설정을 변경했습니다. 다시 불러와 주세요.', 'revision_conflict'); return json({ value: data[0].value, updated_at: data[0].updated_at }); }
   if (path === '/api/catalog' && method === 'GET') {
     const offset = Number(url.searchParams.get('offset') || '0'), limit = Number(url.searchParams.get('limit') || '50'); if (!Number.isSafeInteger(offset) || offset < 0 || offset > 100000 || !Number.isSafeInteger(limit) || limit < 1 || limit > 100) fail(422, '페이지 범위를 확인해 주세요.', 'invalid_pagination');
-    const query: Record<string, string> = { select: '*', order: 'updated_at.desc,id.asc', offset: String(offset), limit: String(limit) }; const q = string(url.searchParams.get('q'), '검색어', 100).replace(/[\\%_*(),."\r\n]/g, ' ').trim(); if (q) query.or = `(brand.ilike.*${q}*,model.ilike.*${q}*,name_own.ilike.*${q}*)`;
+    const query: Record<string, string> = { select: '*', order: 'updated_at.desc,id.asc', offset: String(offset), limit: String(limit) };
+    // Keep model punctuation; strip user wildcards as before and quote each
+    // PostgREST value so punctuation cannot become filter syntax.
+    const q = string(url.searchParams.get('q'), '검색어', 100).replace(/[%_*\r\n]/g, ' ').trim();
+    if (q) {
+      // Escape literal backslashes for ILIKE, then for PostgREST's quoted parser.
+      const pattern = `*${q.replace(/\\/g, '\\\\')}*`;
+      const quoted = `"${pattern.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+      query.or = `(brand.ilike.${quoted},model.ilike.${quoted},name_own.ilike.${quoted})`;
+    }
     const { data, headers } = await db(c, 'product_items', query, 'GET', undefined, 'count=exact'); const totalValue = headers.get('content-range')?.split('/')[1]; const total = totalValue && /^\d+$/.test(totalValue) ? Number(totalValue) : null; const items = data || []; return json({ items, total, nextOffset: items.length === limit ? offset + limit : null });
   }
   if (path === '/api/uploads' && method === 'POST') {
@@ -173,12 +264,28 @@ async function route(c: Context, path: string, method: string, url: URL): Promis
   if (path === '/api/runner/registrations' && method === 'POST') {
     admin(c); const input = await body(c.request), itemId = uuid(input.itemId, '상품 ID'); await one(c, 'product_items', itemId);
     if (!CHANNELS.includes(input.channel)) fail(422, '지원하지 않는 등록 채널입니다.', 'unsupported_channel'); if (!['pending', 'running', 'success', 'failed'].includes(input.status)) fail(422, '등록 상태를 확인해 주세요.', 'invalid_status');
+    const { data: apiOperations } = await db(c, 'godomall_operations', { item_id: `eq.${itemId}`, mall_id: `eq.${input.channel}`, state: 'in.(sending,verifying,needs_review)', select: 'id,state', limit: '1' });
+    if (apiOperations?.some((op: Row) => ['sending', 'verifying', 'needs_review'].includes(op.state))) fail(409, '고도몰 API 작업의 결과 확인이 먼저 필요합니다. 상품 조회의 작업 이력을 확인해 주세요.', 'api_operation_active');
     const warnings = array(input.warnings || [], '경고', 50).map(x => string(x, '경고', 2000)); const stamp = new Date().toISOString();
-    const payload = { item_id: itemId, channel: input.channel, status: input.status, goods_no: string(input.goodsNo, '상품번호', 100) || null, error_message: string(input.errorMessage, '오류', 4000) || null, warnings, attempted_at: stamp, updated_at: stamp };
-    // A cancellation must release the exact claim version returned to this runner.
-    // Matching only status could let a delayed stop release a newer runner's claim.
-    const expectedUpdatedAt = input.status === 'pending' ? string(input.expectedUpdatedAt, '실행 버전', 100) : '';
-    if (input.status === 'pending' && (!expectedUpdatedAt || Number.isNaN(Date.parse(expectedUpdatedAt)))) fail(422, '중단할 실행의 버전이 필요합니다.', 'claim_revision_required');
+    const goodsNo = string(input.goodsNo, '상품번호', 100);
+    const saveAcknowledged = input.saveAcknowledged === true;
+    if (input.saveAcknowledged !== undefined && typeof input.saveAcknowledged !== 'boolean') fail(422, '저장 응답 확인 형식이 올바르지 않습니다.', 'invalid_save_acknowledgement');
+    if (input.status === 'success' && !/^\d+$/.test(goodsNo) && !(saveAcknowledged && !goodsNo)) fail(422, '저장 완료 응답 또는 숫자 상품번호가 필요합니다.', 'goods_number_required');
+    // A delayed cancellation or saved-result synchronization must not change a
+    // newer runner's claim. Older runners may omit a version when finalizing.
+    const finalizing = input.status === 'success' || input.status === 'failed';
+    const versioned = input.status === 'pending' || finalizing;
+    const expectedUpdatedAt = versioned ? string(input.expectedUpdatedAt, '실행 버전', 100) : '';
+    if ((input.status === 'pending' || versioned && input.expectedUpdatedAt !== undefined) && (!expectedUpdatedAt || Number.isNaN(Date.parse(expectedUpdatedAt)))) fail(422, '처리할 실행의 버전이 필요합니다.', 'claim_revision_required');
+    const attemptedAt = finalizing ? string(input.attemptedAt, '실행 시각', 100) : '';
+    if (finalizing && input.attemptedAt !== undefined && (!attemptedAt || Number.isNaN(Date.parse(attemptedAt)))) fail(422, '실행 시각을 확인해 주세요.', 'invalid_attempt_time');
+    // Receipts without a catalog lookup must still belong to this exact claim.
+    if (saveAcknowledged && (input.status !== 'success' || !expectedUpdatedAt || !attemptedAt)) fail(422, '저장 응답을 확인한 실행 버전과 시각이 필요합니다.', 'save_claim_required');
+    if (saveAcknowledged) {
+      const note = '고도몰 저장 완료 응답 확인 · 최종 상품 검수 필요';
+      if (!warnings.includes(note)) { if (warnings.length === 50) warnings.pop(); warnings.push(note); }
+    }
+    const payload = { item_id: itemId, channel: input.channel, status: input.status, goods_no: goodsNo || null, error_message: string(input.errorMessage, '오류', 4000) || null, warnings, attempted_at: attemptedAt || stamp, updated_at: stamp };
     // Claim is a compare-and-set; the unique item/channel constraint arbitrates first inserts.
     const allowed = input.status === 'running' ? 'in.(pending,failed)' : input.status === 'success' ? 'eq.running' : input.status === 'failed' ? 'in.(pending,running)' : 'in.(running,failed)';
     const query = { item_id: `eq.${itemId}`, channel: `eq.${input.channel}` };
@@ -187,7 +294,11 @@ async function route(c: Context, path: string, method: string, url: URL): Promis
     const { data: existing } = await db(c, 'product_registrations', { ...query, select: '*', limit: '1' });
     // Repeating a completed cancellation is a no-op, never an additional state write.
     if (input.status === 'pending' && existing?.[0]?.status === 'pending') return json({ registration: existing[0] });
-    if (existing?.length || input.status === 'success' || input.status === 'pending') fail(409, '이미 실행 중이거나 완료된 상품입니다. 최신 상태를 확인해 주세요.', 'registration_conflict');
+    // A response can be lost after the database commits. The same saved product
+    // is already synchronized; preserve its timestamps, warnings and evidence.
+    const sameSavedResult = existing?.[0]?.goods_no === (goodsNo || null) && (goodsNo || saveAcknowledged && Date.parse(existing[0].attempted_at) === Date.parse(attemptedAt));
+    if (input.status === 'success' && existing?.[0]?.status === 'success' && sameSavedResult) return json({ registration: existing[0] });
+    if (existing?.length || input.status === 'success' || input.status === 'pending' || expectedUpdatedAt) fail(409, '이미 실행 중이거나 완료된 상품입니다. 최신 상태를 확인해 주세요.', 'registration_conflict');
     const { data: inserted } = await db(c, 'product_registrations', {}, 'POST', payload, 'return=representation');
     return json({ registration: inserted?.[0] || payload });
   }
@@ -206,6 +317,7 @@ export function createWorker(options: { fetch?: typeof fetch } = {}) {
     const url = new URL(request.url); if (!url.pathname.startsWith('/api/')) return env.ASSETS.fetch(request);
     try {
       const origin = request.headers.get('origin'); if (origin && origin !== url.origin) fail(403, '다른 출처의 요청은 허용되지 않습니다.', 'origin_denied');
+      if (url.pathname.startsWith('/api/godomall/payloads/')) return await godomallPayload(request, (...args) => db({ env, fetch: fetcher }, ...args));
       if (url.pathname === '/api/config' && request.method === 'GET') { const c = config(env); return json({ supabaseUrl: c.url, supabasePublishableKey: c.key }); }
       if (url.pathname.startsWith('/api/auth/')) {
         config(env, true);
@@ -218,9 +330,15 @@ export function createWorker(options: { fetch?: typeof fetch } = {}) {
         fail(404, 'API 경로를 찾을 수 없습니다.', 'not_found');
       }
       const context = await auth(request, env, fetcher);
+      const godomallResponse = await godomallRoute({ env, user: context.user, role: context.role, fetch: fetcher, db: (...args) => db(context, ...args), readBody: () => body(request), publicOrigin: env.GODOMALL_PUBLIC_ORIGIN || 'https://cauto.yeseo.im' }, url.pathname.replace(/\/$/, ''), request.method, url);
+      if (godomallResponse) return godomallResponse;
       const accountResponse = await accountRoute(request, env, fetcher, { ...context.user, role: context.role });
       return accountResponse || await route(context, url.pathname.replace(/\/$/, ''), request.method, url);
-    } catch (error) { if (error instanceof ApiError || error instanceof AccountError) return json({ error: { code: error.code, message: error.message } }, error.status); return json({ error: { code: 'internal_error', message: '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.' } }, 500); }
+    } catch (error) {
+      if (error instanceof ApiError || error instanceof AccountError || error instanceof GodomallError) { const response = json({ error: { code: error.code, message: error.message } }, error.status); if (error instanceof GodomallError && error.retryAfter) response.headers.set('retry-after', String(error.retryAfter)); return response; }
+      console.error('api_unhandled', { path: url.pathname, method: request.method, name: error instanceof Error ? error.name : 'UnknownError', message: error instanceof Error ? error.message : 'Non-Error exception' });
+      return json({ error: { code: 'internal_error', message: '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.' } }, 500);
+    }
   } };
 }
 export default createWorker();

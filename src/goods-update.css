@@ -1,0 +1,7 @@
+.godomall-goods-table .goods-sold-out-row > td { background: var(--canvas); color: var(--disabled); }
+.godomall-goods-table .goods-sold-out-row .table-link, .godomall-goods-table .goods-sold-out-row .secondary { color: var(--disabled); }
+.godomall-goods-table .goods-sold-out-row .table-link:hover, .godomall-goods-table .goods-sold-out-row .table-link:focus-visible { color: var(--brand-strong); }
+.godomall-goods-table .goods-sold-out-row:hover > td { background: var(--subtle); }
+.godomall-goods-table .goods-sold-out-label { display: inline-flex; margin-left: 8px; color: var(--brand); font-size: 12px; font-weight: 600; white-space: nowrap; }
+.goods-unlimited { display: inline-block; font-family: system-ui, sans-serif; font-size: 24px; line-height: 1; vertical-align: middle; }
+.godomall-goods-table .goods-master-price { color: var(--muted); }

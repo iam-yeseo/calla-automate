@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { automationPayload, canRun, core, duplicateProduct, listState, money, newProduct, parsePrice, prepareDraft } from '../src/domain.ts';
+import { automationPayload, canRun, core, duplicateProduct, listState, money, newProduct, parsePrice, prepareDraft, supportsProductSetup } from '../src/domain.ts';
 import type { Product, ProductList, Registration, Settings } from '../src/types.ts';
 type ExportedProduct = Product & { detailImages: Product['automation']['detailImages']; detailHtml: string; issues: string[]; categoryPaths: { retail: string; wholesale: string }; brandCode: string };
 
@@ -114,4 +114,125 @@ test('empty lists remain pending and failures/running take priority over manual 
   assert.equal(listState({ ...list, total: 1, doneCount: 1 }), 'success');
   assert.equal(listState({ ...list, total: 1, doneCount: 1, runningCount: 1 }), 'running');
   assert.equal(listState({ ...list, total: 1, doneCount: 1, runningCount: 1, failedCount: 1 }), 'warning');
+});
+
+test('verified registration in every required mall completes a list without changing manual completion', () => {
+  const list: ProductList = { id: LIST, title: 'API 등록 완료', author: '', work_date: '2026-10-19', created_at: '', total: 6, doneCount: 0, retailTotal: 6, retailSuccess: 6, wholesaleTotal: 6, wholesaleSuccess: 6 };
+  const before = structuredClone(list);
+  assert.equal(listState(list), 'success');
+  assert.deepEqual(list, before);
+  assert.equal(listState({ ...list, retailTotal: 0, retailSuccess: 0 }), 'success');
+  assert.equal(listState({ ...list, wholesaleTotal: 0, wholesaleSuccess: 0 }), 'success');
+  assert.equal(listState({ ...list, runningCount: 1 }), 'running');
+  assert.equal(listState({ ...list, failedCount: 1 }), 'warning');
+  assert.equal(listState({ ...list, failedCount: 1, runningCount: 1 }), 'warning');
+});
+
+test('list registration completion requires nonempty, explicit and complete per-mall results', () => {
+  const list: ProductList = { id: LIST, title: '등록 대기', author: '', work_date: '2026-10-19', created_at: '', total: 2, doneCount: 0, retailTotal: 2, retailSuccess: 2, wholesaleTotal: 2, wholesaleSuccess: 2 };
+  for (const incomplete of [
+    { wholesaleSuccess: 1 }, { retailSuccess: 1 }, { retailSuccess: undefined },
+    { retailSuccess: 3, wholesaleSuccess: 1 },
+    { retailTotal: undefined }, { wholesaleTotal: undefined },
+    { retailTotal: 0, wholesaleTotal: 0, retailSuccess: 0, wholesaleSuccess: 0 },
+    { total: 0 }, { total: undefined },
+  ]) assert.equal(listState({ ...list, ...incomplete }), 'pending', JSON.stringify(incomplete));
+});
+
+test('stock defaults to unlimited zero, validates integers and survives save/copy/export', () => {
+  const p=product();
+  assert.deepEqual(p.automation.stock,{mode:'unlimited',quantity:0});
+  assert.deepEqual(core.normalize({}).stock,{mode:'unlimited',quantity:0});
+  p.automation.stock={mode:'limited',quantity:0};
+  assert.equal(core.stockIssue(p.automation),'');
+  p.automation.stock.quantity=17;
+  for(const value of [prepareDraft([p])[0].automation,duplicateProduct(p).automation]) assert.deepEqual((value as any).stock,p.automation.stock);
+  assert.deepEqual(automationPayload(LIST,[p],settings,true).items[0].stock,p.automation.stock);
+  for(const quantity of [-1,0.5,NaN,Infinity,Number.MAX_SAFE_INTEGER+1]) assert.ok(core.stockIssue({...p.automation,stock:{mode:'limited',quantity}}));
+});
+
+test('ordered mixed detail content retains exact raw code through normalization/save/copy/export', () => {
+  const p=product(),image=p.automation.detailImages[0];
+  const raw='  <!-- keep -->\n<iframe src="https://example.com/embed?a=1&b=2"></iframe>\n텍스트 &amp; <B data-case="YES">그대로</B>\n ';
+  p.automation=core.withDetailBlocks(p.automation,[{id:'img-b',type:'image',image:{...image,filename:'second.jpg'}},{id:'raw',type:'text',text:raw},{id:'img-a',type:'image',image}]);
+  const expected=core.html([{...image,filename:'second.jpg'}])+raw+core.html([image]);
+  const saved=(prepareDraft([p])[0].automation as Product['automation']);
+  assert.equal(saved.detailHtml,expected);
+  assert.equal(core.detailHtml(core.normalize(saved)),expected);
+  assert.equal(core.detailHtml(duplicateProduct({...p,automation:saved}).automation),expected);
+  assert.equal(automationPayload(LIST,[p],settings,true).items[0].detailHtml,expected);
+  assert.deepEqual(saved.detailImages.map(i=>i.filename),['second.jpg',image.filename]);
+  assert.equal(saved.detailBlocks?.[1].type,'text');
+  assert.equal((saved.detailBlocks?.[1] as any).text,raw);
+});
+
+test('text-only details need no image validation and old image-only markup is unchanged', () => {
+  const p=product(),legacy=core.html(p.automation.detailImages);
+  assert.equal(core.detailHtml(p.automation),legacy);
+  const raw=' \n<script type="application/ld+json">{"name":"x&y"}</script>\n ';
+  p.automation=core.withDetailBlocks(p.automation,[{id:'text',type:'text',text:raw}]);
+  assert.equal(core.detailHtml(p.automation),raw);
+  assert.deepEqual(core.readyIssues(p,settings),[]);
+  p.automation=core.withDetailBlocks(p.automation,[]);
+  assert.equal(core.detailHtml(p.automation),'');
+  assert.ok(core.readyIssues(p,settings).some(s=>s.includes('상세')));
+  assert.equal(core.detailHtml(core.normalize({detailHtml:raw})),raw,'legacy HTML must survive opening and saving');
+});
+
+test('old runners cannot silently ignore stock or raw detail content', () => {
+  for(const version of [undefined,'','1.0.2','invalid']) assert.equal(supportsProductSetup(version),false);
+  for(const version of ['1.1.0','1.2.3','2.0.0']) assert.equal(supportsProductSetup(version),true);
+});
+
+test('origin presets and English countries normalize once while unknown legacy values remain editable', () => {
+  for (const [value, expected] of [['대한민국', 'Korea'], ['한국', 'Korea'], ['국내산', 'Korea'], ['South Korea', 'Korea'], ['중국', 'China'], ['일본', 'Japan'], ['미국', 'USA'], ['United States', 'USA'], ['Germany', 'Germany'], ["Cote d'Ivoire", "Cote d'Ivoire"], ['Timor-Leste', 'Timor-Leste']]) {
+    const origin = `Made in ${expected}`;
+    assert.equal(core.normalize({origin:value}).origin, origin);
+    assert.equal(core.normalizeOrigin(origin), origin);
+    assert.equal(core.originCountry(origin), expected);
+    assert.equal(core.originIssue(origin), '');
+  }
+  assert.equal(core.normalizeOrigin(''), '');
+  for (const invalid of ['독일', 'Made in ', 'Made in Made in Germany', '<b>Germany</b>', 'Germany123']) {
+    assert.equal(core.normalizeOrigin(invalid), invalid.trim());
+    assert.ok(core.originIssue(invalid));
+  }
+  const item=product(); item.automation.origin='중국';
+  assert.equal(automationPayload(LIST,[item],settings,true).items[0].origin,'Made in China');
+  assert.equal((prepareDraft([item])[0].automation as Product['automation']).origin,'Made in China');
+});
+
+test('wholesale regular price follows retail unless manually overridden, preserving zero and null', () => {
+  const item=product(); item.price_retail=12000;
+  assert.deepEqual(core.normalize({}).wholesaleRegularPrice,{mode:'retail',value:null});
+  assert.equal(core.wholesaleRegularPrice(item),12000);
+  item.automation.wholesaleRegularPrice={mode:'retail',value:999};
+  assert.equal(core.wholesaleRegularPrice(item),12000);
+  assert.deepEqual(core.normalize(item.automation).wholesaleRegularPrice,{mode:'retail',value:null});
+  item.price_retail=15000;
+  assert.equal(core.wholesaleRegularPrice(item),15000);
+  item.automation.wholesaleRegularPrice={mode:'manual',value:9000};
+  assert.equal(core.wholesaleRegularPrice(item),9000);
+  assert.deepEqual(duplicateProduct(item).automation.wholesaleRegularPrice,{mode:'manual',value:9000});
+  assert.deepEqual((prepareDraft([item])[0].automation as Product['automation']).wholesaleRegularPrice,{mode:'manual',value:9000});
+  for (const value of [0,null]) {
+    item.automation.wholesaleRegularPrice={mode:'manual',value};
+    assert.equal(core.wholesaleRegularPrice(item),value);
+    assert.equal(automationPayload(LIST,[item],settings,true).items[0].price_wholesale_regular,value);
+  }
+  item.automation.wholesaleRegularPrice={mode:'retail',value:null};
+  item.price_retail=null;
+  assert.equal(core.wholesaleRegularPrice(item),null);
+  for (const value of [-1,0.5,Number.MAX_SAFE_INTEGER+1]) {
+    item.automation.wholesaleRegularPrice={mode:'manual',value};
+    assert.ok(core.readyIssues(item,settings).some(issue=>issue.includes('도매 정가')));
+  }
+});
+
+test('literal markup is a nonempty basic product name while whitespace alone remains invalid', () => {
+  const item=product(); item.name_own='<b></b>';
+  assert.ok(!core.readyIssues(item,settings).some(issue=>issue.includes('상품명')));
+  assert.equal(automationPayload(LIST,[item],settings,true).items[0].name_own,'<b></b>');
+  item.name_own='  ';
+  assert.ok(core.readyIssues(item,settings).some(issue=>issue.includes('상품명')));
 });

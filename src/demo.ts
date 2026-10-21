@@ -60,6 +60,11 @@ export async function demoApi<T>(path:string,init:RequestInit,role:Role,previewU
  let body:Record<string,unknown>={};if(typeof init.body==='string')body=JSON.parse(init.body);
  const summary=(l:ProductList)=>{const items=db.items.filter(p=>p.list_id===l.id),regs=db.registrations.filter(r=>items.some(p=>p.id===r.item_id));return{...l,total:items.length,doneCount:items.filter(p=>p.done).length,retailSuccess:regs.filter(r=>r.channel==='retail'&&r.status==='success').length,wholesaleSuccess:regs.filter(r=>r.channel==='wholesale'&&r.status==='success').length,retailTotal:items.filter(p=>p.need_retail==='필요').length,wholesaleTotal:items.filter(p=>p.need_wholesale==='필요').length,runningCount:regs.filter(r=>r.status==='running').length,failedCount:regs.filter(r=>r.status==='failed').length};};
  let result:unknown;
+ if(url.pathname.startsWith('/godomall/')) {
+  if(url.pathname==='/godomall/connections')return {connections: ['retail','wholesale'].map(mallId=>({mallId,configured:false,connected:false,checkedAt:null,message:'개발 미리보기: 실제 고도몰 API에 연결하지 않습니다.'}))} as T;
+  if(url.pathname.endsWith('/operations')&&method==='GET')return {operations:[],nextOffset:null} as T;
+  throw new Error('개발 미리보기에서는 실제 고도몰 API 조회·전송을 실행하지 않습니다.');
+ }
  if(path==='/me'){const account=db.users.find(user=>user.id===(previewUserId||(role==='admin'?'preview-admin':'preview-viewer')));if(!account||account.status!=='active'||!account.role)throw new Error('사용 권한이 승인되지 않은 계정입니다.');result={user:{id:account.id,email:account.email,username:account.username,name:account.name},role:account.role};}
  else if(url.pathname==='/admin/users'){
   if(role!=='admin')throw new Error('관리자만 접근할 수 있습니다.');

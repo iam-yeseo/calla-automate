@@ -1,0 +1,287 @@
+diff --git a/server/accounts.ts b/server/accounts.ts
+index 590257ecc80156301919edbbb011a493655a80ac..fe81f9ea95fd49f9f81b20c84c3b956f198be77e 100644
+--- a/server/accounts.ts
++++ b/server/accounts.ts
+@@ -9,6 +9,7 @@
+   SUPABASE_SERVICE_ROLE_KEY: string;
+   ADMIN_EMAILS?: string;
+   CALLA_SETUP_TOKEN?: string;
++  CALLA_SIGNUP_CODE?: string;
+ };
+ export type AccountIdentity = {
+   id: string;
+@@ -168,7 +169,10 @@
+       return json({ access_token: accessToken, refresh_token: refreshToken });
+     }
+     if (path === '/api/auth/signup') {
+-      fields(input, ['username', 'name', 'password']);
++      fields(input, ['username', 'name', 'password', 'signupCode']);
++      const signupCode = env.CALLA_SIGNUP_CODE || '';
++      if (signupCode.length < 24 || signupCode.length > 512) fail(503, '현재 회원가입을 받을 수 없습니다. 관리자에게 문의해 주세요.', 'signup_unavailable');
++      if (!tokenMatches(input.signupCode, signupCode)) fail(403, '가입 코드가 올바르지 않습니다.', 'invalid_signup_code');
+       const id = username(input.username);
+       await createAccount(env, fetcher, id, name(input.name, id), password(input.password), null, 'pending');
+       return json({ username: id, message: '가입 신청이 완료되었습니다. 관리자 승인 후 로그인할 수 있습니다.' }, 201);
+diff --git a/src/Auth.tsx b/src/Auth.tsx
+index 500a6e16862dad82b4faf393357a5c4a1ac4eacb..64660ee71363754adc6dee1b8254355083a408e9 100644
+--- a/src/Auth.tsx
++++ b/src/Auth.tsx
+@@ -23,7 +23,7 @@
+ }) {
+   const [identifier, setIdentifier] = useState(() => page === 'login' ? rememberedIdentifier() : ''), [name, setName] = useState('');
+   const [remember, setRemember] = useState(() => !!rememberedIdentifier());
+-  const [password, setPassword] = useState(''), [repeatPassword, setRepeatPassword] = useState(''), [setupToken, setSetupToken] = useState('');
++  const [password, setPassword] = useState(''), [repeatPassword, setRepeatPassword] = useState(''), [setupToken, setSetupToken] = useState(''), [signupCode, setSignupCode] = useState('');
+   const [busy, setBusy] = useState(false), [message, setMessage] = useState(''), [created, setCreated] = useState('');
+   const lock = useRef(false);
+   const signingUp = page === 'signup', settingUp = page === 'setup', creating = signingUp || settingUp;
+@@ -38,8 +38,8 @@
+       if (creating) {
+         const result = await publicPost<{username: string}>(settingUp ? '/auth/setup' : '/auth/signup', settingUp
+           ? {setupToken: setupToken.trim(), name: name.trim(), password}
+-          : {username: identifier.trim(), name: name.trim(), password});
+-        setCreated(result.username || (settingUp ? 'calla-admin' : identifier.trim())); setPassword(''); setRepeatPassword(''); setSetupToken('');
++          : {username: identifier.trim(), name: name.trim(), password, signupCode: signupCode.trim()});
++        setCreated(result.username || (settingUp ? 'calla-admin' : identifier.trim())); setPassword(''); setRepeatPassword(''); setSetupToken(''); setSignupCode('');
+       } else {
+         await loginWithIdentifier(identifier, password);
+         try { if (remember) localStorage.setItem(rememberedIdentifierKey, identifier.trim()); else localStorage.removeItem(rememberedIdentifierKey); } catch { /* Login remains available when storage is restricted. */ }
+@@ -72,6 +72,7 @@
+           </> : <Field label={signingUp ? '아이디' : '아이디 또는 이메일'} hint={signingUp ? usernameHint : undefined}>
+             <input type="text" required autoComplete="username" autoCapitalize="none" spellCheck={false} pattern={signingUp ? USERNAME_PATTERN : undefined} maxLength={signingUp ? 32 : 254} value={identifier} onChange={e=>setIdentifier(signingUp ? e.target.value.toLowerCase() : e.target.value)} placeholder={signingUp ? '사용할 아이디를 입력하세요' : '아이디 또는 이메일을 입력하세요'} autoFocus={!creating}/>
+           </Field>}
++          {signingUp && <Field label="가입 코드" hint="관리자에게 받은 가입 코드를 입력해 주세요."><input type="password" required autoComplete="off" maxLength={512} value={signupCode} onChange={e=>setSignupCode(e.target.value)}/></Field>}
+           <Field label="비밀번호" hint={creating ? '8자 이상으로 설정해 주세요.' : undefined}><input autoComplete={creating ? 'new-password' : 'current-password'} type="password" required minLength={creating ? 8 : undefined} maxLength={128} value={password} onChange={e=>setPassword(e.target.value)} placeholder="비밀번호를 입력하세요"/></Field>
+           {creating && <Field label="비밀번호 확인" hint={passwordMismatch ? <span className="field-error">비밀번호가 일치하지 않습니다. 다시 입력하세요.</span> : undefined}><input autoComplete="new-password" type="password" required minLength={8} maxLength={128} value={repeatPassword} onChange={e=>setRepeatPassword(e.target.value)} placeholder="비밀번호를 다시 입력하세요" aria-invalid={passwordMismatch || undefined}/></Field>}
+           {authFailure && <div className="alert error auth-notice" role="alert"><Icon name="info"/><span>{authFailure}</span></div>}
+diff --git a/tests/accounts.test.ts b/tests/accounts.test.ts
+index db5d5491b163d3484ca34e34d2b7b62c3fe1cda5..c47195fe94b226032894e70a37638fb68c4549a5 100644
+--- a/tests/accounts.test.ts
++++ b/tests/accounts.test.ts
+@@ -5,7 +5,8 @@
+ const ADMIN_ID = '11111111-1111-4111-8111-111111111111';
+ const USER_ID = '22222222-2222-4222-8222-222222222222';
+ const SETUP_TOKEN = 'a-long-test-token-with-entropy-0123456789';
+-const env: AccountsEnv = { SUPABASE_URL: 'https://example.supabase.co', SUPABASE_PUBLISHABLE_KEY: 'test-public', SUPABASE_SERVICE_ROLE_KEY: 'test-service', ADMIN_EMAILS: '', CALLA_SETUP_TOKEN: SETUP_TOKEN };
++const SIGNUP_CODE = 'test-only-signup-code-0123456789';
++const env: AccountsEnv = { SUPABASE_URL: 'https://example.supabase.co', SUPABASE_PUBLISHABLE_KEY: 'test-public', SUPABASE_SERVICE_ROLE_KEY: 'test-service', ADMIN_EMAILS: '', CALLA_SETUP_TOKEN: SETUP_TOKEN, CALLA_SIGNUP_CODE: SIGNUP_CODE };
+ const admin = { id: ADMIN_ID, email: 'admin@example.com', role: 'admin' as const };
+ const rawUser = (meta: Record<string, unknown> = {}, extra: Record<string, unknown> = {}) => ({ id: USER_ID, email: '746573742d75736572@accounts.calla.invalid', created_at: '2026-10-01T00:00:00Z', last_sign_in_at: null, app_metadata: { calla_username: 'test-user', calla_name: '사용자', ...meta }, ...extra });
+ const response = (value: unknown, status = 200, headers: Record<string, string> = {}) => new Response(JSON.stringify(value), { status, headers: { 'content-type': 'application/json', ...headers } });
+@@ -26,28 +27,29 @@
+   catch (error) { if (!(error instanceof AccountError)) throw error; return response({ error: { code: error.code, message: error.message } }, error.status); }
+ }
+ const payload = { username: 'Test-User', name: '사용자', password: 'StrongPassword123' };
++const signupPayload = { ...payload, signupCode: SIGNUP_CODE };
+ 
+ test('signup creates only a pending trusted profile and never accepts privilege metadata', async () => {
+   const a = harness(c => response(rawUser(c.body!.app_metadata), 201));
+-  const result = await run(request('/api/auth/signup', 'POST', payload), a.fetcher);
++  const result = await run(request('/api/auth/signup', 'POST', signupPayload), a.fetcher);
+   assert.equal(result!.status, 201); assert.deepEqual(await result!.json(), { username: 'test-user', message: '가입 신청이 완료되었습니다. 관리자 승인 후 로그인할 수 있습니다.' });
+   const call = a.calls[0]!; assert.equal(call.url.pathname, '/auth/v1/admin/users'); assert.equal(call.body!.email, '746573742d75736572@accounts.calla.invalid');
+   assert.equal(call.body!.email_confirm, true); assert.equal(call.body!.app_metadata.calla_status, 'pending'); assert.ok(!Object.hasOwn(call.body!.app_metadata, 'calla_role'));
+   assert.equal(call.headers.get('apikey'), env.SUPABASE_SERVICE_ROLE_KEY);
+   for (const extra of [{ role: 'admin' }, { status: 'active' }, { app_metadata: { calla_role: 'admin' } }, { user_metadata: { calla_role: 'admin' } }]) {
+-    assert.equal((await run(request('/api/auth/signup', 'POST', { ...payload, ...extra }), a.fetcher))!.status, 422);
++    assert.equal((await run(request('/api/auth/signup', 'POST', { ...signupPayload, ...extra }), a.fetcher))!.status, 422);
+   }
+   assert.equal(a.calls.length, 1);
+ });
+ 
+ test('username encoding is valid and collision-free for dotted IDs and normalizes case', async () => {
+   const a = harness(c => response(rawUser(c.body!.app_metadata)));
+-  for (const id of ['abc.', 'a..b', 'a_b', 'a-b', 'AbC', 'x'.repeat(32)]) await run(request('/api/auth/signup', 'POST', { ...payload, username: id }), a.fetcher);
++  for (const id of ['abc.', 'a..b', 'a_b', 'a-b', 'AbC', 'x'.repeat(32)]) await run(request('/api/auth/signup', 'POST', { ...signupPayload, username: id }), a.fetcher);
+   const emails = a.calls.map(c => c.body!.email as string);
+   assert.equal(new Set(emails).size, emails.length); assert.ok(emails.every(email => /^[0-9a-f]{6,64}@accounts\.calla\.invalid$/.test(email))); assert.deepEqual(emails.map(email => email.toLowerCase()), emails);
+   assert.equal(emails[0], '6162632e@accounts.calla.invalid'); assert.equal(emails[1], '612e2e62@accounts.calla.invalid'); assert.equal(emails[5]!.split('@')[0]!.length, 64);
+   assert.equal(a.calls[4]!.body!.app_metadata.calla_username, 'abc');
+-  for (const id of ['ab', '한글', '@name', 'x'.repeat(33), 'calla-admin']) assert.equal((await run(request('/api/auth/signup', 'POST', { ...payload, username: id }), a.fetcher))!.status, 422);
++  for (const id of ['ab', '한글', '@name', 'x'.repeat(33), 'calla-admin']) assert.equal((await run(request('/api/auth/signup', 'POST', { ...signupPayload, username: id }), a.fetcher))!.status, 422);
+   assert.equal(a.calls.length, 6);
+ });
+ 
+@@ -179,20 +181,59 @@
+ 
+ test('public bodies are bounded and cross-origin, malformed and unsupported requests do not reach Auth', async () => {
+   const a = harness(() => { throw Error('must not fetch'); });
+-  assert.equal((await run(request('/api/auth/signup', 'POST', { ...payload, name: 'x'.repeat(17 * 1024) }), a.fetcher))!.status, 413);
+-  assert.equal((await run(request('/api/auth/signup', 'POST', payload, { 'content-length': String(17 * 1024) }), a.fetcher))!.status, 413);
+-  assert.equal((await run(request('/api/auth/signup', 'POST', payload, { origin: 'https://evil.test' }), a.fetcher))!.status, 403);
++  assert.equal((await run(request('/api/auth/signup', 'POST', { ...signupPayload, name: 'x'.repeat(17 * 1024) }), a.fetcher))!.status, 413);
++  assert.equal((await run(request('/api/auth/signup', 'POST', signupPayload, { 'content-length': String(17 * 1024) }), a.fetcher))!.status, 413);
++  assert.equal((await run(request('/api/auth/signup', 'POST', signupPayload, { origin: 'https://evil.test' }), a.fetcher))!.status, 403);
+   assert.equal((await run(request('/api/auth/signup', 'GET'), a.fetcher))!.status, 405);
+-  assert.equal((await run(request('/api/auth/signup', 'POST', payload, { 'content-type': 'text/plain' }), a.fetcher))!.status, 415);
++  assert.equal((await run(request('/api/auth/signup', 'POST', signupPayload, { 'content-type': 'text/plain' }), a.fetcher))!.status, 415);
+   assert.equal((await run(new Request('https://calla.test/api/auth/signup', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{' }), a.fetcher))!.status, 400);
+   assert.equal((await run(request('/api/auth/signup', 'POST', []), a.fetcher))!.status, 422); assert.equal(a.calls.length, 0);
+ });
+ 
+ test('upstream failures are sanitized and unrelated API routes return null', async () => {
+   const a = harness(() => response({ code: 'unexpected', msg: 'private test-service password row' }, 500));
+-  const result = await run(request('/api/auth/signup', 'POST', payload), a.fetcher);
++  const result = await run(request('/api/auth/signup', 'POST', signupPayload), a.fetcher);
+   assert.equal(result!.status, 502); assert.ok(!(await result!.text()).includes('private'));
+   const invalid = harness(() => response({ code: 'invalid_credentials', msg: 'private' }, 400));
+   assert.equal((await run(request('/api/auth/login', 'POST', { username: 'test-user', password: 'wrong' }), invalid.fetcher))!.status, 401);
+   assert.equal(await accountRoute(request('/api/lists', 'GET'), env, a.fetcher), null);
+ });
++
++test('signup without a code is forbidden before contacting Auth', async () => {
++  const a = harness(() => { throw Error('must not fetch'); });
++  const result = await run(request('/api/auth/signup', 'POST', payload), a.fetcher);
++  assert.equal(result!.status, 403);
++  assert.deepEqual(await result!.json(), { error: { code: 'invalid_signup_code', message: '가입 코드가 올바르지 않습니다.' } });
++  assert.equal(a.calls.length, 0);
++});
++
++test('incorrect signup codes disclose no hints or username existence and never contact Auth', async () => {
++  const a = harness(() => { throw Error('must not fetch'); });
++  for (const signupCode of ['', null, 42, {}, 'wrong', SIGNUP_CODE.replace('0', '1'), '한'.repeat(32), 'x'.repeat(513)]) {
++    const result = await run(request('/api/auth/signup', 'POST', { ...payload, signupCode }), a.fetcher);
++    assert.equal(result!.status, 403);
++    assert.deepEqual(await result!.json(), { error: { code: 'invalid_signup_code', message: '가입 코드가 올바르지 않습니다.' } });
++  }
++  assert.equal(a.calls.length, 0);
++});
++
++test('signup is unavailable without a valid configured code', async () => {
++  const a = harness(() => { throw Error('must not fetch'); });
++  for (const CALLA_SIGNUP_CODE of [undefined, '', 'short', 'x'.repeat(513)]) {
++    const result = await run(request('/api/auth/signup', 'POST', signupPayload), a.fetcher, undefined, { ...env, CALLA_SIGNUP_CODE });
++    assert.equal(result!.status, 503);
++    assert.equal((await result!.json() as any).error.code, 'signup_unavailable');
++  }
++  assert.equal(a.calls.length, 0);
++});
++
++test('signup code is not forwarded to Auth and duplicate username wording remains unchanged', async () => {
++  const a = harness(c => {
++    assert.equal('signupCode' in c.body!, false);
++    assert.ok(!JSON.stringify(c.body).includes(SIGNUP_CODE));
++    return response({ code: 'email_exists' }, 422);
++  });
++  const result = await run(request('/api/auth/signup', 'POST', signupPayload), a.fetcher);
++  assert.equal(result!.status, 409);
++  assert.deepEqual(await result!.json(), { error: { code: 'username_exists', message: '이미 사용 중인 아이디입니다.' } });
++});
+diff --git a/.dev.vars.example b/.dev.vars.example
+index b74c1a6579d62eea5800112595cc045ca5694451..265b858d8c9249e572b7cfb056e934018a5cd6da 100644
+--- a/.dev.vars.example
++++ b/.dev.vars.example
+@@ -3,6 +3,8 @@
+ # First administrator setup only. Use a random code of at least 24 characters.
+ # Remove this secret after creating calla-admin at /setup.
+ CALLA_SETUP_TOKEN=""
++# Shared signup code: 24-512 characters. Unset disables public signup.
++CALLA_SIGNUP_CODE=""
+ 
+ # Shared partner key and independent mall user keys (Worker runtime Secrets).
+ GODOMALL_PARTNER_KEY=""
+diff --git a/desktop/tests/ui/signup-code.spec.ts b/desktop/tests/ui/signup-code.spec.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..37bfed2f099af3b97232da822ed55498d59c92c0
+--- /dev/null
++++ b/desktop/tests/ui/signup-code.spec.ts
+@@ -0,0 +1,99 @@
++import { test, expect, chromium, _electron as electron, type Browser, type ElectronApplication, type Page } from '@playwright/test';
++import { createServer } from 'node:http';
++import { mkdtemp, readFile, rm } from 'node:fs/promises';
++import os from 'node:os';
++import path from 'node:path';
++import { startFixture } from './fixture';
++
++for (const surface of ['web', 'desktop'] as const) test(`${surface}: signup requires a code and submits one pending account request`, async () => {
++  const userData = await mkdtemp(path.join(os.tmpdir(), 'calla-signup-code-'));
++  const submissions: unknown[] = [], errors: string[] = [];
++  let signupRequests = 0, releaseSignup = () => {};
++  const signupResponse = new Promise<void>(resolve => { releaseSignup = resolve; });
++  const fixture = await startFixture({ respond: (route, method, body) => {
++    if (route === '/auth/signup' && method === 'POST') {
++      submissions.push(JSON.parse(body));
++      return { username: 'fixture-new-user', status: 'pending' };
++    }
++  } });
++  const web = createServer(async (request, response) => {
++    const url = new URL(request.url || '/', 'http://local'), pathname = url.pathname;
++    // Electron's calla:// protocol is not visible to Playwright request routing.
++    // Gate both surfaces at the local HTTP boundary, before forwarding to the fixture.
++    if (pathname.startsWith('/api/')) {
++      try {
++        let body = ''; for await (const chunk of request) body += chunk;
++        if (pathname === '/api/auth/signup') { signupRequests++; await signupResponse; }
++        const headers = new Headers();
++        for (const name of ['authorization', 'content-type']) {
++          const value = request.headers[name]; if (typeof value === 'string') headers.set(name, value);
++        }
++        const upstream = await fetch(fixture.origin + pathname + url.search, { method: request.method, headers, body: body || undefined, redirect: 'error' });
++        response.statusCode = upstream.status;
++        response.setHeader('content-type', upstream.headers.get('content-type') || 'application/json');
++        response.end(Buffer.from(await upstream.arrayBuffer()));
++      } catch { response.statusCode = 502; response.end(); }
++      return;
++    }
++    const file = pathname.startsWith('/assets/') ? path.resolve('dist', pathname.slice(1)) : path.resolve('dist/index.html');
++    try {
++      const data = await readFile(file);
++      response.setHeader('content-type', file.endsWith('.js') ? 'text/javascript' : file.endsWith('.css') ? 'text/css' : file.endsWith('.svg') ? 'image/svg+xml' : file.endsWith('.woff2') ? 'font/woff2' : 'text/html');
++      response.end(data);
++    } catch { response.statusCode = 404; response.end(); }
++  });
++  let browser: Browser | undefined, app: ElectronApplication | undefined, page: Page;
++  try {
++    await new Promise<void>(resolve => web.listen(0, '127.0.0.1', resolve));
++    const origin = `http://127.0.0.1:${(web.address() as { port: number }).port}`;
++    if (surface === 'desktop') {
++      app = await electron.launch({ args: ['.'], env: { ...process.env, ELECTRON_RUN_AS_NODE: '', CALLA_DESKTOP_TEST: '1', CALLA_TEST_USER_DATA: userData, CALLA_TEST_API_ORIGIN: origin } });
++      page = await app.firstWindow();
++    } else {
++      browser = await chromium.launch({ channel: 'chrome' });
++      page = await browser.newPage();
++    }
++    page.on('pageerror', error => errors.push(error.message));
++    // All API writes go to the local fixture; unrelated external requests are blocked.
++    await page.route('https://**', route => route.abort());
++    if (surface === 'web') await page.goto(origin);
++    await expect(page.getByRole('heading', { name: '로그인', exact: true })).toBeVisible();
++    await expect(page.getByLabel('가입 코드', { exact: true })).toHaveCount(0);
++    await page.getByRole('link', { name: '최초 관리자 계정 설정', exact: true }).click();
++    await expect(page.getByLabel('초기 설정 토큰', { exact: true })).toBeVisible();
++    await expect(page.getByLabel('가입 코드', { exact: true })).toHaveCount(0);
++    await page.getByRole('link', { name: '로그인으로 돌아가기', exact: true }).click();
++    await page.getByRole('link', { name: '회원가입', exact: true }).click();
++    await page.getByLabel('이름', { exact: true }).fill('가입 검증');
++    await page.getByLabel('아이디', { exact: true }).fill('fixture-new-user');
++    await page.getByLabel('비밀번호', { exact: true }).fill('fixture-password');
++    await page.getByLabel('비밀번호 확인', { exact: true }).fill('fixture-password');
++    const code = page.getByLabel('가입 코드', { exact: true });
++    await expect(code).toHaveAttribute('type', 'password');
++    await page.getByRole('button', { name: '가입 신청', exact: true }).click();
++    await expect(code).toBeFocused();
++    expect(await code.evaluate((input: HTMLInputElement) => input.validity.valueMissing)).toBe(true);
++    expect(signupRequests).toBe(0);
++    expect(submissions).toEqual([]);
++
++    await code.fill('  fixture-signup-code  ');
++    await page.getByRole('button', { name: '가입 신청', exact: true }).click();
++    await expect.poll(() => signupRequests).toBe(1);
++    await expect(page.getByRole('button', { name: '처리 중…', exact: true })).toBeDisabled();
++    await expect(code).toBeDisabled();
++    releaseSignup();
++    await expect(page.getByRole('heading', { name: '관리자 승인을 기다리고 있습니다', exact: true })).toBeVisible();
++    await expect(page.getByRole('status')).toContainText('승인 대기');
++    await expect(page.getByRole('status')).toContainText('fixture-new-user');
++    expect(submissions).toEqual([{ username: 'fixture-new-user', name: '가입 검증', password: 'fixture-password', signupCode: 'fixture-signup-code' }]);
++    expect(fixture.calls.filter(call => call.method !== 'GET')).toEqual([{ path: '/auth/signup', method: 'POST' }]);
++    expect(errors).toEqual([]);
++  } finally {
++    releaseSignup();
++    if (app) await app.evaluate(({ app }) => app.exit(0)).catch(() => {});
++    if (browser) await browser.close();
++    if (web.listening) await new Promise<void>(resolve => web.close(() => resolve()));
++    await fixture.close();
++    await rm(userData, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
++  }
++});

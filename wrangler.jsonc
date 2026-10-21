@@ -5,6 +5,7 @@
   "compatibility_date": "2026-09-30",
   "compatibility_flags": ["nodejs_compat"],
   "keep_vars": true,
+  "placement": { "region": "aws:ap-northeast-2" },
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
@@ -13,6 +14,7 @@
   },
   "vars": {
     "SUPABASE_URL": "https://giuqapykceosroauaijq.supabase.co",
+    "GODOMALL_PUBLIC_ORIGIN": "https://cauto.yeseo.im",
     "ADMIN_EMAILS": ""
   },
   "ratelimits": [

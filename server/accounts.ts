@@ -9,6 +9,7 @@ export type AccountsEnv = {
   SUPABASE_SERVICE_ROLE_KEY: string;
   ADMIN_EMAILS?: string;
   CALLA_SETUP_TOKEN?: string;
+  CALLA_SIGNUP_CODE?: string;
 };
 export type AccountIdentity = {
   id: string;
@@ -168,7 +169,10 @@ export async function accountRoute(request: Request, env: AccountsEnv, fetcher: 
       return json({ access_token: accessToken, refresh_token: refreshToken });
     }
     if (path === '/api/auth/signup') {
-      fields(input, ['username', 'name', 'password']);
+      fields(input, ['username', 'name', 'password', 'signupCode']);
+      const signupCode = env.CALLA_SIGNUP_CODE || '';
+      if (signupCode.length < 24 || signupCode.length > 512) fail(503, '현재 회원가입을 받을 수 없습니다. 관리자에게 문의해 주세요.', 'signup_unavailable');
+      if (!tokenMatches(input.signupCode, signupCode)) fail(403, '가입 코드가 올바르지 않습니다.', 'invalid_signup_code');
       const id = username(input.username);
       await createAccount(env, fetcher, id, name(input.name, id), password(input.password), null, 'pending');
       return json({ username: id, message: '가입 신청이 완료되었습니다. 관리자 승인 후 로그인할 수 있습니다.' }, 201);
